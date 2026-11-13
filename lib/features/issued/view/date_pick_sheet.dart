@@ -1,0 +1,130 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:material_ui/material_ui.dart' show Material, MaterialType;
+
+import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
+import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
+import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
+
+/// Opens a calendar in a sheet above the current one; completes with the
+/// chosen day, or null when closed.
+Future<DateTime?> showDatePick(
+  BuildContext context, {
+  required DateTime date,
+  required DateTime first,
+  required DateTime last,
+  required bool end,
+}) => AdaptiveNativeSheet.show<DateTime>(
+  context: context,
+  route: 'datePick',
+  arguments: {
+    'date': date.toIso8601String(),
+    'first': first.toIso8601String(),
+    'last': last.toIso8601String(),
+    'end': end,
+  },
+  decodeResult: (value) => DateTime.parse(value as String),
+  backgroundColor: KeelColors.page.of(context),
+  builder: (_) => DatePickSheet(date: date, first: first, last: last, end: end),
+);
+
+class DatePickSheet extends StatelessWidget {
+  const DatePickSheet({
+    super.key,
+    required this.date,
+    required this.first,
+    required this.last,
+    required this.end,
+  });
+
+  final DateTime date;
+  final DateTime first;
+  final DateTime last;
+
+  /// Whether this is the end of the range (a filled flag) or its start.
+  final bool end;
+
+  @override
+  Widget build(BuildContext context) => BlocProvider(
+    create: (_) => DraftBloc<DateTime>(date),
+    child: BlocBuilder<DraftBloc<DateTime>, DraftState<DateTime>>(
+      builder: (context, state) {
+        final ink = KeelColors.ink.of(context);
+        final azure = KeelColors.azure.of(context);
+        return Material(
+          type: MaterialType.transparency,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        end ? CupertinoIcons.flag_fill : CupertinoIcons.flag,
+                        color: azure,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          Formats.shortDate(state.value),
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ),
+                      RoundIconButton(
+                        icon: CupertinoIcons.xmark,
+                        label: 'Close',
+                        foreground: ink,
+                        onPressed: () => AdaptiveNativeSheet.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 340,
+                    child: AdaptiveInlineDatePicker(
+                      initialDate: date,
+                      firstDate: first,
+                      lastDate: last,
+                      style: AdaptiveDatePickerStyle.inline,
+                      tintColor: azure,
+                      onDateChanged: (d) => context
+                          .read<DraftBloc<DateTime>>()
+                          .change(DateTime(d.year, d.month, d.day)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: RoundIconButton(
+                      icon: CupertinoIcons.checkmark,
+                      label: 'Use this date',
+                      foreground: CupertinoColors.white,
+                      background: azure,
+                      size: 54,
+                      iconSize: 22,
+                      onPressed: () => AdaptiveNativeSheet.pop(
+                        context,
+                        state.value.toIso8601String(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}

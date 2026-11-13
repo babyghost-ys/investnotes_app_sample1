@@ -1,0 +1,27 @@
+name: investnotes_app_sample1
+description: "Keel: a sample investment notes app."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  adaptive_platform_ui:
+    path: packages/adaptive_platform_ui
+  bloc: ^9.2.1
+  flutter_bloc: ^9.1.1
+  equatable: ^3.0.0
+  material_ui: ^1.11.0
+  cupertino_ui: ^1.1.6
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
