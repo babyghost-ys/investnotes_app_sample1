@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
-import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.dart';
 
 /// Offerings bookmarked from their pages, soonest to close first.

@@ -15,3 +15,14 @@ final class SearchQueryChanged extends SearchEvent {
   @override
   List<Object?> get props => [query];
 }
+
+/// Opens a result's terms in place, closing any other; closes it when it
+/// is already open.
+final class SearchRowToggled extends SearchEvent {
+  const SearchRowToggled(this.id);
+
+  final String id;
+
+  @override
+  List<Object?> get props => [id];
+}

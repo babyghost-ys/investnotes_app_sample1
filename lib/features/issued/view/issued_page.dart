@@ -8,9 +8,11 @@ import 'package:investnotes_app_sample1/core/widgets/filter_icon_button.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/widgets/issued_row.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 
 class IssuedPage extends StatelessWidget {
   const IssuedPage({super.key});
@@ -99,6 +101,10 @@ class IssuedPage extends StatelessWidget {
                   expanded: state.expanded.contains(n.id),
                   onToggle: () =>
                       context.read<IssuedBloc>().add(IssuedRowToggled(n.id)),
+                  onOpen: () => openProduct(
+                    context,
+                    context.read<NotesRepository>().productOfIssued(n),
+                  ),
                 ),
               if (visible.isEmpty)
                 EmptyState(

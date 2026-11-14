@@ -9,7 +9,7 @@ import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
-import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.dart';
 

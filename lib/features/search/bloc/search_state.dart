@@ -1,18 +1,16 @@
 part of 'search_bloc.dart';
 
 final class SearchState extends Equatable {
-  const SearchState({
-    this.query = '',
-    this.offerings = const [],
-    this.issued = const [],
-  });
+  const SearchState({this.query = '', this.results = const [], this.expanded});
 
   final String query;
-  final List<Offering> offerings;
-  final List<IssuedNote> issued;
+  final List<Product> results;
 
-  bool get empty => offerings.isEmpty && issued.isEmpty;
+  /// The result showing its terms, if any.
+  final String? expanded;
+
+  bool get empty => results.isEmpty;
 
   @override
-  List<Object?> get props => [query, offerings, issued];
+  List<Object?> get props => [query, results, expanded];
 }

@@ -5,6 +5,7 @@ import 'package:investnotes_app_sample1/data/models/issued_note.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
 import 'package:investnotes_app_sample1/data/models/payoff.dart';
+import 'package:investnotes_app_sample1/data/models/product.dart';
 
 /// Sample notes, held in memory. Dates are relative to today, so the
 /// offerings stay open whenever the app runs.
@@ -409,6 +410,72 @@ class NotesRepository {
       matures: DateTime(issued.year + term, issued.month, issued.day),
       history: _walk(id.hashCode, change, type),
     );
+  }
+
+  /// An offering as its page shows it. It issues a week after subscription
+  /// closes and matures on the anniversary of its term.
+  Product productOf(Offering o) {
+    final issue = o.closes.add(const Duration(days: 7));
+    return Product(
+      id: o.id,
+      name: o.name,
+      underlying: o.underlying,
+      payoff: o.payoff,
+      currency: o.currency,
+      region: o.region,
+      assetClass: o.assetClass,
+      fundserv: 'KEL${2104 + offerings.indexOf(o) * 7}',
+      issueDate: issue,
+      maturity: DateTime(issue.year + o.termYears, issue.month, issue.day),
+      closes: o.closes,
+    );
+  }
+
+  /// An issued note as its page shows it, with the terms of the series it
+  /// belongs to: the open offering of the same name.
+  Product productOfIssued(IssuedNote n) {
+    final series = _series(n.name);
+    final called = n.status == IssuedStatus.called
+        ? _lastAnniversary(n.issued)
+        : null;
+    return Product(
+      id: n.id,
+      name: n.name,
+      underlying: series.underlying,
+      payoff: series.payoff,
+      currency: n.currency,
+      region: series.region,
+      assetClass: series.assetClass,
+      fundserv: 'KEL${1403 + issued.indexOf(n) * 11}',
+      issueDate: n.issued,
+      maturity: n.matures,
+      status: n.status,
+      calledOn: called,
+      history: n.history,
+    );
+  }
+
+  Product? productById(String id) {
+    for (final o in offerings) {
+      if (o.id == id) return productOf(o);
+    }
+    for (final n in issued) {
+      if (n.id == id) return productOfIssued(n);
+    }
+    return null;
+  }
+
+  Offering _series(String name) {
+    String stem(String s) => s.replaceAll(RegExp(r'\s+\d{4}$'), '');
+    return offerings.firstWhere((o) => stem(o.name) == stem(name));
+  }
+
+  DateTime _lastAnniversary(DateTime issued) {
+    var date = DateTime(issued.year + 1, issued.month, issued.day);
+    while (DateTime(date.year + 1, date.month, date.day).isBefore(_now)) {
+      date = DateTime(date.year + 1, date.month, date.day);
+    }
+    return date;
   }
 
   /// A plausible, repeatable value path from 1.0 to 1 + [change]. Protected

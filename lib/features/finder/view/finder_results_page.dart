@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/features/finder/bloc/finder_bloc.dart';
-import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.dart';
 
 /// The offerings the answers lead to. When nothing fits every answer, the

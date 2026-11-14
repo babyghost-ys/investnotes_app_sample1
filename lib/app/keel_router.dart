@@ -9,8 +9,8 @@ import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart'
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
 import 'package:investnotes_app_sample1/features/learn/view/article_page.dart';
-import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
 import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/view/biometric_settings_page.dart';
@@ -27,17 +27,11 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
       routes: [
         GoRoute(
           path: 'offering/:id',
-          pageBuilder: (context, state) {
-            final id = state.pathParameters['id'];
-            return AdaptivePage<void>(
-              key: state.pageKey,
-              name: state.matchedLocation,
-              // The detail page carries its own scaffold for its bookmark.
-              child: OfferingDetailPage(
-                offering: repository.offerings.firstWhere((o) => o.id == id),
-              ),
-            );
-          },
+          pageBuilder: (context, state) => _productPage(state, repository),
+        ),
+        GoRoute(
+          path: 'note/:id',
+          pageBuilder: (context, state) => _productPage(state, repository),
         ),
         GoRoute(
           path: 'article/:id',
@@ -100,4 +94,17 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
       ],
     ),
   ],
+);
+
+/// A note's page, open or issued. The page carries its own scaffold for
+/// its bookmark.
+AdaptivePage<void> _productPage(
+  GoRouterState state,
+  NotesRepository repository,
+) => AdaptivePage<void>(
+  key: state.pageKey,
+  name: state.matchedLocation,
+  child: ProductPage(
+    product: repository.productById(state.pathParameters['id']!)!,
+  ),
 );

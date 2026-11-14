@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
+import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/core/widgets/sparkline.dart';
 import 'package:investnotes_app_sample1/data/models/issued_note.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
@@ -15,11 +16,15 @@ class IssuedRow extends StatelessWidget {
     required this.note,
     required this.expanded,
     required this.onToggle,
+    this.onOpen,
   });
 
   final IssuedNote note;
   final bool expanded;
   final VoidCallback onToggle;
+
+  /// Opens the note's page from the unfolded row.
+  final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +145,16 @@ class IssuedRow extends StatelessWidget {
                               text: '${n.type.code} · ${n.currency.code}',
                               semantics: 'Type and currency',
                             ),
+                            if (onOpen != null)
+                              RoundIconButton(
+                                icon: CupertinoIcons.arrow_right,
+                                label: 'Open ${n.name}',
+                                foreground: CupertinoColors.white,
+                                background: KeelColors.tide.of(context),
+                                size: 40,
+                                iconSize: 18,
+                                onPressed: onOpen,
+                              ),
                           ],
                         ),
                       ],

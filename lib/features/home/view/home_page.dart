@@ -9,7 +9,7 @@ import 'package:investnotes_app_sample1/features/home/widgets/finder_banner.dart
 import 'package:investnotes_app_sample1/features/home/widgets/floor_hero.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
-import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 
 class HomePage extends StatelessWidget {
