@@ -232,7 +232,6 @@ class _NativeScaffoldState extends State<NativeScaffold> {
     // like UIKit's navigation bar behind a presented sheet, and while the
     // sheet slides away.
     final showNativeToolbar = isCurrentRoute || isPopping || coveredByPopup;
-    debugPrint('TMP2 scaffold build current=$isCurrentRoute leaving=${AdaptiveNativeSheet.leaving.value} show=$showNativeView');
 
     // Get brightness and determine text color
     final brightness = MediaQuery.platformBrightnessOf(context);

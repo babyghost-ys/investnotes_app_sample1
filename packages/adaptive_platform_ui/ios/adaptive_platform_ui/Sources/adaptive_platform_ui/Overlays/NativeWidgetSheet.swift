@@ -45,6 +45,9 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         /// Holds the sheet still for the first half of a turn (see
         /// [NativeWidgetSheet.freezeForTurn]).
         let turnHold: TurnHold
+        /// The status bar style of every Flutter page this sheet covers, as
+        /// it stood when the sheet opened (see [CoveredStatusBarStyle]).
+        var coveredStyles: [CoveredStatusBarStyle] = []
 
         init(engine: FlutterEngine, arguments: [String: Any], depth: Int,
              completion: @escaping FlutterResult) {
@@ -222,10 +225,12 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             return
         }
         originalHost = host
+        let covered = [host] + levels.map { $0.controller as FlutterViewController }
         let options = FlutterEngineGroupOptions()
         options.entrypoint = "nativeSheetMain"
         let engine = engineGroup.makeEngine(with: options)
         let level = Level(engine: engine, arguments: args, depth: levels.count, completion: result)
+        level.coveredStyles = covered.map(CoveredStatusBarStyle.init)
         if let height = measuredHeights[route] { level.fitHeight = height }
         levels.append(level)
         if let registrar = engine.registrar(forPlugin: "AdaptivePlatformUiPlugin") {
@@ -456,6 +461,17 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         }
     }
 
+    /// Has UIKit read the status bar style again through `window`'s
+    /// controllers, from the root down the controllers that decide it.
+    private static func refreshStatusBar(of window: UIWindow?) {
+        var controller = window?.rootViewController
+        while let current = controller {
+            current.setNeedsStatusBarAppearanceUpdate()
+            let next = current.presentedViewController ?? current.childForStatusBarStyle
+            controller = next === current ? nil : next
+        }
+    }
+
     /// A sheet that only closes through its own controls cannot be dragged,
     /// so UIKit's pan recognisers around it are switched off. Left on, they
     /// claim vertical drags meant for the Flutter content, and a long sheet
@@ -613,7 +629,12 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         levels.removeLast()
         flushPendingHeights()
         level.window?.isHidden = true
-        (levels.last?.window ?? originalHost?.view.window)?.makeKey()
+        let below = levels.last?.window ?? originalHost?.view.window
+        below?.makeKey()
+        // The status bar showed the sheet's style while its window was up;
+        // the window below takes it back, with the styles its pages had
+        // before the sheet's engine overwrote them.
+        Self.restoreStatusBar(level.coveredStyles, in: below)
         level.completion(value)
         // Wait until both channel replies leave their callbacks. Each engine
         // tears down only its own platform views and rendering surface.
@@ -625,7 +646,42 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             level.window = nil
             level.engine.viewController = nil
             level.engine.destroyContext()
+            // A style the sheet posted while closing reaches the covered
+            // pages one main queue turn after it was sent; restore after it.
+            DispatchQueue.main.async { Self.restoreStatusBar(level.coveredStyles, in: below) }
         }
+    }
+
+    private static func restoreStatusBar(_ styles: [CoveredStatusBarStyle], in window: UIWindow?) {
+        styles.forEach { $0.restore() }
+        refreshStatusBar(of: window)
+    }
+}
+
+/// A Flutter page's status bar style, held while a sheet covers it.
+///
+/// Flutter broadcasts each engine's `SystemChrome` style to every
+/// `FlutterViewController` in the process, not only its own, so a sheet's
+/// engine overwrites the style of the pages beneath it, and the page shows
+/// the sheet's style once the sheet has gone (dark text on the iPhone Duo's
+/// blue bar). The page's own engine does not send its style again while it
+/// stays the same, so the plugin puts it back.
+struct CoveredStatusBarStyle {
+    private weak var controller: FlutterViewController?
+    private let style: UIStatusBarStyle
+
+    init(_ controller: FlutterViewController) {
+        self.controller = controller
+        style = controller.preferredStatusBarStyle
+    }
+
+    func restore() {
+        // The style Flutter reports is its `statusBarStyle` property, which
+        // the engine keeps private; it is set the way the engine sets it.
+        guard let controller, controller.preferredStatusBarStyle != style,
+              controller.responds(to: NSSelectorFromString("setStatusBarStyle:")) else { return }
+        controller.setValue(style.rawValue, forKey: "statusBarStyle")
+        controller.setNeedsStatusBarAppearanceUpdate()
     }
 }
 
@@ -767,6 +823,12 @@ final class SheetNavigationController: UINavigationController,
     override func viewDidLoad() {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = self
+        // iOS 26 also pops with a swipe that starts anywhere on the page;
+        // it follows the same rule, or the custom back item leaves both
+        // swipes switched off and only the button goes back.
+        if #available(iOS 26.0, *) {
+            interactiveContentPopGestureRecognizer?.delegate = self
+        }
     }
 
     func configure(color: Int?, foreground: UIColor?, plainButtons: Bool,
