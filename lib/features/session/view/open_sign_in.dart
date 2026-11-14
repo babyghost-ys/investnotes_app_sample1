@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -15,14 +15,14 @@ import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart'
 /// first; otherwise sign-in opens on username and password.
 Future<void> openSignIn(BuildContext context) async {
   final biometric = context.read<BiometricBloc>().state;
-  if (AdaptiveStyle.of(context) != AdaptiveStyle.native) {
+  if (NativeStyle.of(context) != NativeStyle.native) {
     await context.push<void>(
       biometric.enabled ? KeelRoutes.biometricSignIn : KeelRoutes.signIn,
     );
     return;
   }
   final session = context.read<SessionBloc>();
-  final name = await AdaptiveNativeSheet.show<String>(
+  final name = await NativeSheet.show<String>(
     context: context,
     route: 'signIn',
     arguments: biometric.enabled
@@ -38,7 +38,7 @@ Future<void> openSignIn(BuildContext context) async {
     barColor: KeelColors.tide.of(context),
     barForeground: CupertinoColors.white,
     plainBarButtons: true,
-    barTitleStyle: AdaptiveTheme.of(context).barStyle.titleStyle,
+    barTitleStyle: NativeTheme.of(context).barStyle.titleStyle,
     // The sheet runs its own engine and router; see the native sheet app.
     builder: (_) => const SizedBox.shrink(),
   );

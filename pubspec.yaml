@@ -9,8 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  adaptive_platform_ui:
-    path: packages/adaptive_platform_ui
+  flutter_native_widgets:
+    path: packages/flutter_native_widgets
   bloc: ^9.2.1
   flutter_bloc: ^9.1.1
   equatable: ^3.0.0

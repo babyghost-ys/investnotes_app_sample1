@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +18,7 @@ import 'package:investnotes_app_sample1/features/session/view/sign_in_route.dart
 import 'package:investnotes_app_sample1/features/shell/view/shell_page.dart';
 
 /// Keel's routes. The shell is the root; every other page is pushed over
-/// it as an [AdaptivePage], so iOS keeps the native push and swipe-back.
+/// it as an [NativePage], so iOS keeps the native push and swipe-back.
 GoRouter keelRouter(NotesRepository repository) => GoRouter(
   routes: [
     GoRoute(
@@ -69,8 +69,8 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             state,
             title: 'Your notes',
             actions: [
-              AdaptiveAppBarAction(
-                icon: const AdaptiveIcon(
+              NativeAppBarAction(
+                icon: const NativeIcon(
                   sfSymbol: 'checkmark',
                   icon: CupertinoIcons.checkmark,
                 ),
@@ -98,10 +98,10 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
 
 /// A note's page, open or issued. The page carries its own scaffold for
 /// its bookmark.
-AdaptivePage<void> _productPage(
+NativePage<void> _productPage(
   GoRouterState state,
   NotesRepository repository,
-) => AdaptivePage<void>(
+) => NativePage<void>(
   key: state.pageKey,
   name: state.matchedLocation,
   child: ProductPage(

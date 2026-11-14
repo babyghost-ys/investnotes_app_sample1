@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart' show MaterialPage;
@@ -14,7 +14,7 @@ import 'package:investnotes_app_sample1/features/session/widgets/sheet_bar_binde
 
 /// A page of the sign-in flow.
 ///
-/// In the iOS [sheet] each page is an [AdaptiveScaffold] in a native page
+/// In the iOS [sheet] each page is an [NativeScaffold] in a native page
 /// of the sheet's navigation: UIKit pushes and pops whole pages, bar and
 /// all, with its own back and swipe ([SheetBarBinder]). Elsewhere the
 /// [first] page rises as a full-screen dialog and the rest push over it.
@@ -34,7 +34,7 @@ Page<void> _page(
     return NoTransitionPage<void>(
       key: state.pageKey,
       child: Builder(
-        builder: (context) => AdaptiveScaffold(
+        builder: (context) => NativeScaffold(
           body: SheetBarBinder(
             first: first,
             title: title,
@@ -51,16 +51,16 @@ Page<void> _page(
       key: state.pageKey,
       fullscreenDialog: true,
       child: Builder(
-        builder: (context) => AdaptiveScaffold(
+        builder: (context) => NativeScaffold(
           extendBody: true,
-          appBar: AdaptiveAppBar(
+          appBar: NativeAppBar(
             title: title,
             // A worded close replaces the dialog's own xmark.
             leading: closeTitle == null ? null : const SizedBox.shrink(),
             actions: closeTitle == null
                 ? null
                 : [
-                    AdaptiveAppBarAction(
+                    NativeAppBarAction(
                       title: closeTitle,
                       onPressed: SignInScope.of(context).onClose,
                     ),

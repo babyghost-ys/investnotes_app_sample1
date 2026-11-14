@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +27,7 @@ class KeelDrawer extends StatelessWidget {
     final shell = context.watch<ShellBloc>().state;
     final session = context.watch<SessionBloc>().state;
     final biometric = context.watch<BiometricBloc>().state.kind;
-    final scaffold = AdaptiveScaffold.of(context);
+    final scaffold = NativeScaffold.of(context);
 
     // The drawer's own context goes when it closes; pages are pushed from
     // the scaffold's, which stays.

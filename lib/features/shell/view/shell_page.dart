@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -22,20 +22,20 @@ class ShellPage extends StatefulWidget {
 }
 
 class _ShellPageState extends State<ShellPage> {
-  final _scaffold = GlobalKey<AdaptiveScaffoldState>();
+  final _scaffold = GlobalKey<NativeScaffoldState>();
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ShellBloc, ShellState>(
-    builder: (context, state) => AdaptiveScaffold(
+    builder: (context, state) => NativeScaffold(
       key: _scaffold,
       extendBody: true,
       extendBodyBehindSides: true,
       backgroundColor: KeelColors.page.of(context),
-      appBar: AdaptiveAppBar(
+      appBar: NativeAppBar(
         title: state.tab == ShellTab.home ? 'Keel' : null,
         actions: [
-          AdaptiveAppBarAction(
-            icon: const AdaptiveIcon(
+          NativeAppBarAction(
+            icon: const NativeIcon(
               sfSymbol: 'line.3.horizontal',
               icon: Icons.menu_rounded,
             ),
@@ -43,8 +43,8 @@ class _ShellPageState extends State<ShellPage> {
             spacerAfter: ToolbarSpacerType.flexible,
             onPressed: () => _scaffold.currentState?.openDrawer(),
           ),
-          AdaptiveAppBarAction(
-            icon: const AdaptiveIcon(
+          NativeAppBarAction(
+            icon: const NativeIcon(
               sfSymbol: 'magnifyingglass',
               icon: Icons.search,
             ),
@@ -53,11 +53,11 @@ class _ShellPageState extends State<ShellPage> {
           ),
         ],
       ),
-      drawer: AdaptiveDrawer.custom(
+      drawer: NativeDrawer.custom(
         backgroundColor: KeelColors.tide.of(context),
         child: const KeelDrawer(),
       ),
-      bottomNavigationBar: AdaptiveBottomNavigationBar(
+      bottomNavigationBar: NativeBottomNavigationBar(
         selectedIndex: state.tab.index,
         selectedItemColor: KeelColors.azure.of(context),
         onTap: (i) {
@@ -65,32 +65,32 @@ class _ShellPageState extends State<ShellPage> {
           context.read<ShellBloc>().add(ShellTabSelected(ShellTab.values[i]));
         },
         items: const [
-          AdaptiveNavigationDestination(
-            icon: AdaptiveIcon(sfSymbol: 'house', icon: Icons.home_outlined),
-            selectedIcon: AdaptiveIcon(
+          NativeNavigationDestination(
+            icon: NativeIcon(sfSymbol: 'house', icon: Icons.home_outlined),
+            selectedIcon: NativeIcon(
               sfSymbol: 'house.fill',
               icon: Icons.home,
             ),
             label: 'Home',
           ),
-          AdaptiveNavigationDestination(
-            icon: AdaptiveIcon(sfSymbol: 'tag', icon: Icons.sell_outlined),
-            selectedIcon: AdaptiveIcon(sfSymbol: 'tag.fill', icon: Icons.sell),
+          NativeNavigationDestination(
+            icon: NativeIcon(sfSymbol: 'tag', icon: Icons.sell_outlined),
+            selectedIcon: NativeIcon(sfSymbol: 'tag.fill', icon: Icons.sell),
             label: 'Offerings',
           ),
-          AdaptiveNavigationDestination(
-            icon: AdaptiveIcon(
+          NativeNavigationDestination(
+            icon: NativeIcon(
               sfSymbol: 'clock.arrow.circlepath',
               icon: Icons.history,
             ),
             label: 'Issued',
           ),
-          AdaptiveNavigationDestination(
-            icon: AdaptiveIcon(
+          NativeNavigationDestination(
+            icon: NativeIcon(
               sfSymbol: 'graduationcap',
               icon: Icons.school_outlined,
             ),
-            selectedIcon: AdaptiveIcon(
+            selectedIcon: NativeIcon(
               sfSymbol: 'graduationcap.fill',
               icon: Icons.school,
             ),

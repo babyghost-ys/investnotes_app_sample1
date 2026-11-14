@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -76,7 +76,7 @@ class PayoffProbe extends StatelessWidget {
               labelColor: muted,
             ),
             const SizedBox(height: 10),
-            AdaptiveSlider(
+            NativeSlider(
               value: state.move,
               min: PayoffChart.minMove,
               max: PayoffChart.maxMove,

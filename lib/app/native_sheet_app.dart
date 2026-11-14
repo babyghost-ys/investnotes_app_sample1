@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -19,7 +19,7 @@ import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart
 /// engines, so each sheet gets plain values in and hands plain values back.
 Future<void> runNativeSheetApp() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final configuration = await AdaptiveNativeSheet.bootstrap(
+  final configuration = await NativeSheet.bootstrap(
     encodeResult: (value) => switch (value) {
       OfferingFilter filter => filter.encode(),
       IssuedFilter filter => filter.encode(),
@@ -70,15 +70,15 @@ class NativeSheetApp extends StatelessWidget {
 
     Widget themed(BuildContext context, Widget child) => MediaQuery(
       data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
-      child: AdaptiveTheme(
+      child: NativeTheme(
         data: theme,
         child: Theme(data: theme.material(brightness), child: child),
       ),
     );
 
     if (configuration['route'] == 'signIn') {
-      return AdaptiveStyleScope(
-        style: AdaptiveStyle.native,
+      return NativeStyleScope(
+        style: NativeStyle.native,
         child: _SignInSheetApp(
           biometric: switch (configuration['arguments']) {
             {
@@ -95,14 +95,14 @@ class NativeSheetApp extends StatelessWidget {
       );
     }
 
-    return AdaptiveStyleScope(
-      style: AdaptiveStyle.native,
+    return NativeStyleScope(
+      style: NativeStyle.native,
       child: CupertinoApp(
         debugShowCheckedModeBanner: false,
         theme: theme.cupertino(brightness),
         localizationsDelegates: const [DefaultMaterialLocalizations.delegate],
         builder: (context, child) => themed(context, child!),
-        home: AdaptiveNativeSheetContent(
+        home: NativeSheetContent(
           // Only a fit sheet measures its content; a full-height one lays
           // its own scrolling out in the space UIKit gives it.
           fits:
@@ -161,15 +161,15 @@ class _SignInSheetAppState extends State<_SignInSheetApp> {
     routerConfig: _router,
     builder: (context, child) => widget.themed(
       context,
-      AdaptiveNativeSheetContent(
+      NativeSheetContent(
         fits: false,
         backgroundColor: widget.background,
         child: SignInScope(
           base: '/',
           sheet: true,
           biometric: widget.biometric,
-          onSignedIn: (name) => AdaptiveNativeSheet.pop(context, name),
-          onClose: () => AdaptiveNativeSheet.pop(context),
+          onSignedIn: (name) => NativeSheet.pop(context, name),
+          onClose: () => NativeSheet.pop(context),
           child: child!,
         ),
       ),

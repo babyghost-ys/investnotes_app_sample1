@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +18,7 @@ Future<IssuedFilter?> showIssuedFilter(
   BuildContext context, {
   required IssuedFilter current,
   required List<IssuedNote> notes,
-}) => AdaptiveNativeSheet.show<IssuedFilter>(
+}) => NativeSheet.show<IssuedFilter>(
   context: context,
   route: 'issuedFilter',
   arguments: current.encode(),
@@ -118,7 +118,7 @@ class IssuedFilterSheet extends StatelessWidget {
           onReset: f == const IssuedFilter()
               ? null
               : () => draft.add(const DraftReset()),
-          onApply: () => AdaptiveNativeSheet.pop(context, f),
+          onApply: () => NativeSheet.pop(context, f),
           groups: [
             Wrap(
               spacing: 8,
@@ -159,7 +159,7 @@ class IssuedFilterSheet extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                AdaptiveSegmentedControl(
+                NativeSegmentedControl(
                   labels: [for (final p in IssuedPeriod.values) p.label],
                   selectedIndex: f.period.index,
                   onValueChanged: (i) {

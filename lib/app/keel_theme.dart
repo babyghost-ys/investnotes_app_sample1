@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// Keel's app-wide look, in light and dark.
@@ -17,10 +17,10 @@ abstract final class KeelTheme {
     fontWeight: FontWeight.w600,
   );
 
-  static const light = AdaptiveThemeData(
+  static const light = NativeThemeData(
     primaryColor: Color(0xFF1E6FE0),
     background: Color(0xFFF5F8FD),
-    barStyle: AdaptiveBarStyle.solid(
+    barStyle: NativeBarStyle.solid(
       _tide,
       foreground: Colors.white,
       plainButtons: true,
@@ -33,10 +33,10 @@ abstract final class KeelTheme {
     ),
   );
 
-  static const dark = AdaptiveThemeData(
+  static const dark = NativeThemeData(
     primaryColor: Color(0xFF4C93FF),
     background: Color(0xFF050B16),
-    barStyle: AdaptiveBarStyle.solid(
+    barStyle: NativeBarStyle.solid(
       _tideDark,
       foreground: Colors.white,
       plainButtons: true,

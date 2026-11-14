@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -95,15 +95,15 @@ class _ProductViewState extends State<_ProductView> {
         context.select<OfferingsBloc, bool>(
           (b) => b.state.saved.contains(p.id),
         );
-    return AdaptiveScaffold(
+    return NativeScaffold(
       extendBody: true,
       backgroundColor: KeelColors.page.of(context),
-      appBar: AdaptiveAppBar(
+      appBar: NativeAppBar(
         title: p.type.code,
         actions: [
           if (p.isOffering)
-            AdaptiveAppBarAction(
-              icon: AdaptiveIcon(
+            NativeAppBarAction(
+              icon: NativeIcon(
                 sfSymbol: saved ? 'bookmark.fill' : 'bookmark',
                 icon: saved ? Icons.bookmark : Icons.bookmark_border,
               ),

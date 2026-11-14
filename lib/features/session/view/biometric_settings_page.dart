@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -77,7 +77,7 @@ class BiometricSettingsPage extends StatelessWidget {
                 Semantics(
                   label: 'Sign in with ${kind.title}',
                   toggled: on,
-                  child: AdaptiveSwitch(
+                  child: NativeSwitch(
                     value: on,
                     activeColor: azure,
                     onChanged: state.checking

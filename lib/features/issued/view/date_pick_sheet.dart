@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
@@ -16,7 +16,7 @@ Future<DateTime?> showDatePick(
   required DateTime first,
   required DateTime last,
   required bool end,
-}) => AdaptiveNativeSheet.show<DateTime>(
+}) => NativeSheet.show<DateTime>(
   context: context,
   route: 'datePick',
   arguments: {
@@ -80,7 +80,7 @@ class DatePickSheet extends StatelessWidget {
           icon: CupertinoIcons.xmark,
           label: 'Close',
           foreground: ink,
-          onPressed: () => AdaptiveNativeSheet.pop(context),
+          onPressed: () => NativeSheet.pop(context),
         );
         final use = RoundIconButton(
           icon: CupertinoIcons.checkmark,
@@ -89,15 +89,15 @@ class DatePickSheet extends StatelessWidget {
           background: azure,
           size: 54,
           iconSize: 22,
-          onPressed: () => AdaptiveNativeSheet.pop(context, state.value),
+          onPressed: () => NativeSheet.pop(context, state.value),
         );
         Widget calendar(double height) => SizedBox(
           height: height,
-          child: AdaptiveInlineDatePicker(
+          child: NativeInlineDatePicker(
             initialDate: date,
             firstDate: first,
             lastDate: last,
-            style: AdaptiveDatePickerStyle.inline,
+            style: NativeDatePickerStyle.inline,
             tintColor: azure,
             onDateChanged: (d) =>
                 draft.change(DateTime(d.year, d.month, d.day)),

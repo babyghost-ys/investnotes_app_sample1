@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,12 +22,12 @@ Future<OfferingFilter?> showOfferingsFilter(
   required OfferingFilter current,
   required NoteType type,
   required List<Offering> offerings,
-}) => AdaptiveNativeSheet.show<OfferingFilter>(
+}) => NativeSheet.show<OfferingFilter>(
   context: context,
   route: 'offeringsFilter',
   arguments: {'filter': current.encode(), 'type': type.name},
   decodeResult: OfferingFilter.decode,
-  detents: AdaptiveFilterDetents.full,
+  detents: NativeFilterDetents.full,
   // A long sheet scrolls; dragging belongs to its content, and the close
   // control dismisses it.
   isDismissible: false,
@@ -70,7 +70,7 @@ class OfferingsFilterSheet extends StatelessWidget {
           Icon(CupertinoIcons.arrow_up_to_line, size: 20, color: azure),
           const SizedBox(width: 8),
           Expanded(
-            child: AdaptiveSlider(
+            child: NativeSlider(
               value: f.minHeadline,
               min: 0,
               max: OfferingFilter.headlineCeiling,
@@ -157,7 +157,7 @@ class OfferingsFilterSheet extends StatelessWidget {
           onReset: f == const OfferingFilter()
               ? null
               : () => draft.add(const DraftReset()),
-          onApply: () => AdaptiveNativeSheet.pop(context, f),
+          onApply: () => NativeSheet.pop(context, f),
           groups: [
             Wrap(
               spacing: 8,
@@ -270,18 +270,18 @@ class OfferingsFilterSheet extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: AdaptiveSegmentedControl(
+                  child: NativeSegmentedControl(
                     labels: const ['Closing', 'Headline', 'Term'],
                     icons: const [
-                      AdaptiveIcon(
+                      NativeIcon(
                         sfSymbol: 'calendar.badge.clock',
                         icon: CupertinoIcons.calendar,
                       ),
-                      AdaptiveIcon(
+                      NativeIcon(
                         sfSymbol: 'chart.line.uptrend.xyaxis',
                         icon: CupertinoIcons.graph_square,
                       ),
-                      AdaptiveIcon(
+                      NativeIcon(
                         sfSymbol: 'hourglass',
                         icon: CupertinoIcons.hourglass,
                       ),
@@ -294,14 +294,14 @@ class OfferingsFilterSheet extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   flex: 2,
-                  child: AdaptiveSegmentedControl(
+                  child: NativeSegmentedControl(
                     labels: const ['Ascending', 'Descending'],
                     icons: const [
-                      AdaptiveIcon(
+                      NativeIcon(
                         sfSymbol: 'arrow.up',
                         icon: CupertinoIcons.arrow_up,
                       ),
-                      AdaptiveIcon(
+                      NativeIcon(
                         sfSymbol: 'arrow.down',
                         icon: CupertinoIcons.arrow_down,
                       ),

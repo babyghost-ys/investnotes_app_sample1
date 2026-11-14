@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 /// Ties a page of the sign-in sheet to its native page. Arriving, it has
@@ -45,19 +45,19 @@ class _SheetBarBinderState extends State<SheetBarBinder> {
 
   void _arrive() {
     if (!mounted) return;
-    AdaptiveNativeSheet.onPagePopped = () {
+    NativeSheet.onPagePopped = () {
       if (mounted) Navigator.of(context).pop();
     };
     if (_shown) {
       _setBar();
-      AdaptiveNativeSheet.revealPage();
+      NativeSheet.revealPage();
       return;
     }
     _shown = true;
     if (widget.first) {
       _setBar();
     } else {
-      AdaptiveNativeSheet.pushPage(
+      NativeSheet.pushPage(
         title: widget.title,
         onClose: widget.onClose,
         closeTitle: widget.closeTitle,
@@ -65,7 +65,7 @@ class _SheetBarBinderState extends State<SheetBarBinder> {
     }
   }
 
-  void _setBar() => AdaptiveNativeSheet.setBar(
+  void _setBar() => NativeSheet.setBar(
     title: widget.title,
     onClose: widget.onClose,
     closeTitle: widget.closeTitle,

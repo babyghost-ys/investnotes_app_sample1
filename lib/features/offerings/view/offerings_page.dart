@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -48,7 +48,7 @@ class OfferingsPage extends StatelessWidget {
                   insets.bottom + 32,
                 ),
                 children: [
-                  AdaptiveSegmentedControl(
+                  NativeSegmentedControl(
                     labels: [for (final t in NoteType.values) t.code],
                     selectedIndex: state.type.index,
                     onValueChanged: (i) => context.read<OfferingsBloc>().add(

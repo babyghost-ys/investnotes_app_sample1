@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
@@ -60,7 +60,7 @@ class FilterSheetLayout extends StatelessWidget {
             icon: CupertinoIcons.xmark,
             label: 'Close',
             foreground: ink,
-            onPressed: () => AdaptiveNativeSheet.pop(context),
+            onPressed: () => NativeSheet.pop(context),
           ),
         ],
       ),

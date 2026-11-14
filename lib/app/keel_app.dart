@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -31,7 +31,7 @@ class _KeelAppState extends State<KeelApp> {
 
   /// Built once: the scopes above it change (who signs in with Face ID),
   /// and rebuilding the app would reset its native navigation stack.
-  late final Widget _app = AdaptiveApp.router(
+  late final Widget _app = NativeApp.router(
     title: 'Keel',
     theme: KeelTheme.light,
     darkTheme: KeelTheme.dark,

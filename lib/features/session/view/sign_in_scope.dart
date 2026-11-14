@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,7 +63,7 @@ class SignInScope extends InheritedWidget {
     String location, {
     Object? extra,
   }) async {
-    if (sheet) await AdaptiveNativeSheet.preparePush();
+    if (sheet) await NativeSheet.preparePush();
     if (!context.mounted) return null;
     return context.push<T>(location, extra: extra);
   }
@@ -71,7 +71,7 @@ class SignInScope extends InheritedWidget {
   /// Leaves the page in front with [result]. In the sheet UIKit pops it
   /// first, and the Flutter route follows.
   Future<void> pop<T>(BuildContext context, [T? result]) async {
-    if (sheet) await AdaptiveNativeSheet.popPage();
+    if (sheet) await NativeSheet.popPage();
     if (context.mounted) context.pop(result);
   }
 

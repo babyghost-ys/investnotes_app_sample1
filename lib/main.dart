@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:investnotes_app_sample1/app/keel_app.dart';
@@ -10,7 +10,7 @@ Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   // iOS's native bars draw their titles with the same font file Flutter
   // has in its assets; it is registered with iOS here, before any bar.
-  await AdaptiveNativeFonts.registerAssets(const [KeelTheme.titleFontAsset]);
+  await NativeFonts.registerAssets(const [KeelTheme.titleFontAsset]);
   // The first frame waits for the opening picture, so it lands on the
   // launch screen's identical one without a blank frame between.
   binding.deferFirstFrame();

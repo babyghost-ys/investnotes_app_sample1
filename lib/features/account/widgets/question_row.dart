@@ -1,4 +1,4 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -35,14 +35,14 @@ class QuestionRow extends StatelessWidget {
         const SizedBox(width: 16),
         SizedBox(
           width: 112,
-          child: AdaptiveSegmentedControl(
+          child: NativeSegmentedControl(
             labels: const ['Yes', 'No'],
             icons: const [
-              AdaptiveIcon(
+              NativeIcon(
                 sfSymbol: 'checkmark',
                 icon: CupertinoIcons.checkmark,
               ),
-              AdaptiveIcon(sfSymbol: 'xmark', icon: CupertinoIcons.xmark),
+              NativeIcon(sfSymbol: 'xmark', icon: CupertinoIcons.xmark),
             ],
             selectedIndex: value ? 0 : 1,
             onValueChanged: (i) => onChanged(i == 0),
