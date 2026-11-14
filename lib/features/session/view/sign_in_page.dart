@@ -1,6 +1,5 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
@@ -54,7 +53,8 @@ class _SignInPageState extends State<SignInPage> {
         }
 
         Future<void> resetPassword() async {
-          final name = await context.push<String>(
+          final name = await scope.push<String>(
+            context,
             scope.resetPassword(form.name.trim()),
           );
           if (name == null || !mounted) return;
@@ -196,8 +196,10 @@ class _SignInPageState extends State<SignInPage> {
                                   TextLink(
                                     label: 'Forgot username?',
                                     color: ink,
-                                    onPressed: () =>
-                                        context.push<void>(scope.findUsername),
+                                    onPressed: () => scope.push<void>(
+                                      context,
+                                      scope.findUsername,
+                                    ),
                                   ),
                                   TextLink(
                                     label: 'Forgot password?',
@@ -240,8 +242,10 @@ class _SignInPageState extends State<SignInPage> {
                                     label: 'Register',
                                     color: KeelColors.azure.of(context),
                                     weight: FontWeight.w600,
-                                    onPressed: () =>
-                                        context.push<void>(scope.register),
+                                    onPressed: () => scope.push<void>(
+                                      context,
+                                      scope.register,
+                                    ),
                                   ),
                                 ],
                               ),

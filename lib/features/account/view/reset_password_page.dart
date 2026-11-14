@@ -1,6 +1,5 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
@@ -16,6 +15,7 @@ import 'package:investnotes_app_sample1/features/account/widgets/flow_page.dart'
 import 'package:investnotes_app_sample1/features/account/widgets/password_checks.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/step_switcher.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/valid_mark.dart';
+import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
 
 /// A new password for a forgotten one. Pops with the username, so sign-in
 /// can fill it in.
@@ -41,7 +41,8 @@ class ResetPasswordPage extends StatelessWidget {
                 title: 'Password changed',
                 detail: state.username.trim(),
                 actionLabel: 'Back to sign in',
-                onAction: () => context.pop(state.username.trim()),
+                onAction: () =>
+                    SignInScope.of(context).pop(context, state.username.trim()),
               ),
             },
           ),

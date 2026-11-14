@@ -13,10 +13,9 @@ import 'package:investnotes_app_sample1/features/session/widgets/sheet_bar_binde
 
 /// Sign-in and the pages it leads to, at [path].
 ///
-/// In the iOS [sheet] each page is an [AdaptiveScaffold] under the sheet's
-/// native navigation bar, which shows the page's title, back and close
-/// ([SheetBarBinder]); the pages push with Flutter's own transition and
-/// swipe-back inside the sheet's engine. Elsewhere sign-in rises as a full-screen
+/// In the iOS [sheet] each page is an [AdaptiveScaffold] in a native page
+/// of the sheet's navigation: UIKit pushes and pops whole pages, bar and
+/// all, with its own back and swipe ([SheetBarBinder]). Elsewhere sign-in rises as a full-screen
 /// dialog and the rest push over it.
 GoRoute signInRoute({required String path, required bool sheet}) {
   Page<void> page(
@@ -26,14 +25,15 @@ GoRoute signInRoute({required String path, required bool sheet}) {
     bool first = false,
   }) {
     if (sheet) {
-      return CupertinoPage<void>(
+      // UIKit moves the whole page; Flutter switches without a transition.
+      return NoTransitionPage<void>(
         key: state.pageKey,
         child: Builder(
           builder: (context) => AdaptiveScaffold(
             body: SheetBarBinder(
+              first: first,
               // Sign-in's brand band says what it is; its bar stays bare.
               title: first ? null : title,
-              onBack: first ? null : () => Navigator.maybePop(context),
               onClose: first ? SignInScope.of(context).onClose : null,
               child: child,
             ),

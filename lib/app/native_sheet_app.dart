@@ -146,6 +146,7 @@ class _SignInSheetAppState extends State<_SignInSheetApp> {
         backgroundColor: widget.background,
         child: SignInScope(
           base: '/',
+          sheet: true,
           onSignedIn: (name) => AdaptiveNativeSheet.pop(context, name),
           onClose: () => AdaptiveNativeSheet.pop(context),
           child: child!,

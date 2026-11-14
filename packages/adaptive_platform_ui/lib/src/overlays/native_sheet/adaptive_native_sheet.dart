@@ -59,8 +59,11 @@ class AdaptiveNativeSheet {
   static bool _startupReported = false;
   static String? _firstError;
   static FlutterExceptionHandler? _previousFlutterError;
-  static VoidCallback? _barBack;
   static VoidCallback? _barClose;
+
+  /// Called when the sheet's navigation popped its page in front by back or
+  /// swipe: the page's Flutter route should pop, without a transition.
+  static VoidCallback? onPagePopped;
   static ErrorCallback? _previousPlatformError;
 
   static final Set<Route<Object?>> _leavingRoutes = <Route<Object?>>{};
@@ -171,26 +174,46 @@ class AdaptiveNativeSheet {
     });
   }
 
-  /// Inside a full-screen sheet shown with `navigationBar`, what its native
-  /// bar shows for the page in front: [title], and a back and a close
-  /// control when [onBack] and [onClose] are given. UIKit lays the bar out
-  /// for the device, across the top or, on an iPhone Duo, in the system's
-  /// vertical bar. Does nothing elsewhere.
-  static void setBar({
-    String? title,
-    VoidCallback? onBack,
-    VoidCallback? onClose,
-  }) {
+  /// Inside a full-screen sheet shown with `navigationBar`, what the bar
+  /// shows for the page in front: [title], and a close control when
+  /// [onClose] is given. Back appears on its own once a page has been
+  /// pushed. UIKit lays the bar out for the device, across the top or, on an
+  /// iPhone Duo, in the system's vertical bar. Does nothing elsewhere.
+  ///
+  /// The sheet's pages push as whole native pages, bar and all:
+  /// [preparePush] before the Flutter route is pushed (without a
+  /// transition), then [pushPage] once the new page has drawn. A pop by back
+  /// or swipe calls [onPagePopped]; a pop of Flutter's own goes through
+  /// [popPage] first. Either way the page now in front calls [revealPage]
+  /// once it has drawn again.
+  static void setBar({String? title, VoidCallback? onClose}) {
     if (!_hosted) return;
-    _barBack = onBack;
     _barClose = onClose;
-    unawaited(
-      _send('setBar', {
-        'title': title,
-        'back': onBack != null,
-        'close': onClose != null,
-      }),
-    );
+    unawaited(_send('setBar', {'title': title, 'close': onClose != null}));
+  }
+
+  /// Covers the page in front with a picture of itself, so the next page
+  /// can be drawn beneath it unseen.
+  static Future<void> preparePush() async {
+    if (_hosted) await _send('preparePush');
+  }
+
+  /// UIKit pushes a new page showing what Flutter now draws.
+  static void pushPage({String? title, VoidCallback? onClose}) {
+    if (!_hosted) return;
+    _barClose = onClose;
+    unawaited(_send('pushPage', {'title': title, 'close': onClose != null}));
+  }
+
+  /// UIKit pops the page in front; completes once it has, for the Flutter
+  /// route to follow.
+  static Future<void> popPage() async {
+    if (_hosted) await _send('popPage');
+  }
+
+  /// The page in front has drawn again after a pop: its picture lifts.
+  static void revealPage() {
+    if (_hosted) unawaited(_send('revealPage'));
   }
 
   /// The content built its first frame: the native side stops waiting.
@@ -382,12 +405,10 @@ class AdaptiveNativeSheet {
         );
       case 'barAction':
         final arguments = call.arguments as Map<Object?, Object?>;
-        switch (arguments['id']) {
-          case 'back':
-            _barBack?.call();
-          case 'close':
-            _barClose?.call();
-        }
+        if (arguments['id'] == 'close') _barClose?.call();
+        return null;
+      case 'pagePopped':
+        onPagePopped?.call();
         return null;
       default:
         throw MissingPluginException();

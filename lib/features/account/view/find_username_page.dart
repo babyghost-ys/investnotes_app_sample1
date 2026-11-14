@@ -1,6 +1,5 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
@@ -11,6 +10,7 @@ import 'package:investnotes_app_sample1/features/account/widgets/flow_done.dart'
 import 'package:investnotes_app_sample1/features/account/widgets/flow_page.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/step_switcher.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/valid_mark.dart';
+import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
 
 typedef UsernameRequest = ({String email, bool sent});
 
@@ -39,7 +39,7 @@ class FindUsernamePage extends StatelessWidget {
                     title: 'Username sent',
                     detail: Credentials.masked(request.email),
                     actionLabel: 'Back to sign in',
-                    onAction: () => context.pop(),
+                    onAction: () => SignInScope.of(context).pop<void>(context),
                   )
                 : FlowBody(
                     children: [

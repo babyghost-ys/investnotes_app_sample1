@@ -58,7 +58,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             let controller = SheetViewController(engine: engine, nibName: nil, bundle: nil)
             self.controller = controller
             navigation = detents == "fullScreen" && arguments["navigationBar"] as? Bool == true
-                ? SheetNavigationController(rootViewController: controller)
+                ? SheetNavigationController(content: controller)
                 : nil
             channel = FlutterMethodChannel(name: "adaptive_platform_ui/widget_sheet",
                                            binaryMessenger: engine.binaryMessenger)
@@ -181,7 +181,19 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             if let source { setHeight(args, for: source) }
             result(nil)
         case "setBar":
-            if let source { setBar(args, for: source) }
+            source?.navigation?.setBar(args)
+            result(nil)
+        case "preparePush":
+            source?.navigation?.preparePush()
+            result(nil)
+        case "pushPage":
+            source?.navigation?.pushPage(args)
+            result(nil)
+        case "popPage":
+            guard let navigation = source?.navigation else { result(nil); return }
+            navigation.popPage { result(nil) }
+        case "revealPage":
+            source?.navigation?.revealPage()
             result(nil)
         case "dismiss":
             dismiss(source, value: args["value"], result: result)
@@ -260,6 +272,9 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
                 color: (args["barColor"] as? NSNumber)?.intValue,
                 foreground: (args["barForeground"] as? NSNumber).map { UIColor(argb: $0.intValue) },
                 plainButtons: args["plainButtons"] as? Bool ?? false)
+            navigation.send = { [weak level] method, arguments in
+                level?.channel.invokeMethod(method, arguments: arguments)
+            }
             navigation.overrideUserInterfaceStyle = controller.overrideUserInterfaceStyle
             navigation.view.backgroundColor = controller.view.backgroundColor
         }
@@ -543,30 +558,6 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         level.turnHold.hold(coordinator: coordinator)
     }
 
-    /// What the sheet's navigation bar shows for the page now in front: its
-    /// title, and a back and a close control whose taps go to the sheet's
-    /// isolate as `barAction`.
-    private func setBar(_ args: [String: Any], for level: Level) {
-        guard let navigation = level.navigation, !level.closed else { return }
-        let item = level.controller.navigationItem
-        item.title = args["title"] as? String
-        item.hidesBackButton = true
-        func button(_ symbol: String, _ label: String, _ id: String) -> UIBarButtonItem {
-            let action = UIAction { [weak level] _ in
-                level?.channel.invokeMethod("barAction", arguments: ["id": id])
-            }
-            let button = UIBarButtonItem(title: nil, image: UIImage(systemName: symbol),
-                                         primaryAction: action, menu: nil)
-            button.accessibilityLabel = label
-            return button
-        }
-        item.leftBarButtonItem = args["back"] as? Bool == true
-            ? button("chevron.backward", "Back", "back") : nil
-        item.rightBarButtonItem = args["close"] as? Bool == true
-            ? button("xmark", "Close", "close") : nil
-        navigation.styleButtons()
-    }
-
     private func dismiss(_ source: Level?, value: Any?, result: @escaping FlutterResult) {
         guard let level = source, level === levels.last else {
             result(FlutterError(code: "inactive", message: "Only the active sheet can dismiss itself", details: nil))
@@ -684,12 +675,63 @@ private final class SheetWindowRootController: UIViewController {
     }
 }
 
-/// The navigation bar of a full-screen sheet. The sheet's Flutter pages
-/// navigate among themselves inside one engine, so this controller holds a
-/// single page and only shows what the page in front asks for.
-final class SheetNavigationController: UINavigationController {
+/// One page of a full-screen sheet's navigation. The page in front holds
+/// the sheet's Flutter view; a page further back keeps a picture of how it
+/// looked, so UIKit's push and pop move whole pages, bar and all.
+final class SheetPageController: UIViewController {
+    private var cover: UIView?
+    /// Called as the page first comes on screen.
+    var willAppear: (() -> Void)?
+
+    /// The Flutter view moves between pages, in and out of the window. Were
+    /// UIKit to tell Flutter's controller it disappeared each time, Flutter
+    /// would drop its surface and the native controls inside it; it is told
+    /// once, as the sheet first shows, that it appeared.
+    override var shouldAutomaticallyForwardAppearanceMethods: Bool { false }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        willAppear?()
+    }
+
+    override func loadView() {
+        view = UIView()
+        view.backgroundColor = .clear
+    }
+
+    /// Lays [picture] over the page, above the Flutter view while it changes
+    /// underneath.
+    func cover(with picture: UIView) {
+        cover?.removeFromSuperview()
+        picture.frame = view.bounds
+        picture.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        // Touches on the picture never reach the page changing beneath it.
+        picture.isUserInteractionEnabled = true
+        picture.accessibilityElementsHidden = true
+        view.addSubview(picture)
+        cover = picture
+    }
+
+    func uncover() {
+        cover?.removeFromSuperview()
+        cover = nil
+    }
+}
+
+/// The navigation of a full-screen sheet. The sheet's Flutter pages share
+/// one engine and one Flutter view, which moves into whichever page is in
+/// front. Before a push, a picture of the page in front covers it while
+/// Flutter switches to the new page beneath; UIKit then pushes a new page
+/// holding the Flutter view. A pop slides the page away over the picture
+/// left behind, after which Flutter switches back and the picture lifts.
+final class SheetNavigationController: UINavigationController,
+    UINavigationControllerDelegate, UIGestureRecognizerDelegate {
+    private let content: FlutterViewController
     private var plainButtons = false
     private var foreground: UIColor?
+    private var popCompletion: (() -> Void)?
+    /// Sends a call to the sheet's isolate.
+    var send: ((String, Any?) -> Void)?
     /// The bar colour above the bar. On an iPhone Duo the title sits lower,
     /// in the system's title band, and UIKit leaves the space over it bare;
     /// the app's own navigation fills it the same way.
@@ -699,6 +741,31 @@ final class SheetNavigationController: UINavigationController {
         view.accessibilityElementsHidden = true
         return view
     }()
+
+    init(content: FlutterViewController) {
+        self.content = content
+        let root = SheetPageController()
+        super.init(rootViewController: root)
+        delegate = self
+        embed(in: root)
+        root.willAppear = { [weak self, weak root] in
+            guard let self, !self.contentAppeared else { return }
+            self.contentAppeared = true
+            root?.willAppear = nil
+            self.content.beginAppearanceTransition(true, animated: false)
+            self.content.endAppearanceTransition()
+        }
+    }
+
+    /// Whether Flutter's controller has been told it appeared.
+    private var contentAppeared = false
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
 
     func configure(color: Int?, foreground: UIColor?, plainButtons: Bool) {
         self.plainButtons = plainButtons
@@ -713,6 +780,109 @@ final class SheetNavigationController: UINavigationController {
         topBackdrop.backgroundColor = color.map { UIColor(argb: $0) }
     }
 
+    /// Moves the Flutter view into [page], beneath anything covering it.
+    private func embed(in page: SheetPageController) {
+        guard content.parent !== page else { return }
+        content.willMove(toParent: nil)
+        content.view.removeFromSuperview()
+        content.removeFromParent()
+        page.addChild(content)
+        content.view.frame = page.view.bounds
+        content.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        page.view.insertSubview(content.view, at: 0)
+        content.didMove(toParent: page)
+    }
+
+    private var front: SheetPageController? { topViewController as? SheetPageController }
+
+    /// The page in front's title and close control. Back appears on its own
+    /// whenever there is a page to go back to.
+    func setBar(_ args: [String: Any]) {
+        guard let page = front else { return }
+        configureItems(of: page, args, back: viewControllers.count > 1)
+    }
+
+    private func configureItems(of page: SheetPageController, _ args: [String: Any],
+                                back: Bool) {
+        let item = page.navigationItem
+        item.title = args["title"] as? String
+        item.hidesBackButton = true
+        item.leftBarButtonItem = back
+            ? button("chevron.backward", "Back") { [weak self] in self?.goBack() }
+            : nil
+        item.rightBarButtonItem = args["close"] as? Bool == true
+            ? button("xmark", "Close") { [weak self] in
+                self?.send?("barAction", ["id": "close"])
+            }
+            : nil
+        styleButtons()
+    }
+
+    private func button(_ symbol: String, _ label: String,
+                        _ action: @escaping () -> Void) -> UIBarButtonItem {
+        let item = UIBarButtonItem(title: nil, image: UIImage(systemName: symbol),
+                                   primaryAction: UIAction { _ in action() }, menu: nil)
+        item.accessibilityLabel = label
+        return item
+    }
+
+    /// Covers the page in front with a picture of itself, so Flutter can
+    /// switch to the next page beneath it unseen.
+    func preparePush() {
+        guard let page = front,
+              let picture = content.view.snapshotView(afterScreenUpdates: false) else { return }
+        page.cover(with: picture)
+    }
+
+    /// Pushes a new page holding the Flutter view, now drawing the next page.
+    func pushPage(_ args: [String: Any]) {
+        guard transitionCoordinator == nil else { return }
+        let page = SheetPageController()
+        page.loadViewIfNeeded()
+        configureItems(of: page, args, back: true)
+        embed(in: page)
+        pushViewController(page, animated: true)
+        styleButtons()
+    }
+
+    /// The back control: UIKit pops, then Flutter follows.
+    private func goBack() {
+        guard viewControllers.count > 1, transitionCoordinator == nil else { return }
+        popViewController(animated: true)
+    }
+
+    /// A pop asked for by Flutter, such as a page that finished: completes
+    /// once UIKit has popped, so Flutter can follow.
+    func popPage(completion: @escaping () -> Void) {
+        guard viewControllers.count > 1, transitionCoordinator == nil else { completion(); return }
+        popCompletion = completion
+        popViewController(animated: true)
+    }
+
+    /// Flutter now draws the page in front: lift its picture.
+    func revealPage() {
+        front?.uncover()
+    }
+
+    func navigationController(_ navigationController: UINavigationController,
+                              didShow viewController: UIViewController, animated: Bool) {
+        guard let page = viewController as? SheetPageController, content.parent !== page else { return }
+        // A pop finished (by back, swipe or Flutter): the page now in front
+        // takes the Flutter view, still under its picture until Flutter has
+        // drawn it again.
+        embed(in: page)
+        if let completion = popCompletion {
+            popCompletion = nil
+            completion()
+        } else {
+            send?("pagePopped", nil)
+        }
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        viewControllers.count > 1 && transitionCoordinator == nil
+    }
+
     /// Whether the system shows the bar's controls in a vertical bar (an
     /// iPhone Duo) rather than across the top.
     private var verticalNavigation: Bool {
@@ -725,14 +895,16 @@ final class SheetNavigationController: UINavigationController {
     /// Plain buttons across the top; in the vertical bar, the system's glass
     /// with label contrast, as the app's own native bars do.
     func styleButtons() {
-        let items = (topViewController?.navigationItem.leftBarButtonItems ?? [])
-            + (topViewController?.navigationItem.rightBarButtonItems ?? [])
         let vertical = verticalNavigation
-        for item in items {
-            if #available(iOS 26.0, *) {
-                item.hidesSharedBackground = plainButtons && !vertical
+        for page in viewControllers {
+            let items = (page.navigationItem.leftBarButtonItems ?? [])
+                + (page.navigationItem.rightBarButtonItems ?? [])
+            for item in items {
+                if #available(iOS 26.0, *) {
+                    item.hidesSharedBackground = plainButtons && !vertical
+                }
+                item.tintColor = plainButtons && vertical ? .label : foreground
             }
-            item.tintColor = plainButtons && vertical ? .label : foreground
         }
     }
 

@@ -1,4 +1,6 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:go_router/go_router.dart';
 
 /// Where the sign-in flow lives and what finishing it means there.
 ///
@@ -13,7 +15,11 @@ class SignInScope extends InheritedWidget {
     required this.onSignedIn,
     required this.onClose,
     required super.child,
+    this.sheet = false,
   });
+
+  /// In the iOS sheet, where pages push as whole native pages.
+  final bool sheet;
 
   /// The location of the sign-in page in the router that holds it.
   final String base;
@@ -32,6 +38,21 @@ class SignInScope extends InheritedWidget {
     path: _at('reset-password'),
     queryParameters: username.isEmpty ? null : {'username': username},
   ).toString();
+
+  /// Opens [location]. In the sheet the page in front is pictured first, so
+  /// UIKit can push the new page whole once Flutter has drawn it.
+  Future<T?> push<T>(BuildContext context, String location) async {
+    if (sheet) await AdaptiveNativeSheet.preparePush();
+    if (!context.mounted) return null;
+    return context.push<T>(location);
+  }
+
+  /// Leaves the page in front with [result]. In the sheet UIKit pops it
+  /// first, and the Flutter route follows.
+  Future<void> pop<T>(BuildContext context, [T? result]) async {
+    if (sheet) await AdaptiveNativeSheet.popPage();
+    if (context.mounted) context.pop(result);
+  }
 
   String _at(String page) => base == '/' ? '/$page' : '$base/$page';
 
