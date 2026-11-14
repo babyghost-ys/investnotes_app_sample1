@@ -113,10 +113,8 @@ class DatePickSheet extends StatelessWidget {
                       background: azure,
                       size: 54,
                       iconSize: 22,
-                      onPressed: () => AdaptiveNativeSheet.pop(
-                        context,
-                        state.value.toIso8601String(),
-                      ),
+                      onPressed: () =>
+                          AdaptiveNativeSheet.pop(context, state.value),
                     ),
                   ),
                 ],

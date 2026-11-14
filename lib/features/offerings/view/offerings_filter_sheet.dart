@@ -3,6 +3,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
+import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/filter_sheet_layout.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
@@ -26,6 +27,10 @@ Future<OfferingFilter?> showOfferingsFilter(
   route: 'offeringsFilter',
   arguments: {'filter': current.encode(), 'type': type.name},
   decodeResult: OfferingFilter.decode,
+  detents: AdaptiveFilterDetents.full,
+  // A long sheet scrolls; dragging belongs to its content, and the close
+  // control dismisses it.
+  isDismissible: false,
   backgroundColor: KeelColors.page.of(context),
   builder: (_) =>
       OfferingsFilterSheet(initial: current, type: type, offerings: offerings),
@@ -47,6 +52,49 @@ class OfferingsFilterSheet extends StatelessWidget {
     final next = {...set};
     if (!next.remove(value)) next.add(value);
     return next;
+  }
+
+  Widget _minHeadline(
+    BuildContext context,
+    DraftBloc<OfferingFilter> draft,
+    OfferingFilter f,
+  ) {
+    final azure = KeelColors.azure.of(context);
+    final any = f.minHeadline <= 0;
+    return Semantics(
+      label: any
+          ? 'Any cap or coupon'
+          : 'Cap or coupon at least ${Formats.percent(f.minHeadline)}',
+      child: Row(
+        children: [
+          Icon(CupertinoIcons.arrow_up_to_line, size: 20, color: azure),
+          const SizedBox(width: 8),
+          Expanded(
+            child: AdaptiveSlider(
+              value: f.minHeadline,
+              min: 0,
+              max: OfferingFilter.headlineCeiling,
+              activeColor: azure,
+              onChanged: (v) => draft.change(
+                draft.state.value.copyWith(
+                  minHeadline: (v * 20).roundToDouble() / 20,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            any ? 'Any' : '≥ ${Formats.percent(f.minHeadline)}',
+            style: TextStyle(
+              color: KeelColors.ink.of(context),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _closesBy(
@@ -104,12 +152,62 @@ class OfferingsFilterSheet extends StatelessWidget {
         final f = state.value;
         final count = f.apply(offerings.where((o) => o.type == type)).length;
         return FilterSheetLayout(
+          scrolls: true,
           resultCount: count,
           onReset: f == const OfferingFilter()
               ? null
               : () => draft.add(const DraftReset()),
           onApply: () => AdaptiveNativeSheet.pop(context, f),
           groups: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in ShareClass.values)
+                  OptionChip(
+                    text: c.title,
+                    selected: f.classes.contains(c),
+                    onTap: () =>
+                        draft.change(f.copyWith(classes: _flip(f.classes, c))),
+                  ),
+              ],
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final g in NoteGoal.values)
+                  OptionChip(
+                    text: g.title,
+                    icon: switch (g) {
+                      NoteGoal.income => CupertinoIcons.arrow_2_circlepath,
+                      NoteGoal.growth => CupertinoIcons.arrow_up_right,
+                      NoteGoal.both => CupertinoIcons.chart_pie,
+                    },
+                    selected: f.goals.contains(g),
+                    onTap: () =>
+                        draft.change(f.copyWith(goals: _flip(f.goals, g))),
+                  ),
+              ],
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final p in Payout.values)
+                  OptionChip(
+                    text: p.title,
+                    icon: switch (p) {
+                      Payout.maturity => CupertinoIcons.flag_fill,
+                      Payout.annual => CupertinoIcons.calendar,
+                      Payout.quarterly => CupertinoIcons.calendar_today,
+                    },
+                    selected: f.payouts.contains(p),
+                    onTap: () =>
+                        draft.change(f.copyWith(payouts: _flip(f.payouts, p))),
+                  ),
+              ],
+            ),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -152,6 +250,21 @@ class OfferingsFilterSheet extends StatelessWidget {
                   ),
               ],
             ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final t in TermBand.values)
+                  OptionChip(
+                    text: t.title,
+                    icon: CupertinoIcons.hourglass,
+                    selected: f.terms.contains(t),
+                    onTap: () =>
+                        draft.change(f.copyWith(terms: _flip(f.terms, t))),
+                  ),
+              ],
+            ),
+            _minHeadline(context, draft, f),
             _closesBy(context, draft, f),
             Row(
               children: [

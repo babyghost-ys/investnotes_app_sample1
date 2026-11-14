@@ -290,15 +290,7 @@ class AdaptiveNativeSheet {
               valueListenable: _leaving,
               builder: (context, leaving, child) => Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (leaving)
-                    const SizedBox(
-                      height: 40,
-                      width: double.infinity,
-                      child: ColoredBox(color: Color(0xFFFF0000)),
-                    ),
-                  Flexible(child: child!),
-                ],
+                children: [Flexible(child: child!)],
               ),
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(

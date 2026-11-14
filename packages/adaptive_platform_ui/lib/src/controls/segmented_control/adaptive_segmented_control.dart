@@ -131,7 +131,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
 
     final buttonStyle = SegmentedButton.styleFrom(
       minimumSize: Size.fromHeight(height),
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       selectedBackgroundColor: color,
       selectedForegroundColor: selectedTextColor,
       foregroundColor: textColor,
@@ -140,6 +140,9 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     Widget control = SegmentedButton<int>(
       segments: segments,
       selected: {selectedIndex},
+      // The fill already marks the selection; a checkmark beside the label
+      // pushes longer labels onto several lines in narrow segments.
+      showSelectedIcon: false,
       onSelectionChanged: enabled
           ? (Set<int> newSelection) {
               if (newSelection.isNotEmpty) {

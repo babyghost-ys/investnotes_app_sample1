@@ -103,9 +103,9 @@ class FinderPage extends StatelessWidget {
                                   icon: CupertinoIcons.checkmark,
                                 ),
                                 label: 'Done',
-                                onPressed: () => Navigator.of(
-                                  context,
-                                ).popUntil((route) => route.isFirst),
+                                onPressed: () =>
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst),
                               ),
                             ],
                             builder: (_) => BlocProvider.value(

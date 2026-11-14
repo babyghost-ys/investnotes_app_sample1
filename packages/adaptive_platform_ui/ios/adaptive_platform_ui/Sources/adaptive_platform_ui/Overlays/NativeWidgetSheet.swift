@@ -411,7 +411,25 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         presenter.present(controller, animated: true) { [weak self, weak level] in
             guard let self, let level else { return }
             level.presenting = false
+            if !level.dismissible && level.detents != "fullScreen" {
+                Self.disableSheetPans(above: controller.view)
+            }
             self.flushPendingHeights()
+        }
+    }
+
+    /// A sheet that only closes through its own controls cannot be dragged,
+    /// so UIKit's pan recognisers around it are switched off. Left on, they
+    /// claim vertical drags meant for the Flutter content, and a long sheet
+    /// barely scrolls. Recognisers inside [view] are Flutter's own and stay.
+    private static func disableSheetPans(above view: UIView) {
+        var current = view.superview
+        while let ancestor = current, !(ancestor is UIWindow) {
+            for recognizer in ancestor.gestureRecognizers ?? []
+            where recognizer is UIPanGestureRecognizer {
+                recognizer.isEnabled = false
+            }
+            current = ancestor.superview
         }
     }
 

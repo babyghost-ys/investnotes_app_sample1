@@ -35,8 +35,15 @@ class KeelDrawer extends StatelessWidget {
     // the scaffold's, which stays.
     final host = scaffold.context;
 
+    // The Material drawer can finish closing without completing the
+    // scaffold's future, so the wait is capped at the close animation.
+    Future<void> close() => scaffold.closeDrawer().timeout(
+      const Duration(milliseconds: 350),
+      onTimeout: () {},
+    );
+
     Future<void> open(String title, WidgetBuilder builder) async {
-      await scaffold.closeDrawer();
+      await close();
       if (host.mounted) {
         await pushPage<void>(host, title: title, builder: builder);
       }
@@ -139,7 +146,7 @@ class KeelDrawer extends StatelessWidget {
           icon: CupertinoIcons.wand_stars,
           title: 'Find my note',
           onTap: () async {
-            await scaffold.closeDrawer();
+            await close();
             if (host.mounted) await startFinder(host);
           },
         ),

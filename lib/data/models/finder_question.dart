@@ -112,7 +112,7 @@ final finderQuestions = <FinderQuestion>[
       for (final r in Region.values)
         FinderOption(
           r.title,
-          r == Region.global ? CupertinoIcons.globe : null,
+          null,
           (o) => o.region == r || o.region == Region.global,
         ),
     ],

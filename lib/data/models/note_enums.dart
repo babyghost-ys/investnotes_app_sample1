@@ -51,3 +51,54 @@ enum IssuedStatus {
   final String title;
   final String symbol;
 }
+
+/// Who the note is sold to: through an adviser with a commission (A) or in
+/// a fee-based account without one (F).
+enum ShareClass {
+  a('A-class'),
+  f('F-class');
+
+  const ShareClass(this.title);
+
+  final String title;
+}
+
+/// What the holder is after: payments along the way, growth at maturity,
+/// or some of both.
+enum NoteGoal {
+  income('Income'),
+  growth('Growth'),
+  both('Income & growth');
+
+  const NoteGoal(this.title);
+
+  final String title;
+}
+
+/// How long the money is tied up.
+enum TermBand {
+  short('Up to 3 yrs'),
+  medium('4–5 yrs'),
+  long('6+ yrs');
+
+  const TermBand(this.title);
+
+  final String title;
+
+  static TermBand of(int years) => years <= 3
+      ? TermBand.short
+      : years <= 5
+      ? TermBand.medium
+      : TermBand.long;
+}
+
+/// When the note pays out.
+enum Payout {
+  maturity('At maturity'),
+  annual('Annual'),
+  quarterly('Quarterly');
+
+  const Payout(this.title);
+
+  final String title;
+}

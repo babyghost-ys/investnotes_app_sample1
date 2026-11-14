@@ -20,6 +20,7 @@ Future<void> runNativeSheetApp() async {
     encodeResult: (value) => switch (value) {
       OfferingFilter filter => filter.encode(),
       IssuedFilter filter => filter.encode(),
+      DateTime date => date.toIso8601String(),
       _ => value,
     },
   );
@@ -79,7 +80,12 @@ class NativeSheetApp extends StatelessWidget {
           ),
         ),
         home: AdaptiveNativeSheetContent(
-          fits: route != 'signIn',
+          // Only a fit sheet measures its content; a full-height one lays
+          // its own scrolling out in the space UIKit gives it.
+          fits:
+              route != 'signIn' &&
+              (configuration['detents'] == null ||
+                  configuration['detents'] == 'fit'),
           backgroundColor: background == null ? null : Color(background),
           child: _content(),
         ),

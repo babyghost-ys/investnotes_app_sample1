@@ -15,6 +15,9 @@ class Offering extends Equatable {
     required this.assetClass,
     required this.termYears,
     required this.closes,
+    required this.shareClass,
+    required this.goal,
+    required this.payout,
   });
 
   final String id;
@@ -26,6 +29,9 @@ class Offering extends Equatable {
   final AssetClass assetClass;
   final int termYears;
   final DateTime closes;
+  final ShareClass shareClass;
+  final NoteGoal goal;
+  final Payout payout;
 
   NoteType get type => payoff.type;
 

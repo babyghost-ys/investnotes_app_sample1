@@ -220,6 +220,20 @@ class NotesRepository {
     int term,
     int closesInDays,
   ) => Offering(
+    payout: switch (payoff.type) {
+      NoteType.auto =>
+        int.parse(id.split('-').last).isOdd ? Payout.quarterly : Payout.annual,
+      NoteType.par => Payout.annual,
+      _ => Payout.maturity,
+    },
+    shareClass: int.parse(id.split("-").last).isOdd
+        ? ShareClass.a
+        : ShareClass.f,
+    goal: switch (payoff.type) {
+      NoteType.auto => NoteGoal.income,
+      NoteType.mld => closesInDays.isEven ? NoteGoal.both : NoteGoal.growth,
+      _ => term >= 5 ? NoteGoal.growth : NoteGoal.both,
+    },
     id: id,
     name: name,
     underlying: underlying,
