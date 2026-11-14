@@ -59,6 +59,8 @@ class AdaptiveNativeSheet {
   static bool _startupReported = false;
   static String? _firstError;
   static FlutterExceptionHandler? _previousFlutterError;
+  static VoidCallback? _barBack;
+  static VoidCallback? _barClose;
   static ErrorCallback? _previousPlatformError;
 
   static final Set<Route<Object?>> _leavingRoutes = <Route<Object?>>{};
@@ -101,6 +103,7 @@ class AdaptiveNativeSheet {
     WidgetsFlutterBinding.ensureInitialized();
     _hosted = true;
     _encodeResult = encodeResult;
+    _channel.setMethodCallHandler(_handleCall);
     _watchStartup();
     try {
       final configuration = await _channel.invokeMapMethod<String, dynamic>(
@@ -168,6 +171,28 @@ class AdaptiveNativeSheet {
     });
   }
 
+  /// Inside a full-screen sheet shown with `navigationBar`, what its native
+  /// bar shows for the page in front: [title], and a back and a close
+  /// control when [onBack] and [onClose] are given. UIKit lays the bar out
+  /// for the device, across the top or, on an iPhone Duo, in the system's
+  /// vertical bar. Does nothing elsewhere.
+  static void setBar({
+    String? title,
+    VoidCallback? onBack,
+    VoidCallback? onClose,
+  }) {
+    if (!_hosted) return;
+    _barBack = onBack;
+    _barClose = onClose;
+    unawaited(
+      _send('setBar', {
+        'title': title,
+        'back': onBack != null,
+        'close': onClose != null,
+      }),
+    );
+  }
+
   /// The content built its first frame: the native side stops waiting.
   static void _reportReady() {
     if (!_hosted || _startupReported) return;
@@ -203,6 +228,12 @@ class AdaptiveNativeSheet {
   /// `false` sheet, only closes through [pop]; [detents] and [isDismissible]
   /// do not apply to it. On iOS [route] is required and [arguments] must be
   /// StandardMessageCodec data.
+  ///
+  /// A [fullScreen] sheet with [navigationBar] sits in a native navigation
+  /// controller, so UIKit draws its bar where the device keeps one: across
+  /// the top, or on an iPhone Duo in the system's vertical bar. The bar is
+  /// [barColor] with [barForeground] controls, plain across the top when
+  /// [plainBarButtons]; the sheet's pages fill it in through [setBar].
   static Future<T?> show<T>({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -213,6 +244,10 @@ class AdaptiveNativeSheet {
     bool fullScreen = false,
     bool isDismissible = true,
     Color? backgroundColor,
+    bool navigationBar = false,
+    Color? barColor,
+    Color? barForeground,
+    bool plainBarButtons = false,
   }) async {
     final native = AdaptiveStyle.of(context) == AdaptiveStyle.native;
     if (fullScreen && !native) {
@@ -254,6 +289,12 @@ class AdaptiveNativeSheet {
                     CupertinoColors.systemBackground.resolveFrom(context))
                 .toARGB32(),
         'brightness': CupertinoTheme.brightnessOf(context).name,
+        if (fullScreen && navigationBar) ...{
+          'navigationBar': true,
+          'barColor': ?barColor?.toARGB32(),
+          'barForeground': ?barForeground?.toARGB32(),
+          'plainButtons': plainBarButtons,
+        },
       });
       if (value == null) return null;
       return decodeResult == null ? value as T : decodeResult(value);
@@ -326,18 +367,31 @@ class AdaptiveNativeSheet {
   static void _servePage() {
     if (_servingPage) return;
     _servingPage = true;
-    _channel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case 'resumeIsolate':
-          final arguments = call.arguments as Map<Object?, Object?>;
-          return _resumeIsolatePausedAtStart(
-            arguments['isolateId']! as String,
-            arguments['route'] as String?,
-          );
-        default:
-          throw MissingPluginException();
-      }
-    });
+    _channel.setMethodCallHandler(_handleCall);
+  }
+
+  /// The native side's requests to this isolate: as a page, to resume a
+  /// sheet isolate; as a sheet, a tap on its navigation bar.
+  static Future<Object?> _handleCall(MethodCall call) async {
+    switch (call.method) {
+      case 'resumeIsolate':
+        final arguments = call.arguments as Map<Object?, Object?>;
+        return _resumeIsolatePausedAtStart(
+          arguments['isolateId']! as String,
+          arguments['route'] as String?,
+        );
+      case 'barAction':
+        final arguments = call.arguments as Map<Object?, Object?>;
+        switch (arguments['id']) {
+          case 'back':
+            _barBack?.call();
+          case 'close':
+            _barClose?.call();
+        }
+        return null;
+      default:
+        throw MissingPluginException();
+    }
   }
 
   /// Resumes the sheet isolate [isolateId] when a debugger left it paused at

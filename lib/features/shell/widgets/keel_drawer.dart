@@ -9,6 +9,7 @@ import 'package:investnotes_app_sample1/core/widgets/keel_mark.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
+import 'package:investnotes_app_sample1/features/session/view/open_sign_in.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/widgets/drawer_row.dart';
 
@@ -81,7 +82,10 @@ class KeelDrawer extends StatelessWidget {
                   foreground: KeelColors.tide.of(context),
                   background: _white,
                   iconSize: 22,
-                  onPressed: () => open(KeelRoutes.signIn),
+                  onPressed: () async {
+                    await close();
+                    if (host.mounted) await openSignIn(host);
+                  },
                 ),
             ],
           ),

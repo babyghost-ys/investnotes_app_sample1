@@ -5,16 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:investnotes_app_sample1/app/keel_page.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
-import 'package:investnotes_app_sample1/features/account/view/find_username_page.dart';
-import 'package:investnotes_app_sample1/features/account/view/register_page.dart';
-import 'package:investnotes_app_sample1/features/account/view/reset_password_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
 import 'package:investnotes_app_sample1/features/learn/view/article_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
 import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
 import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
-import 'package:investnotes_app_sample1/features/session/view/sign_in_page.dart';
+import 'package:investnotes_app_sample1/features/session/view/sign_in_route.dart';
 import 'package:investnotes_app_sample1/features/shell/view/shell_page.dart';
 
 /// Keel's routes. The shell is the root; every other page is pushed over
@@ -87,39 +84,7 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             child: const FinderResultsPage(),
           ),
         ),
-        GoRoute(
-          path: 'sign-in',
-          pageBuilder: (context, state) =>
-              keelPage(state, title: 'Sign in', child: const SignInPage()),
-          routes: [
-            GoRoute(
-              path: 'register',
-              pageBuilder: (context, state) => keelPage(
-                state,
-                title: 'Register',
-                child: const RegisterPage(),
-              ),
-            ),
-            GoRoute(
-              path: 'reset-password',
-              pageBuilder: (context, state) => keelPage(
-                state,
-                title: 'Reset password',
-                child: ResetPasswordPage(
-                  username: state.uri.queryParameters['username'] ?? '',
-                ),
-              ),
-            ),
-            GoRoute(
-              path: 'find-username',
-              pageBuilder: (context, state) => keelPage(
-                state,
-                title: 'Find username',
-                child: const FindUsernamePage(),
-              ),
-            ),
-          ],
-        ),
+        signInRoute(path: 'sign-in', sheet: false),
       ],
     ),
   ],

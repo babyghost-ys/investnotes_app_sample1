@@ -1,8 +1,5 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-
-import 'package:investnotes_app_sample1/app/keel_routes.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
@@ -20,10 +17,10 @@ import 'package:investnotes_app_sample1/features/account/widgets/question_row.da
 import 'package:investnotes_app_sample1/features/account/widgets/step_switcher.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/step_tabs.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/valid_mark.dart';
-import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
+import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
 
 /// Opening an account in three steps. Once the emailed code checks out the
-/// new account is signed in and the app returns home.
+/// new account is signed in and the sign-in flow ends.
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
@@ -55,12 +52,8 @@ class RegisterPage extends StatelessWidget {
                 title: 'Account ready',
                 detail: state.username.trim(),
                 actionLabel: 'Continue signed in',
-                onAction: () {
-                  context.read<SessionBloc>().add(
-                    SessionSignedIn(state.username.trim()),
-                  );
-                  context.go(KeelRoutes.home);
-                },
+                onAction: () =>
+                    SignInScope.of(context).onSignedIn(state.username.trim()),
               ),
             },
           ),

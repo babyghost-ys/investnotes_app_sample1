@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_router.dart';
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/finder/bloc/finder_bloc.dart';
 import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
+import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 
 class KeelApp extends StatefulWidget {
@@ -41,11 +43,22 @@ class _KeelAppState extends State<KeelApp> {
         // One run of "find my note" at a time; starting it clears the last.
         BlocProvider(create: (_) => FinderBloc(_repository)),
       ],
-      child: AdaptiveApp.router(
-        title: 'Keel',
-        theme: KeelTheme.light,
-        darkTheme: KeelTheme.dark,
-        routerConfig: _router,
+      child: Builder(
+        // Sign-in as a page of this router (Android): finishing returns home.
+        builder: (context) => SignInScope(
+          base: KeelRoutes.signIn,
+          onSignedIn: (name) {
+            context.read<SessionBloc>().add(SessionSignedIn(name));
+            _router.go(KeelRoutes.home);
+          },
+          onClose: () => _router.go(KeelRoutes.home),
+          child: AdaptiveApp.router(
+            title: 'Keel',
+            theme: KeelTheme.light,
+            darkTheme: KeelTheme.dark,
+            routerConfig: _router,
+          ),
+        ),
       ),
     ),
   );

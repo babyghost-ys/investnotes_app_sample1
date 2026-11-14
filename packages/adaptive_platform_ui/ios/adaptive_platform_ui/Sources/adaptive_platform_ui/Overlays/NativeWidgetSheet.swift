@@ -8,6 +8,12 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
     private final class Level {
         let engine: FlutterEngine
         let controller: SheetViewController
+        /// A full-screen sheet's own navigation bar, when it asked for one.
+        /// UIKit lays the bar out for the device: across the top, or on an
+        /// iPhone Duo in the system's vertical bar.
+        let navigation: SheetNavigationController?
+        /// What UIKit presents: the navigation controller, or the content.
+        var presentedController: UIViewController { navigation ?? controller }
         let channel: FlutterMethodChannel
         let arguments: [String: Any]
         let completion: FlutterResult
@@ -51,6 +57,9 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             fitHeight = CGFloat((arguments["height"] as? NSNumber)?.doubleValue ?? 320)
             let controller = SheetViewController(engine: engine, nibName: nil, bundle: nil)
             self.controller = controller
+            navigation = detents == "fullScreen" && arguments["navigationBar"] as? Bool == true
+                ? SheetNavigationController(rootViewController: controller)
+                : nil
             channel = FlutterMethodChannel(name: "adaptive_platform_ui/widget_sheet",
                                            binaryMessenger: engine.binaryMessenger)
             // Hold the presentation container rather than just the presented
@@ -171,6 +180,9 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         case "setHeight":
             if let source { setHeight(args, for: source) }
             result(nil)
+        case "setBar":
+            if let source { setBar(args, for: source) }
+            result(nil)
         case "dismiss":
             dismiss(source, value: args["value"], result: result)
         default:
@@ -242,6 +254,14 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         case "dark": controller.overrideUserInterfaceStyle = .dark
         case "light": controller.overrideUserInterfaceStyle = .light
         default: controller.overrideUserInterfaceStyle = .unspecified
+        }
+        if let navigation = level.navigation {
+            navigation.configure(
+                color: (args["barColor"] as? NSNumber)?.intValue,
+                foreground: (args["barForeground"] as? NSNumber).map { UIColor(argb: $0.intValue) },
+                plainButtons: args["plainButtons"] as? Bool ?? false)
+            navigation.overrideUserInterfaceStyle = controller.overrideUserInterfaceStyle
+            navigation.view.backgroundColor = controller.view.backgroundColor
         }
         controller.onTransition = { [weak self] coordinator in
             self?.observeHeightTransition(coordinator)
@@ -369,10 +389,11 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         guard let window = level.window, let presenter = window.rootViewController,
               !level.closed, !level.presented else { return }
         let controller = level.controller
+        let presented = level.presentedController
         if level.detents == "fullScreen" {
-            controller.modalPresentationStyle = .overFullScreen
-            controller.modalPresentationCapturesStatusBarAppearance = true
-            controller.isModalInPresentation = true
+            presented.modalPresentationStyle = .overFullScreen
+            presented.modalPresentationCapturesStatusBarAppearance = true
+            presented.isModalInPresentation = true
         } else {
             controller.modalPresentationStyle = .pageSheet
             controller.modalPresentationCapturesStatusBarAppearance = false
@@ -404,11 +425,11 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
                 sheet.prefersEdgeAttachedInCompactHeight = true
             }
         }
-        controller.presentationController?.delegate = self
+        presented.presentationController?.delegate = self
         level.presented = true
         level.presenting = true
         window.makeKeyAndVisible()
-        presenter.present(controller, animated: true) { [weak self, weak level] in
+        presenter.present(presented, animated: true) { [weak self, weak level] in
             guard let self, let level else { return }
             level.presenting = false
             if !level.dismissible && level.detents != "fullScreen" {
@@ -522,6 +543,30 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         level.turnHold.hold(coordinator: coordinator)
     }
 
+    /// What the sheet's navigation bar shows for the page now in front: its
+    /// title, and a back and a close control whose taps go to the sheet's
+    /// isolate as `barAction`.
+    private func setBar(_ args: [String: Any], for level: Level) {
+        guard let navigation = level.navigation, !level.closed else { return }
+        let item = level.controller.navigationItem
+        item.title = args["title"] as? String
+        item.hidesBackButton = true
+        func button(_ symbol: String, _ label: String, _ id: String) -> UIBarButtonItem {
+            let action = UIAction { [weak level] _ in
+                level?.channel.invokeMethod("barAction", arguments: ["id": id])
+            }
+            let button = UIBarButtonItem(title: nil, image: UIImage(systemName: symbol),
+                                         primaryAction: action, menu: nil)
+            button.accessibilityLabel = label
+            return button
+        }
+        item.leftBarButtonItem = args["back"] as? Bool == true
+            ? button("chevron.backward", "Back", "back") : nil
+        item.rightBarButtonItem = args["close"] as? Bool == true
+            ? button("xmark", "Close", "close") : nil
+        navigation.styleButtons()
+    }
+
     private func dismiss(_ source: Level?, value: Any?, result: @escaping FlutterResult) {
         guard let level = source, level === levels.last else {
             result(FlutterError(code: "inactive", message: "Only the active sheet can dismiss itself", details: nil))
@@ -538,7 +583,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             self?.finish(level, value: value is NSNull ? nil : value)
         }
         if level.presented {
-            level.controller.dismiss(animated: true, completion: complete)
+            level.presentedController.dismiss(animated: true, completion: complete)
         } else {
             complete()
         }
@@ -546,13 +591,13 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
 
     func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
         guard let level = levels.last,
-              level.controller === presentationController.presentedViewController else { return true }
+              level.presentedController === presentationController.presentedViewController else { return true }
         return level.dismissible
     }
 
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         guard let level = levels.last,
-              level.controller === presentationController.presentedViewController else { return }
+              level.presentedController === presentationController.presentedViewController else { return }
         finish(level, value: nil)
     }
 
@@ -562,7 +607,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         level.turnHold.snap(duration: 0)
         let failure = FlutterError(code: code, message: message, details: level.arguments["route"])
         if level.presented {
-            level.controller.dismiss(animated: false) { [weak self] in self?.finish(level, value: failure) }
+            level.presentedController.dismiss(animated: false) { [weak self] in self?.finish(level, value: failure) }
         } else {
             finish(level, value: failure)
         }
@@ -636,5 +681,77 @@ private final class SheetWindowRootController: UIViewController {
                                      with coordinator: UIViewControllerTransitionCoordinator) {
         onTurn?(coordinator)
         super.viewWillTransition(to: size, with: coordinator)
+    }
+}
+
+/// The navigation bar of a full-screen sheet. The sheet's Flutter pages
+/// navigate among themselves inside one engine, so this controller holds a
+/// single page and only shows what the page in front asks for.
+final class SheetNavigationController: UINavigationController {
+    private var plainButtons = false
+    private var foreground: UIColor?
+    /// The bar colour above the bar. On an iPhone Duo the title sits lower,
+    /// in the system's title band, and UIKit leaves the space over it bare;
+    /// the app's own navigation fills it the same way.
+    private let topBackdrop: UIView = {
+        let view = UIView()
+        view.isUserInteractionEnabled = false
+        view.accessibilityElementsHidden = true
+        return view
+    }()
+
+    func configure(color: Int?, foreground: UIColor?, plainButtons: Bool) {
+        self.plainButtons = plainButtons
+        self.foreground = foreground
+        if let style = NativeBarAppearance.make(color: color, shadow: false, foreground: foreground) {
+            navigationBar.standardAppearance = style
+            navigationBar.scrollEdgeAppearance = style
+            navigationBar.compactAppearance = style
+            navigationBar.compactScrollEdgeAppearance = style
+        }
+        navigationBar.tintColor = foreground
+        topBackdrop.backgroundColor = color.map { UIColor(argb: $0) }
+    }
+
+    /// Whether the system shows the bar's controls in a vertical bar (an
+    /// iPhone Duo) rather than across the top.
+    private var verticalNavigation: Bool {
+        switch VerticalBarEdgeStreamHandler.edge(of: view) {
+        case "left", "right": true
+        default: false
+        }
+    }
+
+    /// Plain buttons across the top; in the vertical bar, the system's glass
+    /// with label contrast, as the app's own native bars do.
+    func styleButtons() {
+        let items = (topViewController?.navigationItem.leftBarButtonItems ?? [])
+            + (topViewController?.navigationItem.rightBarButtonItems ?? [])
+        let vertical = verticalNavigation
+        for item in items {
+            if #available(iOS 26.0, *) {
+                item.hidesSharedBackground = plainButtons && !vertical
+            }
+            item.tintColor = plainButtons && vertical ? .label : foreground
+        }
+    }
+
+    /// Light status bar text over a bar whose controls are light.
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        var white: CGFloat = 0
+        guard let foreground, foreground.getWhite(&white, alpha: nil) else { return .default }
+        return white > 0.5 ? .lightContent : .darkContent
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if topBackdrop.superview !== view {
+            view.insertSubview(topBackdrop, belowSubview: navigationBar)
+        }
+        topBackdrop.frame = CGRect(x: 0, y: 0, width: view.bounds.width,
+                                   height: max(0, navigationBar.frame.minY))
+        // Folding or unfolding moves the controls between the top and the
+        // vertical bar.
+        styleButtons()
     }
 }
