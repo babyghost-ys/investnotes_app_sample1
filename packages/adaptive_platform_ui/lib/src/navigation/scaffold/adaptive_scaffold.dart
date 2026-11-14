@@ -391,6 +391,7 @@ class AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         navigationBarShadow: appBar.navigationBarShadow ?? _barStyle.shadow,
         hidesNavigationButtonBackground:
             appBar.hidesNavigationButtonBackground ?? _barStyle.plainButtons,
+        titleStyle: appBar.titleStyle ?? _barStyle.titleStyle,
       );
     }
     return _resolvedAppBar;

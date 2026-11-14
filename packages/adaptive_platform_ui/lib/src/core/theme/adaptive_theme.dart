@@ -6,7 +6,7 @@ import 'package:material_ui/material_ui.dart';
 class AdaptiveBarStyle {
   /// The platform's own bar: Liquid Glass on iOS 26+, the classic bar on
   /// earlier iOS, the theme's app bar on Android.
-  const AdaptiveBarStyle.system()
+  const AdaptiveBarStyle.system({this.titleStyle})
     : color = null,
       foreground = null,
       shadow = false,
@@ -32,6 +32,7 @@ class AdaptiveBarStyle {
     this.plainButtons = false,
     this.fillsDuoStrip = true,
     this.duoStripGradient,
+    this.titleStyle,
   });
 
   final Color? color;
@@ -45,6 +46,12 @@ class AdaptiveBarStyle {
   /// Paints the iPhone Duo strip in place of [color] when [fillsDuoStrip].
   final Gradient? duoStripGradient;
 
+  /// The family, size and weight of every bar title, unless a bar sets its
+  /// own: the native UIKit bars on iOS (a font from Flutter assets needs
+  /// `AdaptiveNativeFonts.registerAssets` first) and the app bars Flutter
+  /// draws elsewhere. Colour stays [foreground]'s.
+  final TextStyle? titleStyle;
+
   @override
   bool operator ==(Object other) =>
       other is AdaptiveBarStyle &&
@@ -53,7 +60,8 @@ class AdaptiveBarStyle {
       shadow == other.shadow &&
       plainButtons == other.plainButtons &&
       fillsDuoStrip == other.fillsDuoStrip &&
-      duoStripGradient == other.duoStripGradient;
+      duoStripGradient == other.duoStripGradient &&
+      titleStyle == other.titleStyle;
 
   @override
   int get hashCode => Object.hash(
@@ -63,6 +71,7 @@ class AdaptiveBarStyle {
     plainButtons,
     fillsDuoStrip,
     duoStripGradient,
+    titleStyle,
   );
 }
 

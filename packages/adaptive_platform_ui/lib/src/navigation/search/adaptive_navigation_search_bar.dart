@@ -151,6 +151,12 @@ class _SearchBarState extends State<AdaptiveNavigationSearchBar> {
       'navigationBarColor': bar.color?.toARGB32(),
       'navigationBarShadow': bar.shadow,
       'hidesNavigationButtonBackground': bar.plainButtons,
+      if (bar.titleStyle case final style?)
+        'titleStyle': {
+          'fontFamily': style.fontFamily,
+          'fontSize': style.fontSize,
+          'fontWeight': style.fontWeight?.value,
+        },
     };
   }
 
@@ -168,7 +174,7 @@ class _SearchBarState extends State<AdaptiveNavigationSearchBar> {
       return AppBar(
         backgroundColor: bar.color,
         foregroundColor: bar.foreground,
-        title: Text(widget.title),
+        title: Text(widget.title, style: bar.titleStyle),
         leading: BackButton(onPressed: widget.onBack),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(_materialSearchHeight),

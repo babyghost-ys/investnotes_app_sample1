@@ -1,3 +1,4 @@
+import CoreText
 import Flutter
 import UIKit
 
@@ -25,10 +26,39 @@ enum AdaptiveNativeFonts {
                 result(nil)
             case "availableFamilies":
                 result(UIFont.familyNames.sorted())
+            case "registerAssets":
+                let assets = (call.arguments as? [String: Any])?["assets"] as? [String] ?? []
+                result(registerAssets(assets))
             default:
                 result(FlutterMethodNotImplemented)
             }
         }
+    }
+
+    /// Registers fonts bundled as Flutter assets with iOS for this process,
+    /// so UIKit text can use the same files Flutter draws with: the font is
+    /// embedded once, on the Flutter side. Returns the family names the
+    /// files provide. A file registered before is not an error.
+    static func registerAssets(_ assets: [String]) -> [String] {
+        var families: [String] = []
+        for asset in assets {
+            let key = FlutterDartProject.lookupKey(forAsset: asset)
+            guard let url = Bundle.main.url(forResource: key, withExtension: nil) else { continue }
+            var error: Unmanaged<CFError>?
+            if !CTFontManagerRegisterFontsForURL(url as CFURL, .process, &error),
+               let code = error.map({ CFErrorGetCode($0.takeRetainedValue()) }),
+               code != CTFontManagerError.alreadyRegistered.rawValue {
+                continue
+            }
+            let descriptors = CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor] ?? []
+            for descriptor in descriptors {
+                if let family = CTFontDescriptorCopyAttribute(descriptor, kCTFontFamilyNameAttribute) as? String,
+                   !families.contains(family) {
+                    families.append(family)
+                }
+            }
+        }
+        return families
     }
 
     static func setFamily(_ name: String?) {

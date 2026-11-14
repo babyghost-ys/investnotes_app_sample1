@@ -38,6 +38,7 @@ Future<void> openSignIn(BuildContext context) async {
     barColor: KeelColors.tide.of(context),
     barForeground: CupertinoColors.white,
     plainBarButtons: true,
+    barTitleStyle: AdaptiveTheme.of(context).barStyle.titleStyle,
     // The sheet runs its own engine and router; see the native sheet app.
     builder: (_) => const SizedBox.shrink(),
   );

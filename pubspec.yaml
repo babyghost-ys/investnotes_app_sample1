@@ -28,6 +28,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    # Bar titles. One file, embedded here only: iOS's native bars register
+    # this same asset at launch (see main.dart).
+    - family: Source Sans 3
+      fonts:
+        - asset: assets/fonts/SourceSans3-Semibold.ttf
+          weight: 600
   assets:
     - assets/images/splash_background.jpg
     - assets/images/splash_background_wide.jpg

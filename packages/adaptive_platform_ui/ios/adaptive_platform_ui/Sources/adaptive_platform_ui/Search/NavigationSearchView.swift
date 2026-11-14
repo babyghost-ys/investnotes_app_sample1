@@ -115,11 +115,14 @@ final class NavigationSearchView: NSObject, FlutterPlatformView, NativeNavigatio
         }
         let shadow = args["navigationBarShadow"] as? Bool == true
         let plainButtons = args["hidesNavigationButtonBackground"] as? Bool == true
-        let key: [AnyHashable] = [barColor ?? -1, shadow, plainButtons, color ?? UIColor.clear]
+        let titleStyle = args["titleStyle"] as? [String: Any]
+        let key: [AnyHashable] = [barColor ?? -1, shadow, plainButtons, color ?? UIColor.clear,
+                                  titleStyle.map { "\($0)" } ?? ""]
         if barKey != key {
             barKey = key
             NativeBarAppearance.apply(
-                NativeBarAppearance.make(color: barColor, shadow: shadow, foreground: color), to: item)
+                NativeBarAppearance.make(color: barColor, shadow: shadow, foreground: color,
+                                         titleStyle: titleStyle), to: item)
             item.leftBarButtonItem = plainButtons ? plainBack() : nil
         }
         if active { attach(); NativeNavigationHost.update(self) }

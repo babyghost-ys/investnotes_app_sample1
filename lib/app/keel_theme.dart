@@ -6,6 +6,17 @@ abstract final class KeelTheme {
   static const _tide = Color(0xFF0B3D91);
   static const _tideDark = Color(0xFF0A2C66);
 
+  /// The font of every bar title, from Flutter assets.
+  static const titleFontAsset = 'assets/fonts/SourceSans3-Semibold.ttf';
+
+  /// Bar titles: a humanist sans in semibold, set larger than the
+  /// system's 17 pt. The bar's foreground colours it.
+  static const barTitle = TextStyle(
+    fontFamily: 'Source Sans 3',
+    fontSize: 24,
+    fontWeight: FontWeight.w600,
+  );
+
   static const light = AdaptiveThemeData(
     primaryColor: Color(0xFF1E6FE0),
     background: Color(0xFFF5F8FD),
@@ -13,6 +24,7 @@ abstract final class KeelTheme {
       _tide,
       foreground: Colors.white,
       plainButtons: true,
+      titleStyle: barTitle,
       duoStripGradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -28,6 +40,7 @@ abstract final class KeelTheme {
       _tideDark,
       foreground: Colors.white,
       plainButtons: true,
+      titleStyle: barTitle,
       duoStripGradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,

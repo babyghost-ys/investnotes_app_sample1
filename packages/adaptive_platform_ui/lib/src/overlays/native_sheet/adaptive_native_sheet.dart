@@ -276,7 +276,10 @@ class AdaptiveNativeSheet {
   /// controller, so UIKit draws its bar where the device keeps one: across
   /// the top, or on an iPhone Duo in the system's vertical bar. The bar is
   /// [barColor] with [barForeground] controls, plain across the top when
-  /// [plainBarButtons]; the sheet's pages fill it in through [setBar].
+  /// [plainBarButtons], its titles in [barTitleStyle] (family, size and
+  /// weight; a font from Flutter assets needs
+  /// [AdaptiveNativeFonts.registerAssets] first). The sheet's pages fill
+  /// it in through [setBar].
   static Future<T?> show<T>({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -291,6 +294,7 @@ class AdaptiveNativeSheet {
     Color? barColor,
     Color? barForeground,
     bool plainBarButtons = false,
+    TextStyle? barTitleStyle,
   }) async {
     final native = AdaptiveStyle.of(context) == AdaptiveStyle.native;
     if (fullScreen && !native) {
@@ -337,6 +341,12 @@ class AdaptiveNativeSheet {
           'barColor': ?barColor?.toARGB32(),
           'barForeground': ?barForeground?.toARGB32(),
           'plainButtons': plainBarButtons,
+          if (barTitleStyle != null)
+            'barTitleStyle': {
+              'fontFamily': barTitleStyle.fontFamily,
+              'fontSize': barTitleStyle.fontSize,
+              'fontWeight': barTitleStyle.fontWeight?.value,
+            },
         },
       });
       if (value == null) return null;

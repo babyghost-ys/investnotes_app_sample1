@@ -79,7 +79,23 @@ extension _MaterialScaffold on AdaptiveScaffoldState {
     return AppBar(
       backgroundColor: appBar.navigationBarColor,
       foregroundColor: appBar.tintColor,
-      titleTextStyle: appBar.titleStyle,
+      // A partial style (a family, a weight) keeps the bar's own size and
+      // colour: AppBar would otherwise use it as the whole style.
+      titleTextStyle: appBar.titleStyle == null
+          ? null
+          : () {
+              final theme = Theme.of(context);
+              final bar = theme.appBarTheme;
+              final base = bar.titleTextStyle ?? theme.textTheme.titleLarge;
+              final color =
+                  appBar.tintColor ??
+                  bar.foregroundColor ??
+                  (theme.useMaterial3
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onPrimary);
+              return base?.copyWith(color: color).merge(appBar.titleStyle) ??
+                  appBar.titleStyle;
+            }(),
       title: _buildAppBarTitle(
         crossAxisAlignment: CrossAxisAlignment.start,
         subtitleFontSize: 13,
