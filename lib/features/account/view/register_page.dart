@@ -1,5 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
@@ -17,9 +20,10 @@ import 'package:investnotes_app_sample1/features/account/widgets/question_row.da
 import 'package:investnotes_app_sample1/features/account/widgets/step_switcher.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/step_tabs.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/valid_mark.dart';
+import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
 
-/// Opening an account in three steps. Pops with the new username once the
-/// emailed code checks out, which signs it in.
+/// Opening an account in three steps. Once the emailed code checks out the
+/// new account is signed in and the app returns home.
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
@@ -29,11 +33,7 @@ class RegisterPage extends StatelessWidget {
     child: BlocBuilder<RegisterBloc, RegisterState>(
       builder: (context, state) {
         final bloc = context.read<RegisterBloc>();
-        final inside =
-            state.step != RegisterStep.start && state.step != RegisterStep.done;
         return FlowPage(
-          title: 'Register',
-          onBack: inside ? () => bloc.add(const RegisterStepBack()) : null,
           header: state.step == RegisterStep.done
               ? null
               : StepTabs(
@@ -43,6 +43,7 @@ class RegisterPage extends StatelessWidget {
                     RegisterStep.verify.title,
                   ],
                   current: state.step.index,
+                  onBack: () => bloc.add(const RegisterStepBack()),
                 ),
           child: StepSwitcher(
             step: state.step,
@@ -54,8 +55,12 @@ class RegisterPage extends StatelessWidget {
                 title: 'Account ready',
                 detail: state.username.trim(),
                 actionLabel: 'Continue signed in',
-                onAction: () =>
-                    Navigator.of(context).pop(state.username.trim()),
+                onAction: () {
+                  context.read<SessionBloc>().add(
+                    SessionSignedIn(state.username.trim()),
+                  );
+                  context.go(KeelRoutes.home);
+                },
               ),
             },
           ),

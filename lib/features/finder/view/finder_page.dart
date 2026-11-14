@@ -1,34 +1,20 @@
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:investnotes_app_sample1/app/push_page.dart';
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/data/models/finder_question.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/finder/bloc/finder_bloc.dart';
-import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
 import 'package:investnotes_app_sample1/features/finder/widgets/answer_row.dart';
 import 'package:investnotes_app_sample1/features/finder/widgets/step_bar.dart';
 
-/// Starts "find my note" from its first question. The answers live for as
-/// long as the first question's page does.
-Future<void> startFinder(BuildContext context) async {
-  final bloc = FinderBloc(context.read<NotesRepository>());
-  await _pushStep(context, bloc, 0);
-  await bloc.close();
+/// Starts "find my note" afresh from its first question.
+Future<void> startFinder(BuildContext context) {
+  context.read<FinderBloc>().add(const FinderRestarted());
+  return context.push<void>(KeelRoutes.finderStep(0));
 }
-
-Future<void> _pushStep(BuildContext context, FinderBloc bloc, int step) =>
-    pushPage<void>(
-      context,
-      title: 'Find my note',
-      builder: (_) => BlocProvider.value(
-        value: bloc,
-        child: FinderPage(step: step),
-      ),
-    );
 
 /// One question of the finder.
 class FinderPage extends StatelessWidget {
@@ -92,28 +78,11 @@ class FinderPage extends StatelessWidget {
                     background: KeelColors.azure.of(context),
                     size: 60,
                     iconSize: 24,
-                    onPressed: () => last
-                        ? pushPage<void>(
-                            context,
-                            title: 'Your notes',
-                            actions: [
-                              AdaptiveAppBarAction(
-                                icon: const AdaptiveIcon(
-                                  sfSymbol: 'checkmark',
-                                  icon: CupertinoIcons.checkmark,
-                                ),
-                                label: 'Done',
-                                onPressed: () =>
-                                    Navigator.of(context)
-                                        .popUntil((route) => route.isFirst),
-                              ),
-                            ],
-                            builder: (_) => BlocProvider.value(
-                              value: bloc,
-                              child: const FinderResultsPage(),
-                            ),
-                          )
-                        : _pushStep(context, bloc, step + 1),
+                    onPressed: () => context.push<void>(
+                      last
+                          ? KeelRoutes.finderResults
+                          : KeelRoutes.finderStep(step + 1),
+                    ),
                   ),
                 ),
               ],

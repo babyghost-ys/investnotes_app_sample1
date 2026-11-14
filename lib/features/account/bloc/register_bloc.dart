@@ -37,8 +37,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       emit(state.copyWith(step: RegisterStep.values[state.step.index + 1]));
     });
     on<RegisterStepBack>((e, emit) {
-      if (state.step == RegisterStep.start ||
-          state.step == RegisterStep.done) {
+      if (state.step == RegisterStep.start || state.step == RegisterStep.done) {
         return;
       }
       emit(

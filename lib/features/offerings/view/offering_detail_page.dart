@@ -1,8 +1,10 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart' show Icons;
 
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
@@ -14,10 +16,7 @@ import 'package:investnotes_app_sample1/features/probe/widgets/payoff_probe.dart
 
 /// Pushes an offering's page.
 Future<void> openOffering(BuildContext context, Offering offering) =>
-    AdaptiveNavigator.push<void>(
-      context,
-      (_) => OfferingDetailPage(offering: offering),
-    );
+    context.push<void>(KeelRoutes.offering(offering.id));
 
 class OfferingDetailPage extends StatelessWidget {
   const OfferingDetailPage({super.key, required this.offering});

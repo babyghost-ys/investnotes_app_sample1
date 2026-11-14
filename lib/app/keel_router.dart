@@ -1,0 +1,126 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:investnotes_app_sample1/app/keel_page.dart';
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
+import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/features/account/view/find_username_page.dart';
+import 'package:investnotes_app_sample1/features/account/view/register_page.dart';
+import 'package:investnotes_app_sample1/features/account/view/reset_password_page.dart';
+import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
+import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
+import 'package:investnotes_app_sample1/features/learn/view/article_page.dart';
+import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
+import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
+import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
+import 'package:investnotes_app_sample1/features/session/view/sign_in_page.dart';
+import 'package:investnotes_app_sample1/features/shell/view/shell_page.dart';
+
+/// Keel's routes. The shell is the root; every other page is pushed over
+/// it as an [AdaptivePage], so iOS keeps the native push and swipe-back.
+GoRouter keelRouter(NotesRepository repository) => GoRouter(
+  routes: [
+    GoRoute(
+      path: KeelRoutes.home,
+      builder: (context, state) => const ShellPage(),
+      routes: [
+        GoRoute(
+          path: 'offering/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'];
+            return AdaptivePage<void>(
+              key: state.pageKey,
+              name: state.matchedLocation,
+              // The detail page carries its own scaffold for its bookmark.
+              child: OfferingDetailPage(
+                offering: repository.offerings.firstWhere((o) => o.id == id),
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'article/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'];
+            final article = repository.articles.firstWhere((a) => a.id == id);
+            return keelPage(
+              state,
+              title: article.type.code,
+              child: ArticlePage(article: article),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'search',
+          pageBuilder: (context, state) =>
+              keelPage(state, title: 'Search', child: const SearchPage()),
+        ),
+        GoRoute(
+          path: 'saved',
+          pageBuilder: (context, state) =>
+              keelPage(state, title: 'Saved', child: const SavedPage()),
+        ),
+        GoRoute(
+          path: 'finder/step/:step',
+          pageBuilder: (context, state) => keelPage(
+            state,
+            title: 'Find my note',
+            child: FinderPage(step: int.parse(state.pathParameters['step']!)),
+          ),
+        ),
+        GoRoute(
+          path: 'finder/results',
+          pageBuilder: (context, state) => keelPage(
+            state,
+            title: 'Your notes',
+            actions: [
+              AdaptiveAppBarAction(
+                icon: const AdaptiveIcon(
+                  sfSymbol: 'checkmark',
+                  icon: CupertinoIcons.checkmark,
+                ),
+                label: 'Done',
+                onPressed: () => context.go(KeelRoutes.home),
+              ),
+            ],
+            child: const FinderResultsPage(),
+          ),
+        ),
+        GoRoute(
+          path: 'sign-in',
+          pageBuilder: (context, state) =>
+              keelPage(state, title: 'Sign in', child: const SignInPage()),
+          routes: [
+            GoRoute(
+              path: 'register',
+              pageBuilder: (context, state) => keelPage(
+                state,
+                title: 'Register',
+                child: const RegisterPage(),
+              ),
+            ),
+            GoRoute(
+              path: 'reset-password',
+              pageBuilder: (context, state) => keelPage(
+                state,
+                title: 'Reset password',
+                child: ResetPasswordPage(
+                  username: state.uri.queryParameters['username'] ?? '',
+                ),
+              ),
+            ),
+            GoRoute(
+              path: 'find-username',
+              pageBuilder: (context, state) => keelPage(
+                state,
+                title: 'Find username',
+                child: const FindUsernamePage(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+);

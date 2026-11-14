@@ -10,7 +10,6 @@ import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart'
 import 'package:investnotes_app_sample1/features/issued/view/date_pick_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_filter_sheet.dart';
-import 'package:investnotes_app_sample1/features/session/view/sign_in_sheet.dart';
 
 /// The root of a native sheet's own engine. Blocs and closures cannot cross
 /// engines, so each sheet gets plain values in and hands plain values back.
@@ -45,7 +44,6 @@ class NativeSheetApp extends StatelessWidget {
         initial: IssuedFilter.decode(argument as Object),
         notes: repository.issued,
       ),
-      'signIn' => const SignInSheet(),
       'datePick' => DatePickSheet(
         date: DateTime.parse((argument as Map)['date'] as String),
         first: DateTime.parse(argument['first'] as String),
@@ -65,7 +63,6 @@ class NativeSheetApp extends StatelessWidget {
         ? KeelTheme.dark
         : KeelTheme.light;
     final background = configuration['backgroundColor'] as int?;
-    final route = configuration['route'];
     return AdaptiveStyleScope(
       style: AdaptiveStyle.native,
       child: CupertinoApp(
@@ -83,9 +80,8 @@ class NativeSheetApp extends StatelessWidget {
           // Only a fit sheet measures its content; a full-height one lays
           // its own scrolling out in the space UIKit gives it.
           fits:
-              route != 'signIn' &&
-              (configuration['detents'] == null ||
-                  configuration['detents'] == 'fit'),
+              configuration['detents'] == null ||
+              configuration['detents'] == 'fit',
           backgroundColor: background == null ? null : Color(background),
           child: _content(),
         ),

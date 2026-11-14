@@ -10,8 +10,7 @@ part 'reset_state.dart';
 /// code with a new password. This sample has no server, so any six digits
 /// verify.
 class ResetBloc extends Bloc<ResetEvent, ResetState> {
-  ResetBloc({String username = ''})
-    : super(ResetState(username: username)) {
+  ResetBloc({String username = ''}) : super(ResetState(username: username)) {
     on<ResetUsernameChanged>(
       (e, emit) => emit(state.copyWith(username: e.value)),
     );

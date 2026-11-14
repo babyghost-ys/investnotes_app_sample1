@@ -1,15 +1,14 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:investnotes_app_sample1/app/push_page.dart';
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_mark.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
-import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
-import 'package:investnotes_app_sample1/features/session/view/sign_in_sheet.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/widgets/drawer_row.dart';
 
@@ -34,6 +33,7 @@ class KeelDrawer extends StatelessWidget {
     // The drawer's own context goes when it closes; pages are pushed from
     // the scaffold's, which stays.
     final host = scaffold.context;
+    final router = GoRouter.of(context);
 
     // The Material drawer can finish closing without completing the
     // scaffold's future, so the wait is capped at the close animation.
@@ -42,11 +42,9 @@ class KeelDrawer extends StatelessWidget {
       onTimeout: () {},
     );
 
-    Future<void> open(String title, WidgetBuilder builder) async {
+    Future<void> open(String location) async {
       await close();
-      if (host.mounted) {
-        await pushPage<void>(host, title: title, builder: builder);
-      }
+      await router.push<void>(location);
     }
 
     return ListView(
@@ -83,11 +81,7 @@ class KeelDrawer extends StatelessWidget {
                   foreground: KeelColors.tide.of(context),
                   background: _white,
                   iconSize: 22,
-                  onPressed: () async {
-                    final session = context.read<SessionBloc>();
-                    final name = await showSignIn(context);
-                    if (name != null) session.add(SessionSignedIn(name));
-                  },
+                  onPressed: () => open(KeelRoutes.signIn),
                 ),
             ],
           ),
@@ -140,7 +134,7 @@ class KeelDrawer extends StatelessWidget {
         DrawerRow(
           icon: CupertinoIcons.bookmark_fill,
           title: 'Saved',
-          onTap: () => open('Saved', (_) => const SavedPage()),
+          onTap: () => open(KeelRoutes.saved),
         ),
         DrawerRow(
           icon: CupertinoIcons.wand_stars,

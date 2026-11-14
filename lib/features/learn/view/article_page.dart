@@ -1,17 +1,14 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:investnotes_app_sample1/app/push_page.dart';
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/article.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 import 'package:investnotes_app_sample1/features/probe/widgets/payoff_probe.dart';
 
 Future<void> openArticle(BuildContext context, Article article) =>
-    pushPage<void>(
-      context,
-      title: article.type.code,
-      builder: (_) => ArticlePage(article: article),
-    );
+    context.push<void>(KeelRoutes.article(article.id));
 
 /// An article, led by a payoff the reader can try for themselves.
 class ArticlePage extends StatelessWidget {

@@ -79,9 +79,7 @@ class _CodeFieldState extends State<CodeField> {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           width: 2,
-                          color: i == active
-                              ? azure
-                              : const Color(0x00000000),
+                          color: i == active ? azure : const Color(0x00000000),
                         ),
                       ),
                       child: Text(

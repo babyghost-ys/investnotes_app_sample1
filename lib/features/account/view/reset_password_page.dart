@@ -1,5 +1,6 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
@@ -31,10 +32,6 @@ class ResetPasswordPage extends StatelessWidget {
       builder: (context, state) {
         final bloc = context.read<ResetBloc>();
         return FlowPage(
-          title: 'Reset password',
-          onBack: state.step == ResetStep.reset
-              ? () => bloc.add(const ResetStepBack())
-              : null,
           child: StepSwitcher(
             step: state.step,
             child: switch (state.step) {
@@ -44,8 +41,7 @@ class ResetPasswordPage extends StatelessWidget {
                 title: 'Password changed',
                 detail: state.username.trim(),
                 actionLabel: 'Back to sign in',
-                onAction: () =>
-                    Navigator.of(context).pop(state.username.trim()),
+                onAction: () => context.pop(state.username.trim()),
               ),
             },
           ),

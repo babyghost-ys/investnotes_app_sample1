@@ -1,14 +1,14 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'package:investnotes_app_sample1/app/push_page.dart';
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/features/home/view/home_page.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_page.dart';
 import 'package:investnotes_app_sample1/features/learn/view/learn_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_page.dart';
-import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/widgets/keel_drawer.dart';
 
@@ -49,11 +49,7 @@ class _ShellPageState extends State<ShellPage> {
               icon: Icons.search,
             ),
             label: 'Search',
-            onPressed: () => pushPage<void>(
-              context,
-              title: 'Search',
-              builder: (_) => const SearchPage(),
-            ),
+            onPressed: () => context.push<void>(KeelRoutes.search),
           ),
         ],
       ),
