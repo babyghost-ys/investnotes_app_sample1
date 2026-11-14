@@ -231,6 +231,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         if let registrar = engine.registrar(forPlugin: "AdaptivePlatformUiPlugin") {
             AdaptivePlatformUiPlugin.registerSheetContent(with: registrar)
         }
+        AdaptivePlatformUiPlugin.registerSheetPlugins?(engine)
         level.channel.setMethodCallHandler { [weak self, weak level] call, result in
             guard let self, let level else {
                 result(FlutterError(code: "closed", message: "The sheet has closed", details: nil))
@@ -810,11 +811,16 @@ final class SheetNavigationController: UINavigationController,
         item.leftBarButtonItem = back
             ? button("chevron.backward", "Back") { [weak self] in self?.goBack() }
             : nil
-        item.rightBarButtonItem = args["close"] as? Bool == true
-            ? button("xmark", "Close") { [weak self] in
-                self?.send?("barAction", ["id": "close"])
-            }
-            : nil
+        let close: () -> Void = { [weak self] in self?.send?("barAction", ["id": "close"]) }
+        if args["close"] as? Bool != true {
+            item.rightBarButtonItem = nil
+        } else if let title = args["closeTitle"] as? String {
+            // Leaving named in words, such as going home without signing in.
+            item.rightBarButtonItem = UIBarButtonItem(
+                title: title, image: nil, primaryAction: UIAction { _ in close() }, menu: nil)
+        } else {
+            item.rightBarButtonItem = button("xmark", "Close", close)
+        }
         styleButtons()
     }
 

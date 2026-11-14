@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
+import 'package:investnotes_app_sample1/core/widgets/biometric_glyph.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_mark.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
+import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/view/open_sign_in.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
@@ -24,6 +26,7 @@ class KeelDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final shell = context.watch<ShellBloc>().state;
     final session = context.watch<SessionBloc>().state;
+    final biometric = context.watch<BiometricBloc>().state.kind;
     final scaffold = AdaptiveScaffold.of(context);
 
     Future<void> go(ShellTab tab) async {
@@ -148,6 +151,18 @@ class KeelDrawer extends StatelessWidget {
             if (host.mounted) await startFinder(host);
           },
         ),
+        // Signing in with Face ID or Touch ID, for the account in use on a
+        // device that has one.
+        if (session.signedIn && biometric != null)
+          DrawerRow(
+            glyph: BiometricGlyph(
+              kind: biometric,
+              color: KeelColors.foam,
+              size: 22,
+            ),
+            title: biometric.title,
+            onTap: () => open(KeelRoutes.biometricSettings),
+          ),
       ],
     );
   }

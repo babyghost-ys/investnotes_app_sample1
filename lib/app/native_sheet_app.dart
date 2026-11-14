@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
+import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
 import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
@@ -79,6 +80,14 @@ class NativeSheetApp extends StatelessWidget {
       return AdaptiveStyleScope(
         style: AdaptiveStyle.native,
         child: _SignInSheetApp(
+          biometric: switch (configuration['arguments']) {
+            {
+              'biometricName': final String name,
+              'biometricKind': final String kind,
+            } =>
+              (name: name, kind: BiometricKind.values.byName(kind)),
+            _ => null,
+          },
           theme: theme.cupertino(brightness),
           themed: themed,
           background: background == null ? null : Color(background),
@@ -109,13 +118,18 @@ class NativeSheetApp extends StatelessWidget {
 
 /// The sign-in sheet: its own router, so Register and the forgotten
 /// username and password pages push inside the sheet and come back to it.
+///
+/// With a [biometric] account it opens on the welcome back; signing in with
+/// a password pushes onto the same stack from there.
 class _SignInSheetApp extends StatefulWidget {
   const _SignInSheetApp({
+    required this.biometric,
     required this.theme,
     required this.themed,
     required this.background,
   });
 
+  final BiometricAccount? biometric;
   final CupertinoThemeData theme;
   final Widget Function(BuildContext, Widget) themed;
   final Color? background;
@@ -125,7 +139,13 @@ class _SignInSheetApp extends StatefulWidget {
 }
 
 class _SignInSheetAppState extends State<_SignInSheetApp> {
-  final _router = GoRouter(routes: [signInRoute(path: '/', sheet: true)]);
+  late final _router = GoRouter(
+    initialLocation: widget.biometric == null ? '/' : '/biometric',
+    routes: [
+      signInRoute(path: '/', sheet: true),
+      biometricSignInRoute(path: '/biometric', sheet: true),
+    ],
+  );
 
   @override
   void dispose() {
@@ -147,6 +167,7 @@ class _SignInSheetAppState extends State<_SignInSheetApp> {
         child: SignInScope(
           base: '/',
           sheet: true,
+          biometric: widget.biometric,
           onSignedIn: (name) => AdaptiveNativeSheet.pop(context, name),
           onClose: () => AdaptiveNativeSheet.pop(context),
           child: child!,

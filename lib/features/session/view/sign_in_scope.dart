@@ -2,6 +2,11 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
+
+/// The account that signs in with Face ID or Touch ID, and which.
+typedef BiometricAccount = ({String name, BiometricKind kind});
+
 /// Where the sign-in flow lives and what finishing it means there.
 ///
 /// On iOS the flow runs in its own native sheet, with its own router rooted
@@ -16,7 +21,14 @@ class SignInScope extends InheritedWidget {
     required this.onClose,
     required super.child,
     this.sheet = false,
+    this.biometric,
   });
+
+  /// Sent with sign-in when it is pushed from the biometric welcome.
+  static const fromBiometric = 'fromBiometric';
+
+  /// Set when the flow opens on the biometric welcome.
+  final BiometricAccount? biometric;
 
   /// In the iOS sheet, where pages push as whole native pages.
   final bool sheet;
@@ -31,6 +43,11 @@ class SignInScope extends InheritedWidget {
   final VoidCallback onClose;
 
   String get register => _at('register');
+
+  /// Sign-in with username and password, pushed from the biometric welcome
+  /// as one more page; its own links push over it as always.
+  Future<void> pushPasswordSignIn(BuildContext context) =>
+      push<void>(context, base, extra: fromBiometric);
   String get findUsername => _at('find-username');
 
   /// [username] is what was already typed on sign-in.
@@ -41,10 +58,14 @@ class SignInScope extends InheritedWidget {
 
   /// Opens [location]. In the sheet the page in front is pictured first, so
   /// UIKit can push the new page whole once Flutter has drawn it.
-  Future<T?> push<T>(BuildContext context, String location) async {
+  Future<T?> push<T>(
+    BuildContext context,
+    String location, {
+    Object? extra,
+  }) async {
     if (sheet) await AdaptiveNativeSheet.preparePush();
     if (!context.mounted) return null;
-    return context.push<T>(location);
+    return context.push<T>(location, extra: extra);
   }
 
   /// Leaves the page in front with [result]. In the sheet UIKit pops it
@@ -60,5 +81,6 @@ class SignInScope extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<SignInScope>()!;
 
   @override
-  bool updateShouldNotify(SignInScope old) => base != old.base;
+  bool updateShouldNotify(SignInScope old) =>
+      base != old.base || biometric != old.biometric;
 }

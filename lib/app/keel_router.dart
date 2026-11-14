@@ -1,5 +1,6 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/app/keel_page.dart';
@@ -11,6 +12,8 @@ import 'package:investnotes_app_sample1/features/learn/view/article_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offering_detail_page.dart';
 import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
 import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
+import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
+import 'package:investnotes_app_sample1/features/session/view/biometric_settings_page.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_route.dart';
 import 'package:investnotes_app_sample1/features/shell/view/shell_page.dart';
 
@@ -84,7 +87,16 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             child: const FinderResultsPage(),
           ),
         ),
+        GoRoute(
+          path: 'settings/biometric',
+          pageBuilder: (context, state) => keelPage(
+            state,
+            title: context.read<BiometricBloc>().state.kind?.title ?? 'Face ID',
+            child: const BiometricSettingsPage(),
+          ),
+        ),
         signInRoute(path: 'sign-in', sheet: false),
+        biometricSignInRoute(path: 'sign-in-biometric', sheet: false),
       ],
     ),
   ],

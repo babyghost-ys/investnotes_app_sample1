@@ -7,13 +7,17 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 class DrawerRow extends StatelessWidget {
   const DrawerRow({
     super.key,
-    required this.icon,
+    this.icon,
+    this.glyph,
     required this.title,
     required this.onTap,
     this.selected = false,
   });
 
-  final IconData icon;
+  final IconData? icon;
+
+  /// Drawn in place of [icon], for a glyph no icon font has.
+  final Widget? glyph;
   final String title;
   final VoidCallback onTap;
   final bool selected;
@@ -37,11 +41,12 @@ class DrawerRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 22,
-              color: selected ? CupertinoColors.white : KeelColors.foam,
-            ),
+            glyph ??
+                Icon(
+                  icon,
+                  size: 22,
+                  color: selected ? CupertinoColors.white : KeelColors.foam,
+                ),
             const SizedBox(width: 16),
             Text(
               title,

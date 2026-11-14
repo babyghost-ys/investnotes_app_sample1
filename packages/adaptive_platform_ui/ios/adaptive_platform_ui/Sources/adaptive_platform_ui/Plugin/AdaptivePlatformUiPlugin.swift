@@ -20,6 +20,11 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
         register(with: registrar, ownsNavigation: true)
     }
 
+    /// Registers the app's own plugins on each native sheet's engine, which
+    /// otherwise has this plugin alone. Set it before a sheet first opens,
+    /// and register only what sheets use: never this plugin again.
+    public static var registerSheetPlugins: ((FlutterPluginRegistry) -> Void)?
+
     /// Sheet engines own their controls but must not replace the page's
     /// process-wide native navigation and drawer channels.
     static func registerSheetContent(with registrar: FlutterPluginRegistrar) {

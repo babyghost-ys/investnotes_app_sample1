@@ -186,11 +186,27 @@ class AdaptiveNativeSheet {
   /// or swipe calls [onPagePopped]; a pop of Flutter's own goes through
   /// [popPage] first. Either way the page now in front calls [revealPage]
   /// once it has drawn again.
-  static void setBar({String? title, VoidCallback? onClose}) {
+  ///
+  /// The close control is an xmark, or [closeTitle] in words when given.
+  static void setBar({
+    String? title,
+    VoidCallback? onClose,
+    String? closeTitle,
+  }) {
     if (!_hosted) return;
     _barClose = onClose;
-    unawaited(_send('setBar', {'title': title, 'close': onClose != null}));
+    unawaited(_send('setBar', _bar(title, onClose, closeTitle)));
   }
+
+  static Map<String, Object?> _bar(
+    String? title,
+    VoidCallback? onClose,
+    String? closeTitle,
+  ) => {
+    'title': title,
+    'close': onClose != null,
+    if (closeTitle != null) 'closeTitle': closeTitle,
+  };
 
   /// Covers the page in front with a picture of itself, so the next page
   /// can be drawn beneath it unseen.
@@ -199,10 +215,14 @@ class AdaptiveNativeSheet {
   }
 
   /// UIKit pushes a new page showing what Flutter now draws.
-  static void pushPage({String? title, VoidCallback? onClose}) {
+  static void pushPage({
+    String? title,
+    VoidCallback? onClose,
+    String? closeTitle,
+  }) {
     if (!_hosted) return;
     _barClose = onClose;
-    unawaited(_send('pushPage', {'title': title, 'close': onClose != null}));
+    unawaited(_send('pushPage', _bar(title, onClose, closeTitle)));
   }
 
   /// UIKit pops the page in front; completes once it has, for the Flutter

@@ -12,12 +12,16 @@ class SheetBarBinder extends StatefulWidget {
     required this.title,
     required this.child,
     this.onClose,
+    this.closeTitle,
   });
 
   /// The sheet's first page, already in front when the sheet rises.
   final bool first;
   final String? title;
   final VoidCallback? onClose;
+
+  /// The close control in words instead of an xmark.
+  final String? closeTitle;
   final Widget child;
 
   @override
@@ -45,18 +49,25 @@ class _SheetBarBinderState extends State<SheetBarBinder> {
       if (mounted) Navigator.of(context).pop();
     };
     if (_shown) {
-      AdaptiveNativeSheet.setBar(title: widget.title, onClose: widget.onClose);
+      _setBar();
       AdaptiveNativeSheet.revealPage();
       return;
     }
     _shown = true;
     if (widget.first) {
-      AdaptiveNativeSheet.setBar(title: widget.title, onClose: widget.onClose);
+      _setBar();
     } else {
       AdaptiveNativeSheet.pushPage(
         title: widget.title,
         onClose: widget.onClose,
+        closeTitle: widget.closeTitle,
       );
     }
   }
+
+  void _setBar() => AdaptiveNativeSheet.setBar(
+    title: widget.title,
+    onClose: widget.onClose,
+    closeTitle: widget.closeTitle,
+  );
 }
