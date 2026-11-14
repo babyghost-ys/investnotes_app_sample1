@@ -15,6 +15,8 @@ import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dar
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
+import 'package:investnotes_app_sample1/features/splash/bloc/splash_bloc.dart';
+import 'package:investnotes_app_sample1/features/splash/view/splash_page.dart';
 
 class KeelApp extends StatefulWidget {
   const KeelApp({super.key});
@@ -47,6 +49,7 @@ class _KeelAppState extends State<KeelApp> {
     value: _repository,
     child: MultiBlocProvider(
       providers: [
+        BlocProvider(create: (_) => SplashBloc()),
         BlocProvider(create: (_) => ShellBloc()),
         BlocProvider(create: (_) => SessionBloc()),
         BlocProvider(
@@ -81,7 +84,11 @@ class _KeelAppState extends State<KeelApp> {
               _router.go(KeelRoutes.home);
             },
             onClose: () => _router.go(KeelRoutes.home),
-            child: _app,
+            // The opening screen first; the app once it has had its time.
+            child: BlocBuilder<SplashBloc, SplashState>(
+              builder: (context, splash) =>
+                  splash.done ? _app : const SplashPage(),
+            ),
           ),
         ),
       ),
