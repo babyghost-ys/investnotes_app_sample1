@@ -43,7 +43,7 @@ extension NativeNavigationHost {
             return
         }
         host.movingContent = true
-        host.content.detachFlutter()
+        let appeared = host.content.detachFlutter(moving: true)
         host.content.becameVisible = nil
         host.tabs = nil
         host.externalNavigation = nil
@@ -51,7 +51,7 @@ extension NativeNavigationHost {
         host.outgoingPage = nil
         let content = NativeNavigationContent()
         host.content = content
-        content.attachFlutter(host.flutter)
+        content.attachFlutter(host.flutter, appeared: appeared)
         content.becameVisible = { [weak host] in host?.restoreAppearance() }
         host.restingInset = nil
         host.originContext = nil
@@ -75,7 +75,7 @@ extension NativeNavigationHost {
                 contentPages[ObjectIdentifier(next)] = state
             }
             movingContent = true
-            content.detachFlutter()
+            handedFlutterAppearance = content.detachFlutter(moving: true)
             tabs = controller
             // Every tab now owns its own navigation controller. Keep the tab
             // controller as the window root, with no outer navigation owner
@@ -103,10 +103,11 @@ extension NativeNavigationHost {
         let changedContent = content !== next || flutter.parent !== next
         if changedContent {
             outgoingPage = previousPage
-            content.detachFlutter()
+            let appeared = content.detachFlutter(moving: true) || handedFlutterAppearance
+            handedFlutterAppearance = false
             content.becameVisible = nil
             content = next
-            next.attachFlutter(flutter)
+            next.attachFlutter(flutter, appeared: appeared)
             next.becameVisible = { [weak self] in self?.restoreAppearance() }
             originContext = nil
             movementGeneration += 1

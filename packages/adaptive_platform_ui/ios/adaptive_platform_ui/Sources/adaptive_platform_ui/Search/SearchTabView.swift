@@ -275,13 +275,29 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
             search.isActive = false
         }
         if let index = args["selectedIndex"] as? Int, pages.indices.contains(index), tabs.selectedIndex != index {
-            if index == searchIndex { prepareSearchPresentation() }
-            else { search.isActive = false }
-            if #available(iOS 26.0, *) { tabs.selectedTab = tabs.tabs[index] }
-            else { tabs.selectedIndex = index }
+            // Selected on the next turn of the run loop, not inside Flutter's
+            // call. Switching tab moves the Flutter view and changes its
+            // appearance, which waits for the raster thread; that thread may
+            // be waiting on this one to add overlay layers for native views
+            // (a tab chosen from an open drawer), and the app froze. Back on
+            // the run loop, Flutter's queued work runs first.
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.pages.indices.contains(index),
+                      self.tabs.selectedIndex != index else { return }
+                self.select(index)
+                if wasHidden && !self.hidden && index == self.searchIndex { self.holdsScrollAtRest = false }
+                self.attachAndLayout()
+            }
         }
         if wasHidden && !hidden && tabs.selectedIndex == searchIndex { holdsScrollAtRest = false }
         attachAndLayout()
+    }
+
+    private func select(_ index: Int) {
+        if index == searchIndex { prepareSearchPresentation() }
+        else { search.isActive = false }
+        if #available(iOS 26.0, *) { tabs.selectedTab = tabs.tabs[index] }
+        else { tabs.selectedIndex = index }
     }
 
     private func setTabBarHidden(_ value: Bool) {

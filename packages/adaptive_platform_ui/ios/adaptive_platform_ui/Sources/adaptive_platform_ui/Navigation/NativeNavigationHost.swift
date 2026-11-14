@@ -41,6 +41,9 @@ final class NativeNavigationHost {
     var waitingForNavigationTransition = false
     var deferredRestoredMeasurement = false
     var movingContent = false
+    /// Flutter was shown when taken out of its content on the way to the
+    /// next one; the next content takes it as shown (see `detachFlutter`).
+    var handedFlutterAppearance = false
     var movementGeneration = 0
     var managedRoutes: [NativeRouteState] = []
     weak var managedNavigation: NativeNavigationController?

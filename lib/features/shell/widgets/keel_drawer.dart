@@ -29,15 +29,11 @@ class KeelDrawer extends StatelessWidget {
     final biometric = context.watch<BiometricBloc>().state.kind;
     final scaffold = AdaptiveScaffold.of(context);
 
-    Future<void> go(ShellTab tab) async {
-      context.read<ShellBloc>().add(ShellTabSelected(tab));
-      await scaffold.closeDrawer();
-    }
-
     // The drawer's own context goes when it closes; pages are pushed from
     // the scaffold's, which stays.
     final host = scaffold.context;
     final router = GoRouter.of(context);
+    final shellBloc = context.read<ShellBloc>();
 
     // The Material drawer can finish closing without completing the
     // scaffold's future, so the wait is capped at the close animation.
@@ -45,6 +41,13 @@ class KeelDrawer extends StatelessWidget {
       const Duration(milliseconds: 350),
       onTimeout: () {},
     );
+
+    // Closed first, like every other row: the tab changes on a settled
+    // screen, not under the drawer as it slides away.
+    Future<void> go(ShellTab tab) async {
+      await close();
+      shellBloc.add(ShellTabSelected(tab));
+    }
 
     Future<void> open(String location) async {
       await close();

@@ -225,8 +225,11 @@ final class NativeNavigationContent: UIViewController {
         flutter.endAppearanceTransition()
         flutterAppeared = true
     }
-    func attachFlutter(_ controller: FlutterViewController) {
+    /// [appeared]: Flutter comes straight from another content where it was
+    /// shown (see [detachFlutter]), so it counts as shown here too.
+    func attachFlutter(_ controller: FlutterViewController, appeared: Bool = false) {
         loadViewIfNeeded()
+        if appeared { flutterAppeared = true }
         flutter = controller
         if controller.parent !== self {
             addChild(controller)
@@ -247,20 +250,30 @@ final class NativeNavigationContent: UIViewController {
         backingScroll.setNeedsLayout()
         backingScroll.layoutIfNeeded()
     }
-    func detachFlutter() {
-        guard let controller = flutter, controller.parent === self else { flutter = nil; return }
+    /// Takes Flutter out of this content. When [moving], it goes straight
+    /// into another content, which shows it at once: its appearance is
+    /// handed over (the result, for [attachFlutter]) rather than ended and
+    /// begun again. Ending it tears Flutter's surface down on the main
+    /// thread and waits for the raster thread, which may itself be waiting
+    /// on the main thread to add the overlay layers native views need:
+    /// switching tab from an open drawer froze the app that way.
+    @discardableResult
+    func detachFlutter(moving: Bool = false) -> Bool {
+        guard let controller = flutter, controller.parent === self else { flutter = nil; return false }
         retainedStatusBarStyle = controller.preferredStatusBarStyle
         if forwardingAppearance { controller.endAppearanceTransition(); forwardingAppearance = false; flutterAppeared = true }
         if forwardingDisappearance { controller.endAppearanceTransition(); forwardingDisappearance = false }
-        if flutterAppeared {
+        let appeared = flutterAppeared
+        if flutterAppeared, !moving {
             controller.beginAppearanceTransition(false, animated: false)
             controller.endAppearanceTransition()
-            flutterAppeared = false
         }
+        flutterAppeared = false
         controller.willMove(toParent: nil)
         controller.view.removeFromSuperview()
         controller.removeFromParent()
         flutter = nil
+        return appeared && moving
     }
     /// Retain only page pixels. UIKit continues to own and animate its bars.
     func retainRenderedContent() {

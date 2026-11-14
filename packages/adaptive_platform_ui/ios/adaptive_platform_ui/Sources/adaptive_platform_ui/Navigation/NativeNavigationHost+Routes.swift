@@ -137,10 +137,10 @@ extension NativeNavigationHost {
             next.hidesNativeNavigationBar = incomingPage == nil
             next.loadViewIfNeeded()
             next.view.frame = previous.view.frame
-            previous.detachFlutter()
+            let appeared = previous.detachFlutter(moving: true)
             previous.becameVisible = nil
             content = next
-            next.attachFlutter(flutter)
+            next.attachFlutter(flutter, appeared: appeared)
             next.becameVisible = { [weak self] in self?.restoreAppearance() }
             page = incomingPage
             pendingPush = nil
@@ -224,10 +224,10 @@ extension NativeNavigationHost {
         // anchors. Hold their ownership until Dart renders the target route.
         preparingPop = true
         movingContent = true
-        content.detachFlutter()
+        let appeared = content.detachFlutter(moving: true)
         content.becameVisible = nil
         content = target.content
-        content.attachFlutter(flutter)
+        content.attachFlutter(flutter, appeared: appeared)
         content.keepRetainedContentInFront()
         content.becameVisible = { [weak self] in self?.restoreAppearance() }
         page = target.page
