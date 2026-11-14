@@ -38,10 +38,7 @@ class QuestionRow extends StatelessWidget {
           child: NativeSegmentedControl(
             labels: const ['Yes', 'No'],
             icons: const [
-              NativeIcon(
-                sfSymbol: 'checkmark',
-                icon: CupertinoIcons.checkmark,
-              ),
+              NativeIcon(sfSymbol: 'checkmark', icon: CupertinoIcons.checkmark),
               NativeIcon(sfSymbol: 'xmark', icon: CupertinoIcons.xmark),
             ],
             selectedIndex: value ? 0 : 1,

@@ -3,6 +3,9 @@ abstract final class KeelRoutes {
   static const home = '/';
   static const search = '/search';
   static const saved = '/saved';
+
+  /// Opening an account straight from Home, outside sign-in.
+  static const register = '/register';
   static const finderResults = '/finder/results';
   static const biometricSettings = '/settings/biometric';
 

@@ -156,15 +156,42 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
         guard configuredForWindow else { initialConfiguration = args; return }
         let items = args["items"] as? [[String: Any]] ?? []
         if !(items as NSArray).isEqual(to: configurations) {
+            let previousItems = configurations
+            let previousPages = pages
+            let previousNavigations = navigations
+            let previousSearchIndex = searchIndex
+            let previousTabs: [Any]
+            if #available(iOS 26.0, *) { previousTabs = tabs.tabs } else { previousTabs = [] }
             configurations = items
             searchIndex = items.firstIndex { $0["isSearch"] as? Bool == true } ?? -1
-            pages = items.indices.map { $0 == searchIndex ? searchPage : NativeNavigationContent() }
+            // A tab that stays where it was keeps its page and navigation, so
+            // the one holding the Flutter view is never thrown away when tabs
+            // are added or removed (a tab that appears after signing in).
+            func kept(_ index: Int) -> Bool {
+                index != searchIndex && index != previousSearchIndex
+                    && previousPages.indices.contains(index)
+                    && previousNavigations.indices.contains(index)
+            }
+            pages = items.indices.map { index in
+                if index == searchIndex { return searchPage }
+                return kept(index) ? previousPages[index] : NativeNavigationContent()
+            }
             navigations = pages.enumerated().map { index, page in
-                index == searchIndex ? searchNavigation : NativeNavigationHost.makeNavigationController(
+                if index == searchIndex { return searchNavigation }
+                if kept(index) { return previousNavigations[index] }
+                return NativeNavigationHost.makeNavigationController(
                     content: page, onLayout: { [weak self] in self?.scheduleReport() })
             }
             if #available(iOS 26.0, *) {
                 tabs.tabs = items.enumerated().map { index, item in
+                    // Unchanged tabs are the same UITab, so UIKit leaves their
+                    // controllers where they are.
+                    if kept(index), previousTabs.indices.contains(index),
+                       previousItems.indices.contains(index),
+                       (previousItems[index] as NSDictionary).isEqual(to: item),
+                       let same = previousTabs[index] as? UITab {
+                        return same
+                    }
                     let title = item["title"] as? String ?? ""
                     let tab: UITab
                     if index == searchIndex {
@@ -215,7 +242,11 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
                     return controller
                 }
             }
-            hostedIndex = nil
+            if let hosted = hostedIndex,
+               !(previousPages.indices.contains(hosted) && pages.indices.contains(hosted)
+                 && previousPages[hosted] === pages[hosted]) {
+                hostedIndex = nil
+            }
         }
         let style: UIUserInterfaceStyle = args["isDark"] as? Bool == true ? .dark : .light
         // Keep the controllers above Flutter on the real system traits. Only

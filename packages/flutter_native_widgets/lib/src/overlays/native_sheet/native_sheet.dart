@@ -60,6 +60,7 @@ class NativeSheet {
   static String? _firstError;
   static FlutterExceptionHandler? _previousFlutterError;
   static VoidCallback? _barClose;
+  static VoidCallback? _barAction;
 
   /// Called when the sheet's navigation popped its page in front by back or
   /// swipe: the page's Flutter route should pop, without a transition.
@@ -188,24 +189,30 @@ class NativeSheet {
   /// once it has drawn again.
   ///
   /// The close control is an xmark, or [closeTitle] in words when given.
+  /// An [action] adds the page's own control at the trailing end.
   static void setBar({
     String? title,
     VoidCallback? onClose,
     String? closeTitle,
+    NativeSheetBarAction? action,
   }) {
     if (!_hosted) return;
     _barClose = onClose;
-    unawaited(_send('setBar', _bar(title, onClose, closeTitle)));
+    _barAction = action?.onPressed;
+    unawaited(_send('setBar', _bar(title, onClose, closeTitle, action)));
   }
 
   static Map<String, Object?> _bar(
     String? title,
     VoidCallback? onClose,
     String? closeTitle,
+    NativeSheetBarAction? action,
   ) => {
     'title': title,
     'close': onClose != null,
     if (closeTitle != null) 'closeTitle': closeTitle,
+    if (action != null)
+      'action': {'symbol': action.sfSymbol, 'label': action.label},
   };
 
   /// Covers the page in front with a picture of itself, so the next page
@@ -219,10 +226,12 @@ class NativeSheet {
     String? title,
     VoidCallback? onClose,
     String? closeTitle,
+    NativeSheetBarAction? action,
   }) {
     if (!_hosted) return;
     _barClose = onClose;
-    unawaited(_send('pushPage', _bar(title, onClose, closeTitle)));
+    _barAction = action?.onPressed;
+    unawaited(_send('pushPage', _bar(title, onClose, closeTitle, action)));
   }
 
   /// UIKit pops the page in front; completes once it has, for the Flutter
@@ -435,7 +444,12 @@ class NativeSheet {
         );
       case 'barAction':
         final arguments = call.arguments as Map<Object?, Object?>;
-        if (arguments['id'] == 'close') _barClose?.call();
+        switch (arguments['id']) {
+          case 'close':
+            _barClose?.call();
+          case 'action':
+            _barAction?.call();
+        }
         return null;
       case 'pagePopped':
         onPagePopped?.call();
@@ -771,4 +785,19 @@ class _BelowNativeBars extends StatelessWidget {
       },
     );
   }
+}
+
+/// A page's own control in a sheet's navigation bar, at the trailing end:
+/// an SF Symbol, its spoken [label], and what it does.
+@immutable
+class NativeSheetBarAction {
+  const NativeSheetBarAction({
+    required this.sfSymbol,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String sfSymbol;
+  final String label;
+  final VoidCallback onPressed;
 }

@@ -1,4 +1,6 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart'
+    show NativeSheetBarAction;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -9,6 +11,7 @@ import 'package:investnotes_app_sample1/features/account/bloc/register_bloc.dart
 import 'package:investnotes_app_sample1/features/account/widgets/advance_button.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/code_field.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/code_sent_header.dart';
+import 'package:investnotes_app_sample1/features/account/widgets/flow_bar_action_binder.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/flow_body.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/flow_done.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/flow_page.dart';
@@ -30,32 +33,45 @@ class RegisterPage extends StatelessWidget {
     child: BlocBuilder<RegisterBloc, RegisterState>(
       builder: (context, state) {
         final bloc = context.read<RegisterBloc>();
-        return FlowPage(
-          header: state.step == RegisterStep.done
-              ? null
-              : StepTabs(
-                  titles: [
-                    RegisterStep.start.title,
-                    RegisterStep.account.title,
-                    RegisterStep.verify.title,
-                  ],
-                  current: state.step.index,
-                  onBack: () => bloc.add(const RegisterStepBack()),
+        // Past the first step, and until the code checks out, the bar
+        // carries a way back to the step before.
+        final hasPrevious =
+            state.step != RegisterStep.start && state.step != RegisterStep.done;
+        return FlowBarActionBinder(
+          action: hasPrevious
+              ? NativeSheetBarAction(
+                  sfSymbol: 'backward',
+                  label: 'Previous step',
+                  onPressed: () => bloc.add(const RegisterStepBack()),
+                )
+              : null,
+          child: FlowPage(
+            header: state.step == RegisterStep.done
+                ? null
+                : StepTabs(
+                    titles: [
+                      RegisterStep.start.title,
+                      RegisterStep.account.title,
+                      RegisterStep.verify.title,
+                    ],
+                    current: state.step.index,
+                    onBack: () => bloc.add(const RegisterStepBack()),
+                  ),
+            child: StepSwitcher(
+              step: state.step,
+              child: switch (state.step) {
+                RegisterStep.start => _start(context, state, bloc),
+                RegisterStep.account => _account(context, state, bloc),
+                RegisterStep.verify => _verify(state, bloc),
+                RegisterStep.done => FlowDone(
+                  title: 'Account ready',
+                  detail: state.username.trim(),
+                  actionLabel: 'Continue signed in',
+                  onAction: () =>
+                      SignInScope.of(context).onSignedIn(state.username.trim()),
                 ),
-          child: StepSwitcher(
-            step: state.step,
-            child: switch (state.step) {
-              RegisterStep.start => _start(context, state, bloc),
-              RegisterStep.account => _account(context, state, bloc),
-              RegisterStep.verify => _verify(state, bloc),
-              RegisterStep.done => FlowDone(
-                title: 'Account ready',
-                detail: state.username.trim(),
-                actionLabel: 'Continue signed in',
-                onAction: () =>
-                    SignInScope.of(context).onSignedIn(state.username.trim()),
-              ),
-            },
+              },
+            ),
           ),
         );
       },

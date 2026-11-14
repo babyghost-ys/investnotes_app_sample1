@@ -8,7 +8,9 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/features/home/view/home_page.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_page.dart';
 import 'package:investnotes_app_sample1/features/learn/view/learn_page.dart';
+import 'package:investnotes_app_sample1/features/my_notes/view/my_notes_page.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_page.dart';
+import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/widgets/keel_drawer.dart';
 
@@ -25,14 +27,33 @@ class _ShellPageState extends State<ShellPage> {
   final _scaffold = GlobalKey<NativeScaffoldState>();
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<ShellBloc, ShellState>(
-    builder: (context, state) => NativeScaffold(
+  Widget build(BuildContext context) {
+    final signedIn = context.select<SessionBloc, bool>((b) => b.state.signedIn);
+    return BlocListener<SessionBloc, SessionState>(
+      // Signing out takes My Notes away; whoever was on it goes home.
+      listenWhen: (before, now) => before.signedIn && !now.signedIn,
+      listener: (context, _) {
+        if (context.read<ShellBloc>().state.tab == ShellTab.myNotes) {
+          context.read<ShellBloc>().add(const ShellTabSelected(ShellTab.home));
+        }
+      },
+      child: BlocBuilder<ShellBloc, ShellState>(
+        builder: (context, state) => _frame(context, state, signedIn),
+      ),
+    );
+  }
+
+  Widget _frame(BuildContext context, ShellState state, bool signedIn) {
+    final tab = !signedIn && state.tab == ShellTab.myNotes
+        ? ShellTab.home
+        : state.tab;
+    return NativeScaffold(
       key: _scaffold,
       extendBody: true,
       extendBodyBehindSides: true,
       backgroundColor: KeelColors.page.of(context),
       appBar: NativeAppBar(
-        title: state.tab == ShellTab.home ? 'Keel' : null,
+        title: tab == ShellTab.home ? 'Keel' : null,
         actions: [
           NativeAppBarAction(
             icon: const NativeIcon(
@@ -58,34 +79,31 @@ class _ShellPageState extends State<ShellPage> {
         child: const KeelDrawer(),
       ),
       bottomNavigationBar: NativeBottomNavigationBar(
-        selectedIndex: state.tab.index,
+        selectedIndex: tab.index,
         selectedItemColor: KeelColors.azure.of(context),
         onTap: (i) {
           _scaffold.currentState?.closeDrawer();
           context.read<ShellBloc>().add(ShellTabSelected(ShellTab.values[i]));
         },
-        items: const [
-          NativeNavigationDestination(
+        items: [
+          const NativeNavigationDestination(
             icon: NativeIcon(sfSymbol: 'house', icon: Icons.home_outlined),
-            selectedIcon: NativeIcon(
-              sfSymbol: 'house.fill',
-              icon: Icons.home,
-            ),
+            selectedIcon: NativeIcon(sfSymbol: 'house.fill', icon: Icons.home),
             label: 'Home',
           ),
-          NativeNavigationDestination(
+          const NativeNavigationDestination(
             icon: NativeIcon(sfSymbol: 'tag', icon: Icons.sell_outlined),
             selectedIcon: NativeIcon(sfSymbol: 'tag.fill', icon: Icons.sell),
             label: 'Offerings',
           ),
-          NativeNavigationDestination(
+          const NativeNavigationDestination(
             icon: NativeIcon(
               sfSymbol: 'clock.arrow.circlepath',
               icon: Icons.history,
             ),
             label: 'Issued',
           ),
-          NativeNavigationDestination(
+          const NativeNavigationDestination(
             icon: NativeIcon(
               sfSymbol: 'graduationcap',
               icon: Icons.school_outlined,
@@ -96,17 +114,27 @@ class _ShellPageState extends State<ShellPage> {
             ),
             label: 'Learn',
           ),
+          if (signedIn)
+            const NativeNavigationDestination(
+              icon: NativeIcon(sfSymbol: 'briefcase', icon: Icons.work_outline),
+              selectedIcon: NativeIcon(
+                sfSymbol: 'briefcase.fill',
+                icon: Icons.work,
+              ),
+              label: 'My Notes',
+            ),
         ],
       ),
       body: IndexedStack(
-        index: state.tab.index,
+        index: tab.index,
         children: const [
           HomePage(),
           OfferingsPage(),
           IssuedPage(),
           LearnPage(),
+          MyNotesPage(),
         ],
       ),
-    ),
-  );
+    );
+  }
 }

@@ -36,6 +36,17 @@ abstract final class Formats {
     return '$trimmed×';
   }
 
+  /// 184250.4 -> "$184,250", whole dollars with thousands grouped.
+  static String dollars(double value) {
+    final digits = value.round().abs().toString();
+    final grouped = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) grouped.write(',');
+      grouped.write(digits[i]);
+    }
+    return '${value < 0 ? '-' : ''}\$$grouped';
+  }
+
   static String years(int value) => value == 1 ? '1 yr' : '$value yrs';
 
   /// Dates the way people say them: "Today", "In 3 days", "12 Mar",

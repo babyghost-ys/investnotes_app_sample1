@@ -89,6 +89,7 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             child: const BiometricSettingsPage(),
           ),
         ),
+        registerRoute(path: 'register'),
         signInRoute(path: 'sign-in', sheet: false),
         biometricSignInRoute(path: 'sign-in-biometric', sheet: false),
       ],

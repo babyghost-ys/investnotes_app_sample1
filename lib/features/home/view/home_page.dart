@@ -1,15 +1,20 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:investnotes_app_sample1/app/keel_routes.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
+import 'package:investnotes_app_sample1/features/home/widgets/account_banner.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/closing_card.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/finder_banner.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/floor_hero.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
+import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 
 class HomePage extends StatelessWidget {
@@ -39,7 +44,17 @@ class HomePage extends StatelessWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            FloorHero(topInset: insets.top),
+            FloorHero(
+              topInset: insets.top,
+              banner: AccountBanner(
+                name: context.select<SessionBloc, String?>((b) => b.state.name),
+                onRegister: () async {
+                  final session = context.read<SessionBloc>();
+                  final name = await context.push<String>(KeelRoutes.register);
+                  if (name != null) session.add(SessionSignedIn(name));
+                },
+              ),
+            ),
             ColoredBox(
               color: KeelColors.page.of(context),
               child: Column(

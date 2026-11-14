@@ -3,10 +3,10 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart' show MaterialPage;
 
-import 'package:investnotes_app_sample1/app/keel_page.dart';
 import 'package:investnotes_app_sample1/features/account/view/find_username_page.dart';
 import 'package:investnotes_app_sample1/features/account/view/register_page.dart';
 import 'package:investnotes_app_sample1/features/account/view/reset_password_page.dart';
+import 'package:investnotes_app_sample1/features/account/widgets/flow_bar_host.dart';
 import 'package:investnotes_app_sample1/features/session/view/biometric_sign_in_page.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_page.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
@@ -33,13 +33,14 @@ Page<void> _page(
     // UIKit moves the whole page; Flutter switches without a transition.
     return NoTransitionPage<void>(
       key: state.pageKey,
-      child: Builder(
-        builder: (context) => NativeScaffold(
+      child: FlowBarHost(
+        builder: (context, action) => NativeScaffold(
           body: SheetBarBinder(
             first: first,
             title: title,
             onClose: first ? SignInScope.of(context).onClose : null,
             closeTitle: closeTitle,
+            action: action,
             child: child,
           ),
         ),
@@ -71,8 +72,43 @@ Page<void> _page(
       ),
     );
   }
-  return keelPage(state, title: title ?? '', child: child);
+  return flowPage(state, title: title ?? '', child: child);
 }
+
+/// A flow page pushed in the app's own navigation, the bar carrying the
+/// page's own control when it sets one.
+NativePage<void> flowPage(
+  GoRouterState state, {
+  required String title,
+  required Widget child,
+}) => NativePage<void>(
+  key: state.pageKey,
+  name: state.matchedLocation,
+  child: FlowBarHost(
+    builder: (context, action) => ValueListenableBuilder(
+      valueListenable: action,
+      builder: (context, bar, body) => NativeScaffold(
+        extendBody: true,
+        appBar: NativeAppBar(
+          title: title,
+          actions: [
+            if (bar != null)
+              NativeAppBarAction(
+                icon: NativeIcon(
+                  sfSymbol: bar.sfSymbol,
+                  icon: CupertinoIcons.backward,
+                ),
+                label: bar.label,
+                onPressed: bar.onPressed,
+              ),
+          ],
+        ),
+        body: body!,
+      ),
+      child: child,
+    ),
+  ),
+);
 
 /// Sign-in and the pages it leads to, at [path].
 ///
@@ -136,3 +172,22 @@ GoRoute biometricSignInRoute({required String path, required bool sheet}) =>
         child: const BiometricSignInPage(),
       ),
     );
+
+/// Register on its own, pushed from Home at [path]. Finishing pops back
+/// with the new account's name, the same way Back leaves, so the native
+/// page goes as it came; whoever pushed it signs the account in.
+GoRoute registerRoute({required String path}) => GoRoute(
+  path: path,
+  pageBuilder: (context, state) => flowPage(
+    state,
+    title: 'Register',
+    child: Builder(
+      builder: (context) => SignInScope(
+        base: path,
+        onSignedIn: (name) => context.pop(name),
+        onClose: () => context.pop(),
+        child: const RegisterPage(),
+      ),
+    ),
+  ),
+);

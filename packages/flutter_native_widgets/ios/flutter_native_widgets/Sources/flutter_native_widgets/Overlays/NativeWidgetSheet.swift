@@ -877,15 +877,23 @@ final class SheetNavigationController: UINavigationController,
             ? button("chevron.backward", "Back") { [weak self] in self?.goBack() }
             : nil
         let close: () -> Void = { [weak self] in self?.send?("barAction", ["id": "close"]) }
+        var trailing: [UIBarButtonItem] = []
         if args["close"] as? Bool != true {
-            item.rightBarButtonItem = nil
         } else if let title = args["closeTitle"] as? String {
             // Leaving named in words, such as going home without signing in.
-            item.rightBarButtonItem = UIBarButtonItem(
-                title: title, image: nil, primaryAction: UIAction { _ in close() }, menu: nil)
+            trailing.append(UIBarButtonItem(
+                title: title, image: nil, primaryAction: UIAction { _ in close() }, menu: nil))
         } else {
-            item.rightBarButtonItem = button("xmark", "Close", close)
+            trailing.append(button("xmark", "Close", close))
         }
+        // The page's own control, such as going back a step in a flow.
+        if let action = args["action"] as? [String: Any],
+           let symbol = action["symbol"] as? String {
+            trailing.append(button(symbol, action["label"] as? String ?? "") { [weak self] in
+                self?.send?("barAction", ["id": "action"])
+            })
+        }
+        item.rightBarButtonItems = trailing.isEmpty ? nil : trailing
         styleButtons()
     }
 

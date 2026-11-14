@@ -1,5 +1,6 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 
 /// Ties a page of the sign-in sheet to its native page. Arriving, it has
 /// UIKit push a whole new page once it has drawn (the first page only sets
@@ -13,6 +14,7 @@ class SheetBarBinder extends StatefulWidget {
     required this.child,
     this.onClose,
     this.closeTitle,
+    this.action,
   });
 
   /// The sheet's first page, already in front when the sheet rises.
@@ -22,6 +24,9 @@ class SheetBarBinder extends StatefulWidget {
 
   /// The close control in words instead of an xmark.
   final String? closeTitle;
+
+  /// The page's own control at the trailing end, which it may change.
+  final ValueListenable<NativeSheetBarAction?>? action;
   final Widget child;
 
   @override
@@ -31,6 +36,32 @@ class SheetBarBinder extends StatefulWidget {
 class _SheetBarBinderState extends State<SheetBarBinder> {
   bool _current = false;
   bool _shown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.action?.addListener(_actionChanged);
+  }
+
+  @override
+  void didUpdateWidget(SheetBarBinder old) {
+    super.didUpdateWidget(old);
+    if (old.action != widget.action) {
+      old.action?.removeListener(_actionChanged);
+      widget.action?.addListener(_actionChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.action?.removeListener(_actionChanged);
+    super.dispose();
+  }
+
+  /// The page changed its control while in front: the bar follows.
+  void _actionChanged() {
+    if (_shown && _current) _setBar();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +92,7 @@ class _SheetBarBinderState extends State<SheetBarBinder> {
         title: widget.title,
         onClose: widget.onClose,
         closeTitle: widget.closeTitle,
+        action: widget.action?.value,
       );
     }
   }
@@ -69,5 +101,6 @@ class _SheetBarBinderState extends State<SheetBarBinder> {
     title: widget.title,
     onClose: widget.onClose,
     closeTitle: widget.closeTitle,
+    action: widget.action?.value,
   );
 }

@@ -7,10 +7,13 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 /// Home's hero: a market path that dips and recovers, with a note's path
 /// riding above it, never falling through its floor. Draws itself once.
 class FloorHero extends StatefulWidget {
-  const FloorHero({super.key, required this.topInset});
+  const FloorHero({super.key, required this.topInset, this.banner});
 
   /// Space taken by the status and navigation bars above the band.
   final double topInset;
+
+  /// Shown above the headline, such as the account banner.
+  final Widget? banner;
 
   @override
   State<FloorHero> createState() => _FloorHeroState();
@@ -54,6 +57,10 @@ class _FloorHeroState extends State<FloorHero>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (widget.banner != null) ...[
+            widget.banner!,
+            const SizedBox(height: 24),
+          ],
           const Text(
             'Upside, with a floor.',
             style: TextStyle(

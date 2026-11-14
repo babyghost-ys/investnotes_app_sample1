@@ -1,6 +1,7 @@
 part of 'shell_bloc.dart';
 
-enum ShellTab { home, offerings, issued, learn }
+/// The tabs, in bar order. [myNotes] shows only while someone is signed in.
+enum ShellTab { home, offerings, issued, learn, myNotes }
 
 final class ShellState extends Equatable {
   const ShellState({this.tab = ShellTab.home});

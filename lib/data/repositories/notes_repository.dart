@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/data/models/holding.dart';
 import 'package:investnotes_app_sample1/data/models/issued_note.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
@@ -387,6 +388,18 @@ class NotesRepository {
       4,
       0.01,
     ),
+  ];
+
+  /// The signed-in investor's notes: active issues, all in US dollars so
+  /// they add up to one total.
+  late final List<Holding> holdings = [
+    for (final (id, principal) in const [
+      ('i-02', 75000.0),
+      ('i-01', 50000.0),
+      ('i-03', 40000.0),
+      ('i-12', 25000.0),
+    ])
+      Holding(note: issued.firstWhere((n) => n.id == id), principal: principal),
   ];
 
   IssuedNote _i(

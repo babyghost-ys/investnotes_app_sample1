@@ -10,6 +10,7 @@ import 'package:investnotes_app_sample1/data/repositories/biometric_repository.d
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/finder/bloc/finder_bloc.dart';
 import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
+import 'package:investnotes_app_sample1/features/my_notes/bloc/my_notes_bloc.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
@@ -59,6 +60,9 @@ class _KeelAppState extends State<KeelApp> {
         ),
         BlocProvider(create: (_) => OfferingsBloc(_repository)),
         BlocProvider(create: (_) => IssuedBloc(_repository)),
+        BlocProvider(
+          create: (_) => MyNotesBloc(_repository)..add(const MyNotesStarted()),
+        ),
         // One run of "find my note" at a time; starting it clears the last.
         BlocProvider(create: (_) => FinderBloc(_repository)),
       ],
