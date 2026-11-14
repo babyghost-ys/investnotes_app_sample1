@@ -35,7 +35,7 @@ import '../filter_sheet/native_filter_sheet.dart';
 /// A sheet that hosts any widget, with native platform views inside it.
 ///
 /// On iOS the sheet is a real UIKit sheet with its own Flutter engine: [show]
-/// sends [route] and codec-safe [arguments] to the app's `nativeSheetMain`
+/// sends [route] and codec-safe [arguments] to the app's `commonSheetMain`
 /// entrypoint, which calls [bootstrap] and builds the route inside
 /// [NativeSheetContent]. UIKit owns the grabber, detents, dimming and
 /// drag dismissal, and hides the sheet while the screen turns (see
@@ -91,7 +91,7 @@ class NativeSheet {
     });
   }
 
-  /// Called once by `nativeSheetMain`, before building the sheet app.
+  /// Called once by `commonSheetMain`, before building the sheet app.
   ///
   /// The returned map contains `route`, `arguments`, `detents`,
   /// `backgroundColor` and `brightness`. [encodeResult] converts the value
@@ -318,7 +318,7 @@ class NativeSheet {
     if (native) {
       if (route == null || route.isEmpty) {
         throw ArgumentError(
-          'Native sheets require a route for nativeSheetMain.',
+          'Native sheets require a route for commonSheetMain.',
         );
       }
       _servePage();

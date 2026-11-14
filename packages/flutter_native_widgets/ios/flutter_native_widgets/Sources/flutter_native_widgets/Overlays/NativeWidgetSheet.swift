@@ -123,7 +123,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
     /// engine: iOS exposes no public spawn on FlutterEngine, and the page's
     /// implicit engine belongs to no group. In Debug the group's first engine
     /// loads the bundle's kernel as built, so hot reloads and restarts never
-    /// reach sheet engines made later: a change to `nativeSheetMain`, or any
+    /// reach sheet engines made later: a change to `commonSheetMain`, or any
     /// sheet code, needs a relaunch to show.
     private let engineGroup = FlutterEngineGroup(name: "flutter_native_widgets.sheets", project: nil)
     private var levels: [Level] = []
@@ -227,7 +227,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         originalHost = host
         let covered = [host] + levels.map { $0.controller as FlutterViewController }
         let options = FlutterEngineGroupOptions()
-        options.entrypoint = "nativeSheetMain"
+        options.entrypoint = "commonSheetMain"
         let engine = engineGroup.makeEngine(with: options)
         let level = Level(engine: engine, arguments: args, depth: levels.count, completion: result)
         level.coveredStyles = covered.map(CoveredStatusBarStyle.init)
@@ -308,7 +308,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             if level.engine.isolateId == nil {
                 self.failStartup(level, code: "startup_failed", message:
                     "The sheet's Dart isolate did not launch within \(Int(Self.launchGrace)) seconds. "
-                    + "The app's main.dart must define `@pragma('vm:entry-point') void nativeSheetMain()`, "
+                    + "The app's main.dart must define `@pragma('vm:entry-point') void commonSheetMain()`, "
                     + "and a Debug build runs the program as built: relaunch after adding it.")
             } else if level.revive == nil {
                 // Launched, yet the launch observation never reported it.
@@ -391,7 +391,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         case "PauseBreakpoint", "PauseException", "PauseInterrupted", "PausePostRequest":
             return "The debugger has it paused (\(state)); resume it there."
         case "resumed", "Resume", "None":
-            return "It is running and never called bootstrap: code in nativeSheetMain ahead of "
+            return "It is running and never called bootstrap: code in commonSheetMain ahead of "
                 + "bootstrap() may have thrown or hung."
         case "PauseExit", "gone":
             return "It has already exited."

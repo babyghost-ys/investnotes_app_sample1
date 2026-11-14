@@ -17,7 +17,7 @@ import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart
 
 /// The root of a native sheet's own engine. Blocs and closures cannot cross
 /// engines, so each sheet gets plain values in and hands plain values back.
-Future<void> runNativeSheetApp() async {
+Future<void> runCommonSheetApp() async {
   WidgetsFlutterBinding.ensureInitialized();
   final configuration = await NativeSheet.bootstrap(
     encodeResult: (value) => switch (value) {
@@ -27,11 +27,11 @@ Future<void> runNativeSheetApp() async {
       _ => value,
     },
   );
-  runApp(NativeSheetApp(configuration: configuration));
+  runApp(CommonSheetApp(configuration: configuration));
 }
 
-class NativeSheetApp extends StatelessWidget {
-  const NativeSheetApp({super.key, required this.configuration});
+class CommonSheetApp extends StatelessWidget {
+  const CommonSheetApp({super.key, required this.configuration});
 
   final Map<String, dynamic> configuration;
 
