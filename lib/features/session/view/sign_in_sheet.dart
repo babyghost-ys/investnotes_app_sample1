@@ -4,11 +4,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
+import 'package:investnotes_app_sample1/app/push_flow.dart';
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_mark.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
+import 'package:investnotes_app_sample1/core/widgets/text_link.dart';
+import 'package:investnotes_app_sample1/features/account/view/find_username_page.dart';
+import 'package:investnotes_app_sample1/features/account/view/register_page.dart';
+import 'package:investnotes_app_sample1/features/account/view/reset_password_page.dart';
 
 typedef SignInForm = ({String name, String password, bool reveal});
 
@@ -22,9 +27,25 @@ Future<String?> showSignIn(BuildContext context) =>
       builder: (_) => const SignInSheet(),
     );
 
-/// Sign-in: the brand band on top, two fields and one go control below.
-class SignInSheet extends StatelessWidget {
+/// Sign-in: the brand band on top, two fields and one go control below,
+/// then the ways in for a forgotten username or password and a new account.
+class SignInSheet extends StatefulWidget {
   const SignInSheet({super.key});
+
+  @override
+  State<SignInSheet> createState() => _SignInSheetState();
+}
+
+class _SignInSheetState extends State<SignInSheet> {
+  final _name = TextEditingController();
+  final _passwordFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _passwordFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -40,6 +61,32 @@ class SignInSheet extends StatelessWidget {
           if (ready) AdaptiveNativeSheet.pop(context, form.name.trim());
         }
 
+        Future<void> register() async {
+          final name = await pushFlow<String>(
+            context,
+            (_) => const RegisterPage(),
+          );
+          if (name != null && context.mounted) {
+            await AdaptiveNativeSheet.pop(context, name);
+          }
+        }
+
+        Future<void> resetPassword() async {
+          final name = await pushFlow<String>(
+            context,
+            (_) => ResetPasswordPage(username: form.name.trim()),
+          );
+          if (name == null || !mounted) return;
+          _name.text = name;
+          draft.change((name: name, password: '', reveal: false));
+          _passwordFocus.requestFocus();
+        }
+
+        final muted = KeelColors.muted.of(context);
+        final hairline = Expanded(
+          child: Container(height: 1, color: KeelColors.hairline.of(context)),
+        );
+
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
           child: Material(
@@ -47,7 +94,10 @@ class SignInSheet extends StatelessWidget {
             child: ColoredBox(
               color: KeelColors.raised.of(context),
               child: ListView(
-                padding: EdgeInsets.zero,
+                // Room for the keyboard, so the links below stay reachable.
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.viewInsetsOf(context).bottom,
+                ),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
@@ -97,9 +147,9 @@ class SignInSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         KeelField(
+                          controller: _name,
                           icon: CupertinoIcons.person,
                           placeholder: 'Username',
-                          autofocus: true,
                           autofill: AutofillHints.username,
                           onChanged: (v) => draft.change((
                             name: v,
@@ -109,6 +159,7 @@ class SignInSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         KeelField(
+                          focusNode: _passwordFocus,
                           icon: CupertinoIcons.lock,
                           placeholder: 'Password',
                           obscure: !form.reveal,
@@ -146,6 +197,58 @@ class SignInSheet extends StatelessWidget {
                           size: 56,
                           iconSize: 24,
                           onPressed: ready ? submit : null,
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 12,
+                          children: [
+                            TextLink(
+                              label: 'Forgot username?',
+                              color: KeelColors.ink.of(context),
+                              onPressed: () => pushFlow<void>(
+                                context,
+                                (_) => const FindUsernamePage(),
+                              ),
+                            ),
+                            TextLink(
+                              label: 'Forgot password?',
+                              color: KeelColors.ink.of(context),
+                              onPressed: resetPassword,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            hairline,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              child: Text(
+                                'or',
+                                style: TextStyle(color: muted, fontSize: 14),
+                              ),
+                            ),
+                            hairline,
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'New to Keel?',
+                              style: TextStyle(color: muted, fontSize: 15),
+                            ),
+                            TextLink(
+                              label: 'Register',
+                              color: KeelColors.azure.of(context),
+                              weight: FontWeight.w600,
+                              onPressed: register,
+                            ),
+                          ],
                         ),
                       ],
                     ),

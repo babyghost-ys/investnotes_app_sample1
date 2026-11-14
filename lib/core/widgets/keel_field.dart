@@ -3,7 +3,10 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// A text field: a leading icon, the text, an optional trailing control.
-class KeelField extends StatelessWidget {
+///
+/// Without a [controller] it keeps its own, starting from [initialValue], so
+/// a step that comes back shows what was typed before.
+class KeelField extends StatefulWidget {
   const KeelField({
     super.key,
     required this.icon,
@@ -15,6 +18,10 @@ class KeelField extends StatelessWidget {
     this.autofill,
     this.onSubmitted,
     this.trailing,
+    this.controller,
+    this.focusNode,
+    this.keyboard,
+    this.initialValue = '',
   });
 
   final IconData icon;
@@ -26,26 +33,52 @@ class KeelField extends StatelessWidget {
   final String? autofill;
   final ValueChanged<String>? onSubmitted;
   final Widget? trailing;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final TextInputType? keyboard;
+  final String initialValue;
+
+  @override
+  State<KeelField> createState() => _KeelFieldState();
+}
+
+class _KeelFieldState extends State<KeelField> {
+  TextEditingController? _own;
+
+  TextEditingController get _controller =>
+      widget.controller ??
+      (_own ??= TextEditingController(text: widget.initialValue));
+
+  @override
+  void dispose() {
+    _own?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final muted = KeelColors.muted.of(context);
+    final trailing = widget.trailing;
     return CupertinoTextField(
-      placeholder: placeholder,
-      obscureText: obscure,
-      autofocus: autofocus,
+      controller: _controller,
+      focusNode: widget.focusNode,
+      keyboardType: widget.keyboard,
+      placeholder: widget.placeholder,
+      obscureText: widget.obscure,
+      autofocus: widget.autofocus,
       autocorrect: false,
-      textInputAction: action,
-      autofillHints: autofill == null ? null : [autofill!],
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
+      enableSuggestions: false,
+      textInputAction: widget.action,
+      autofillHints: widget.autofill == null ? null : [widget.autofill!],
+      onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
       cursorColor: KeelColors.azure.of(context),
       style: TextStyle(color: KeelColors.ink.of(context), fontSize: 17),
       placeholderStyle: TextStyle(color: muted, fontSize: 17),
       padding: const EdgeInsets.symmetric(vertical: 17),
       prefix: Padding(
         padding: const EdgeInsets.only(left: 16, right: 12),
-        child: Icon(icon, size: 20, color: muted),
+        child: Icon(widget.icon, size: 20, color: muted),
       ),
       suffix: trailing == null
           ? null
