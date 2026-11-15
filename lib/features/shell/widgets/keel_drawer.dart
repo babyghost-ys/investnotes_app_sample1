@@ -124,11 +124,11 @@ class KeelDrawer extends StatelessWidget {
         const SizedBox(height: 28),
         for (final (tab, icon, title) in [
           (ShellTab.home, CupertinoIcons.house_fill, 'Home'),
+          if (session.signedIn)
+            (ShellTab.myNotes, CupertinoIcons.briefcase_fill, 'My Notes'),
           (ShellTab.offerings, CupertinoIcons.tag_fill, 'Offerings'),
           (ShellTab.issued, CupertinoIcons.clock_fill, 'Issued'),
           (ShellTab.learn, CupertinoIcons.book_fill, 'Learn'),
-          if (session.signedIn)
-            (ShellTab.myNotes, CupertinoIcons.briefcase_fill, 'My Notes'),
         ])
           DrawerRow(
             icon: icon,

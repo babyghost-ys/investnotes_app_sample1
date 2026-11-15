@@ -47,6 +47,7 @@ class _ShellPageState extends State<ShellPage> {
     final tab = !signedIn && state.tab == ShellTab.myNotes
         ? ShellTab.home
         : state.tab;
+    final shown = ShellTab.shown(signedIn: signedIn);
     return NativeScaffold(
       key: _scaffold,
       extendBody: true,
@@ -79,11 +80,11 @@ class _ShellPageState extends State<ShellPage> {
         child: const KeelDrawer(),
       ),
       bottomNavigationBar: NativeBottomNavigationBar(
-        selectedIndex: tab.index,
+        selectedIndex: shown.indexOf(tab),
         selectedItemColor: KeelColors.azure.of(context),
         onTap: (i) {
           _scaffold.currentState?.closeDrawer();
-          context.read<ShellBloc>().add(ShellTabSelected(ShellTab.values[i]));
+          context.read<ShellBloc>().add(ShellTabSelected(shown[i]));
         },
         items: [
           const NativeNavigationDestination(
@@ -91,6 +92,15 @@ class _ShellPageState extends State<ShellPage> {
             selectedIcon: NativeIcon(sfSymbol: 'house.fill', icon: Icons.home),
             label: 'Home',
           ),
+          if (signedIn)
+            const NativeNavigationDestination(
+              icon: NativeIcon(sfSymbol: 'briefcase', icon: Icons.work_outline),
+              selectedIcon: NativeIcon(
+                sfSymbol: 'briefcase.fill',
+                icon: Icons.work,
+              ),
+              label: 'My Notes',
+            ),
           const NativeNavigationDestination(
             icon: NativeIcon(sfSymbol: 'tag', icon: Icons.sell_outlined),
             selectedIcon: NativeIcon(sfSymbol: 'tag.fill', icon: Icons.sell),
@@ -114,25 +124,18 @@ class _ShellPageState extends State<ShellPage> {
             ),
             label: 'Learn',
           ),
-          if (signedIn)
-            const NativeNavigationDestination(
-              icon: NativeIcon(sfSymbol: 'briefcase', icon: Icons.work_outline),
-              selectedIcon: NativeIcon(
-                sfSymbol: 'briefcase.fill',
-                icon: Icons.work,
-              ),
-              label: 'My Notes',
-            ),
         ],
       ),
       body: IndexedStack(
         index: tab.index,
+        // In ShellTab order, so each page keeps its place as My Notes comes
+        // and goes from the bar.
         children: const [
           HomePage(),
+          MyNotesPage(),
           OfferingsPage(),
           IssuedPage(),
           LearnPage(),
-          MyNotesPage(),
         ],
       ),
     );

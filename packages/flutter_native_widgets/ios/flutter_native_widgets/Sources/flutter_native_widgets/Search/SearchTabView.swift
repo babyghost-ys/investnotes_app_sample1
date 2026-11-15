@@ -152,6 +152,11 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
 
     func view() -> UIView { container }
 
+    /// What identifies a tab across updates: its title and symbol.
+    private static func tabKey(_ item: [String: Any]) -> String {
+        "\(item["title"] as? String ?? "")|\(item["symbol"] as? String ?? "")"
+    }
+
     private func configure(_ args: [String: Any]) {
         guard configuredForWindow else { initialConfiguration = args; return }
         let items = args["items"] as? [[String: Any]] ?? []
@@ -164,35 +169,62 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
             if #available(iOS 26.0, *) { previousTabs = tabs.tabs } else { previousTabs = [] }
             configurations = items
             searchIndex = items.firstIndex { $0["isSearch"] as? Bool == true } ?? -1
-            // A tab that stays where it was keeps its page and navigation, so
-            // the one holding the Flutter view is never thrown away when tabs
-            // are added or removed (a tab that appears after signing in).
-            func kept(_ index: Int) -> Bool {
-                index != searchIndex && index != previousSearchIndex
-                    && previousPages.indices.contains(index)
-                    && previousNavigations.indices.contains(index)
+            // A tab that is still in the bar keeps its page, navigation and
+            // UITab wherever it now sits, so the one holding the Flutter view
+            // is never thrown away, and no controller is handed to a second
+            // tab, when tabs are added or removed (a tab that appears after
+            // signing in, in the middle of the bar). Tabs are matched by
+            // title and symbol, not position.
+            let previousKeys = previousItems.map(Self.tabKey)
+            var claimed = Set<Int>()
+            let origin: [Int?] = items.enumerated().map { index, item in
+                guard index != searchIndex else { return nil }
+                let key = Self.tabKey(item)
+                guard let match = previousKeys.indices.first(where: { previous in
+                    !claimed.contains(previous) && previous != previousSearchIndex
+                        && previousKeys[previous] == key
+                        && previousPages.indices.contains(previous)
+                        && previousNavigations.indices.contains(previous)
+                }) else { return nil }
+                claimed.insert(match)
+                return match
             }
             pages = items.indices.map { index in
                 if index == searchIndex { return searchPage }
-                return kept(index) ? previousPages[index] : NativeNavigationContent()
+                return origin[index].map { previousPages[$0] } ?? NativeNavigationContent()
             }
             navigations = pages.enumerated().map { index, page in
                 if index == searchIndex { return searchNavigation }
-                if kept(index) { return previousNavigations[index] }
+                if let previous = origin[index] { return previousNavigations[previous] }
                 return NativeNavigationHost.makeNavigationController(
                     content: page, onLayout: { [weak self] in self?.scheduleReport() })
             }
             if #available(iOS 26.0, *) {
                 tabs.tabs = items.enumerated().map { index, item in
-                    // Unchanged tabs are the same UITab, so UIKit leaves their
-                    // controllers where they are.
-                    if kept(index), previousTabs.indices.contains(index),
-                       previousItems.indices.contains(index),
-                       (previousItems[index] as NSDictionary).isEqual(to: item),
-                       let same = previousTabs[index] as? UITab {
+                    let title = item["title"] as? String ?? ""
+                    // The same UITab, brought up to date: UIKit leaves its
+                    // controller where it is.
+                    if let previous = origin[index], previousTabs.indices.contains(previous),
+                       let same = previousTabs[previous] as? UITab {
+                        same.title = title
+                        same.image = UIImage(systemName: item["symbol"] as? String ?? "circle")
+                        if #available(iOS 26.1, *) {
+                            same.selectedImage = (item["selectedSymbol"] as? String)
+                                .flatMap { UIImage(systemName: $0) }
+                        }
+                        same.badgeValue = item["badge"] as? String
                         return same
                     }
-                    let title = item["title"] as? String ?? ""
+                    if index == searchIndex, previousSearchIndex >= 0,
+                       previousTabs.indices.contains(previousSearchIndex),
+                       let same = previousTabs[previousSearchIndex] as? UITab {
+                        same.title = title
+                        same.badgeValue = item["badge"] as? String
+                        searchPage.title = title
+                        searchPage.navigationItem.title = title
+                        searchPage.navigationItem.largeTitle = title
+                        return same
+                    }
                     let tab: UITab
                     if index == searchIndex {
                         if usesToolbarSearch {
@@ -215,7 +247,7 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
                         let navigation = navigations[index]
                         tab = UITab(title: title,
                                     image: UIImage(systemName: item["symbol"] as? String ?? "circle"),
-                                    identifier: "tab_\(index)") { _ in navigation }
+                                    identifier: "tab_\(Self.tabKey(item))") { _ in navigation }
                         if #available(iOS 26.1, *), let symbol = item["selectedSymbol"] as? String {
                             tab.selectedImage = UIImage(systemName: symbol)
                         }
@@ -242,10 +274,11 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
                     return controller
                 }
             }
-            if let hosted = hostedIndex,
-               !(previousPages.indices.contains(hosted) && pages.indices.contains(hosted)
-                 && previousPages[hosted] === pages[hosted]) {
-                hostedIndex = nil
+            // The hosted page keeps hosting wherever it now sits in the bar.
+            if let hosted = hostedIndex {
+                hostedIndex = previousPages.indices.contains(hosted)
+                    ? pages.firstIndex { $0 === previousPages[hosted] }
+                    : nil
             }
         }
         let style: UIUserInterfaceStyle = args["isDark"] as? Bool == true ? .dark : .light
