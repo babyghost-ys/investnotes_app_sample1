@@ -147,7 +147,11 @@ class KeelDrawer extends StatelessWidget implements LocalisationConsumer {
             ),
           (ShellTab.offerings, CupertinoIcons.tag_fill, words.labels.offerings),
           (ShellTab.issued, CupertinoIcons.clock_fill, words.labels.issued),
-          (ShellTab.education, CupertinoIcons.book_fill, words.labels.education),
+          (
+            ShellTab.education,
+            CupertinoIcons.book_fill,
+            words.labels.education,
+          ),
         ])
           DrawerRow(
             icon: icon,

@@ -11,6 +11,8 @@
     "replay": "Revoir",
     "position": "Position de lecture",
     "noteReturns": "Le billet rapporte {value}",
-    "marketMoves": "Le marché a varié de {value}"
+    "marketMoves": "Le marché a varié de {value}",
+    "fullScreen": "Plein écran",
+    "exitFullScreen": "Quitter le plein écran"
   }
 }

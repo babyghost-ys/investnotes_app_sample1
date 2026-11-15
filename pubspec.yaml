@@ -23,6 +23,7 @@ dependencies:
   local_auth: ^3.0.2
   shared_preferences: ^2.5.6
   connectivity_plus: ^7.3.2
+  video_player: ^2.14.1
 
 dev_dependencies:
   flutter_test:
@@ -44,3 +45,6 @@ flutter:
     # from the JSON in l10n/.
     - assets/l10n/l10n.tar.bz2
     - assets/images/splash_background_wide.jpg
+    # Education's film and its poster, rendered by tool/render_explainer.py.
+    - assets/videos/structured_notes.mp4
+    - assets/videos/structured_notes.jpg

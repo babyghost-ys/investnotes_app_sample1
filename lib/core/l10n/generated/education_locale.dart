@@ -72,6 +72,12 @@ class EducationSemantics {
   /// Market moved {value}
   final String _marketMoves;
 
+  /// Full screen
+  final String fullScreen;
+
+  /// Exit full screen
+  final String exitFullScreen;
+
   const EducationSemantics({
     required this.searchNotes,
     required this.videos,
@@ -82,6 +88,8 @@ class EducationSemantics {
     required this.position,
     required this._noteReturns,
     required this._marketMoves,
+    required this.fullScreen,
+    required this.exitFullScreen,
   });
 
   factory EducationSemantics.fromJson(Map<String, Object?> json) =>
@@ -95,6 +103,8 @@ class EducationSemantics {
         position: json['position'] as String,
         noteReturns: json['noteReturns'] as String,
         marketMoves: json['marketMoves'] as String,
+        fullScreen: json['fullScreen'] as String,
+        exitFullScreen: json['exitFullScreen'] as String,
       );
 
   Map<String, Object?> toJson() => {
@@ -107,6 +117,8 @@ class EducationSemantics {
     'position': position,
     'noteReturns': _noteReturns,
     'marketMoves': _marketMoves,
+    'fullScreen': fullScreen,
+    'exitFullScreen': exitFullScreen,
   };
 
   String noteReturns({required Object value}) =>

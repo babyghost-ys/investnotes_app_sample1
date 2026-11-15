@@ -13,6 +13,7 @@ import 'package:investnotes_app_sample1/features/education/bloc/education_bloc.d
 import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/article_row.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/explainer_card.dart';
+import 'package:investnotes_app_sample1/features/education/widgets/film_card.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/lead_article_card.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/search_band.dart';
 
@@ -80,6 +81,14 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
                 const SizedBox(height: 22),
                 ...switch (state.segment) {
                   EducationSegment.videos => [
+                    for (final film in repository.films)
+                      // The recorded film leads, at the list's full width.
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 760),
+                          child: FilmCard(film: film),
+                        ),
+                      ),
                     // One film per row on a phone; side by side once the
                     // window is wide (an unfolded device, a tablet).
                     LayoutBuilder(

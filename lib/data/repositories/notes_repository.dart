@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:investnotes_app_sample1/data/models/article.dart';
 import 'package:investnotes_app_sample1/data/models/explainer.dart';
+import 'package:investnotes_app_sample1/data/models/film.dart';
 import 'package:investnotes_app_sample1/data/models/holding.dart';
 import 'package:investnotes_app_sample1/data/models/issued_note.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
@@ -580,6 +581,15 @@ class NotesRepository {
         'Interest is usually paid only at maturity, and early withdrawal is '
             'limited, so match the term to when you need the money.',
       ],
+    ),
+  ];
+
+  late final List<Film> films = const [
+    Film(
+      id: 'f-structured-notes',
+      title: 'Structured notes in half a minute',
+      asset: 'assets/videos/structured_notes.mp4',
+      poster: 'assets/videos/structured_notes.jpg',
     ),
   ];
 

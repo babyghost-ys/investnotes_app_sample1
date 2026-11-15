@@ -11,6 +11,8 @@
     "replay": "Play again",
     "position": "Playback position",
     "noteReturns": "Note returns {value}",
-    "marketMoves": "Market moved {value}"
+    "marketMoves": "Market moved {value}",
+    "fullScreen": "Full screen",
+    "exitFullScreen": "Exit full screen"
   }
 }
