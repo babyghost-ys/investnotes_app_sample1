@@ -125,11 +125,14 @@ final class NativeNavigationContent: UIViewController {
     /// falls back to the default style for the whole transition.
     private var retainedStatusBarStyle: UIStatusBarStyle?
     override var childForStatusBarStyle: UIViewController? {
-        drawerStatusBarStyle == nil && flutter != nil ? flutter : nil
+        overlayStatusBarStyle == nil && drawerStatusBarStyle == nil && flutter != nil ? flutter : nil
     }
     override var preferredStatusBarStyle: UIStatusBarStyle {
-        drawerStatusBarStyle ?? retainedStatusBarStyle ?? super.preferredStatusBarStyle
+        overlayStatusBarStyle ?? drawerStatusBarStyle ?? retainedStatusBarStyle
+            ?? super.preferredStatusBarStyle
     }
+    /// The overlay strip sits behind the status bar while it shows.
+    private var overlayStatusBarStyle: UIStatusBarStyle? { NativeOverlayContainer.statusBarStyle }
     override var childForStatusBarHidden: UIViewController? { flutter }
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         flutter?.supportedInterfaceOrientations ?? super.supportedInterfaceOrientations

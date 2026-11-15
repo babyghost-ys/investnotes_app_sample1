@@ -22,6 +22,13 @@ enum NativeEngines {
 final class NativeOverlayContainer {
     static let shared = NativeOverlayContainer()
 
+    /// The status bar's style while the strip lies behind it: legible on the
+    /// strip's colour. Nil while the strip is hidden.
+    static var statusBarStyle: UIStatusBarStyle? {
+        guard shared.shown, let color = (shared.request?["color"] as? NSNumber)?.intValue else { return nil }
+        return NativeBarAppearance.isDark(color) ? .lightContent : .darkContent
+    }
+
     /// Finds the page's window. Set by the plugin of the page's engine.
     var windowProvider: () -> UIWindow? = { nil }
 
@@ -125,12 +132,16 @@ final class NativeOverlayContainer {
         let visible = ready && request != nil
         guard visible != shown else { return }
         shown = visible
+        // The strip lies behind the status bar while it shows.
+        NativeNavigationHost.installed?.content.setNeedsStatusBarAppearanceUpdate()
+        root.setNeedsStatusBarAppearanceUpdate()
         if visible {
             strip.isHidden = false
             strip.setNeedsLayout()
             strip.layoutIfNeeded()
             appear()
-            // Slides down out from under the status bar into the bar's place.
+            // Slides down from the top edge, across the status bar, until it
+            // lies over the navigation bar.
             strip.panel.transform = animated ? strip.raised : .identity
             if animated {
                 UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 1,
@@ -156,8 +167,8 @@ final class NativeOverlayContainer {
     }
 
     /// The navigation bar's frame in `strip`'s coordinates: the band the
-    /// strip covers. The bar on screen when one
-    /// runs across the top. Otherwise (no native bar, or the iPhone Duo's in
+    /// strip's content sits in (its colour runs up to the top edge). The bar
+    /// on screen when one runs across the top. Otherwise (no native bar, or the iPhone Duo's in
     /// the vertical strip) the band UIKit lays out for an inline title in this
     /// window, measured, never assumed.
     fileprivate func band(in strip: UIView) -> CGRect {
@@ -222,14 +233,15 @@ final class NativeOverlayContainer {
 /// Covers the root view and draws the overlay content over the navigation
 /// bar's band. Touches outside the band pass through.
 final class NativeOverlayStripView: UIView {
-    /// The bar's band; clips the panel as it slides in from above.
+    /// From the top edge to the bottom of the navigation bar: the status
+    /// bar area and the bar's band.
     let content = UIView()
     /// The strip's colour and Flutter content, moved as one.
     let panel = UIView()
 
-    /// The panel's place just above the band, hidden by its clipping.
+    /// The panel's place just above the top edge, out of sight.
     var raised: CGAffineTransform {
-        CGAffineTransform(translationX: 0, y: -max(content.bounds.height, 1))
+        CGAffineTransform(translationX: 0, y: -max(content.frame.maxY, 1))
     }
 
     override init(frame: CGRect) {
@@ -255,9 +267,12 @@ final class NativeOverlayStripView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         guard !isHidden else { return }
-        content.frame = NativeOverlayContainer.shared.band(in: self)
+        // The colour runs from the top edge; the content stays in the band.
+        let band = NativeOverlayContainer.shared.band(in: self)
+        content.frame = CGRect(x: band.minX, y: 0, width: band.width, height: band.maxY)
         panel.bounds = content.bounds
         panel.center = CGPoint(x: content.bounds.midX, y: content.bounds.midY)
-        panel.subviews.first?.frame = panel.bounds
+        panel.subviews.first?.frame = CGRect(x: 0, y: band.minY, width: band.width,
+                                             height: band.height)
     }
 }

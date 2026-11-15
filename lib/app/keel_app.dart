@@ -86,9 +86,23 @@ class _KeelAppState extends State<KeelApp> {
           // The first answer hides too: a hot restart can find the strip
           // still up from before.
           BlocListener<ConnectivityBloc, ConnectivityState>(
-            listener: (context, network) => network.offline
-                ? CommonOverlay.showNetworkLost()
-                : NativeOverlayContainer.hide(),
+            listener: (context, network) {
+              if (!network.offline) {
+                NativeOverlayContainer.hide();
+              } else if (context.read<SplashBloc>().state.done) {
+                CommonOverlay.showNetworkLost();
+              }
+            },
+          ),
+          // Lost before the opening screen ended: shown once the app is up,
+          // so its few seconds are not spent on the opening screen.
+          BlocListener<SplashBloc, SplashState>(
+            listenWhen: (before, now) => now.done && !before.done,
+            listener: (context, _) {
+              if (context.read<ConnectivityBloc>().state.offline) {
+                CommonOverlay.showNetworkLost();
+              }
+            },
           ),
         ],
         child: Builder(

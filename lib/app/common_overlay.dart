@@ -18,5 +18,7 @@ abstract final class CommonOverlay {
   static Future<void> showNetworkLost() => NativeOverlayContainer.show(
     networkLost,
     color: NetworkLostBar.background,
+    // Says it once and gets out of the way; it comes back on the next loss.
+    duration: const Duration(seconds: 3),
   );
 }

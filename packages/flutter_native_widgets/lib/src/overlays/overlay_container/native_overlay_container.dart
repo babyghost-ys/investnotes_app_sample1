@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart'
-    show AppBarTheme, Theme, kToolbarHeight;
+    show AppBarTheme, Theme, ThemeData, kToolbarHeight;
 
 import '../../core/platform_info.dart';
 
@@ -77,6 +79,8 @@ abstract final class NativeOverlayContainer {
     null,
   );
 
+  static Timer? _autoHide;
+
   /// Builds the strip in this isolate where it is not native (not iOS).
   static NativeOverlayBuilder? builder;
 
@@ -86,11 +90,17 @@ abstract final class NativeOverlayContainer {
   static bool get _native => PlatformInfo.isIOS;
 
   /// Shows the strip, or changes what it shows.
+  ///
+  /// With [duration], the strip slides away again on its own once that time
+  /// has passed, whatever caused it is still true.
   static Future<void> show(
     String route, {
     required Color color,
     Object? arguments,
+    Duration? duration,
   }) async {
+    _autoHide?.cancel();
+    _autoHide = duration == null ? null : Timer(duration, hide);
     final request = NativeOverlayRequest(
       route: route,
       color: color,
@@ -105,6 +115,8 @@ abstract final class NativeOverlayContainer {
 
   /// Hides the strip and gives the pages their space back.
   static Future<void> hide() async {
+    _autoHide?.cancel();
+    _autoHide = null;
     if (_native) {
       await _channel.invokeMethod<void>('hide');
     } else {
@@ -187,29 +199,33 @@ class _NativeOverlayHostState extends State<NativeOverlayHost> {
               child!,
               if (shown != null && builder != null)
                 Positioned(
-                  top: media.padding.top,
+                  // The colour runs from the top edge, across the status
+                  // bar; the content sits in the app bar's band below it.
+                  top: 0,
                   left: media.padding.left,
                   right: media.padding.right,
                   height:
-                      AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight,
-                  child: ClipRect(
-                    child: TweenAnimationBuilder<double>(
-                      // Starts above the band, hidden by the clip.
-                      tween: Tween(begin: -1, end: request != null ? 0 : -1),
-                      duration: const Duration(milliseconds: 300),
-                      curve: request != null
-                          ? Curves.easeOutCubic
-                          : Curves.easeInCubic,
-                      builder: (context, y, strip) => FractionalTranslation(
-                        translation: Offset(0, y),
-                        child: strip,
-                      ),
-                      // Takes the touches on it, so the bar buttons it covers
-                      // cannot be pressed blind.
-                      child: AbsorbPointer(
-                        absorbing: request != null,
-                        child: ColoredBox(
-                          color: shown.color,
+                      media.padding.top +
+                      (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight),
+                  child: TweenAnimationBuilder<double>(
+                    // Starts above the top edge, out of sight.
+                    tween: Tween(begin: -1, end: request != null ? 0 : -1),
+                    duration: const Duration(milliseconds: 300),
+                    curve: request != null
+                        ? Curves.easeOutCubic
+                        : Curves.easeInCubic,
+                    builder: (context, y, strip) => FractionalTranslation(
+                      translation: Offset(0, y),
+                      child: strip,
+                    ),
+                    // Takes the touches on it, so the bar buttons it covers
+                    // cannot be pressed blind.
+                    child: AbsorbPointer(
+                      absorbing: request != null,
+                      child: ColoredBox(
+                        color: shown.color,
+                        child: Padding(
+                          padding: EdgeInsets.only(top: media.padding.top),
                           child: MediaQuery.removePadding(
                             context: context,
                             removeTop: true,
@@ -231,6 +247,23 @@ class _NativeOverlayHostState extends State<NativeOverlayHost> {
                         ),
                       ),
                     ),
+                  ),
+                ),
+              // Status bar icons legible on the strip while it shows. Kept
+              // after the strip so the strip's place in the tree never moves.
+              if (request != null)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: media.padding.top,
+                  child: AnnotatedRegion<SystemUiOverlayStyle>(
+                    value:
+                        ThemeData.estimateBrightnessForColor(request.color) ==
+                            Brightness.dark
+                        ? SystemUiOverlayStyle.light
+                        : SystemUiOverlayStyle.dark,
+                    child: const SizedBox.expand(),
                   ),
                 ),
             ],
