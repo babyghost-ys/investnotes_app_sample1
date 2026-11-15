@@ -12,9 +12,11 @@ enum NativeEngines {
 /// below the status bar, at the bar's own height; nothing moves for it.
 ///
 /// The page's Flutter view lives under UIKit's bars, so nothing it draws can
-/// reach this band. The strip runs its own engine from the app's
-/// `commonOverlayMain` entrypoint instead (see `NativeOverlayContainer.run`
-/// in Dart), started on the first `show` and kept warm afterwards.
+/// reach this band. A strip that is only a symbol and a line of text
+/// (`content` in the request) is drawn here natively and starts no engine.
+/// Any other strip runs its own engine from the app's `commonOverlayMain`
+/// entrypoint (see `NativeOverlayContainer.run` in Dart), started on the
+/// first such `show` and kept warm afterwards.
 ///
 /// The strip is the topmost view of the window's root view controller, so
 /// presented sheets still slide over it. It takes the touches on it, so the
@@ -35,6 +37,8 @@ final class NativeOverlayContainer {
     private var engine: FlutterEngine?
     private var controller: FlutterViewController?
     private var contentChannel: FlutterMethodChannel?
+    /// The native symbol and text, for a request with `content`.
+    private var label: NativeOverlayLabelView?
     private let strip = NativeOverlayStripView()
     private weak var root: UIViewController?
     /// The strip is on screen.
@@ -66,12 +70,39 @@ final class NativeOverlayContainer {
 
     private func show(_ arguments: [String: Any]) {
         request = arguments
-        if engine == nil {
-            start()
+        if let content = arguments["content"] as? [String: Any] {
+            showNative(content)
         } else {
-            contentChannel?.invokeMethod("update", arguments: arguments)
+            label?.isHidden = true
+            controller?.view.isHidden = false
+            if engine == nil {
+                // Shown once its engine has drawn, not on the label's readiness.
+                ready = false
+                start()
+            } else {
+                contentChannel?.invokeMethod("update", arguments: arguments)
+            }
         }
         apply(animated: true)
+    }
+
+    /// Draws [content]'s symbol and text natively: nothing to wait for.
+    private func showNative(_ content: [String: Any]) {
+        let label = self.label ?? {
+            let view = NativeOverlayLabelView()
+            strip.panel.addSubview(view)
+            self.label = view
+            return view
+        }()
+        label.configure(content)
+        label.isHidden = false
+        controller?.view.isHidden = true
+        ready = true
+        strip.setNeedsLayout()
+        // Said once as it arrives, as a live region would be.
+        if let text = content["text"] as? String, !shown {
+            UIAccessibility.post(notification: .announcement, argument: text)
+        }
     }
 
     private func start() {
@@ -272,7 +303,68 @@ final class NativeOverlayStripView: UIView {
         content.frame = CGRect(x: band.minX, y: 0, width: band.width, height: band.maxY)
         panel.bounds = content.bounds
         panel.center = CGPoint(x: content.bounds.midX, y: content.bounds.midY)
-        panel.subviews.first?.frame = CGRect(x: 0, y: band.minY, width: band.width,
-                                             height: band.height)
+        for view in panel.subviews {
+            view.frame = CGRect(x: 0, y: band.minY, width: band.width, height: band.height)
+        }
+    }
+}
+
+/// A symbol and a line of text, centred in the strip's band: the whole
+/// content of a strip that needs no engine.
+final class NativeOverlayLabelView: UIView {
+    private let stack = UIStackView()
+    private let symbol = UIImageView()
+    private let text = UILabel()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.spacing = 8
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        symbol.contentMode = .scaleAspectFit
+        symbol.setContentHuggingPriority(.required, for: .horizontal)
+        text.numberOfLines = 1
+        text.lineBreakMode = .byTruncatingTail
+        // A fixed size, like the bar it covers: it must fit the band.
+        text.adjustsFontForContentSizeCategory = false
+        stack.addArrangedSubview(symbol)
+        stack.addArrangedSubview(text)
+        addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -16),
+        ])
+        isAccessibilityElement = true
+        accessibilityTraits = .staticText
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    /// `symbol` (an SF Symbol name), `text`, `foreground` (ARGB), and
+    /// optional `fontSize` and `symbolSize` in points.
+    func configure(_ content: [String: Any]) {
+        let foreground = (content["foreground"] as? NSNumber)
+            .map { UIColor(argb: $0.intValue) } ?? .white
+        let fontSize = (content["fontSize"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 15
+        let symbolSize = (content["symbolSize"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? fontSize
+        let value = content["text"] as? String ?? ""
+        text.attributedText = NSAttributedString(string: value, attributes: [
+            .font: UIFont.systemFont(ofSize: fontSize, weight: .semibold),
+            .foregroundColor: foreground,
+            .kern: -0.2,
+        ])
+        if let name = content["symbol"] as? String {
+            let configuration = UIImage.SymbolConfiguration(pointSize: symbolSize, weight: .semibold)
+            symbol.image = UIImage(systemName: name, withConfiguration: configuration)
+            symbol.tintColor = foreground
+            symbol.isHidden = symbol.image == nil
+        } else {
+            symbol.isHidden = true
+        }
+        accessibilityLabel = value
     }
 }

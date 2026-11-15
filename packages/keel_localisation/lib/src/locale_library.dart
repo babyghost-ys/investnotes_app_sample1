@@ -92,6 +92,37 @@ class LocaleLibrary {
           ),
       });
 
+  /// Every namespace's words in [language], fallback included, as plain
+  /// values a platform channel can carry. A native sheet's or overlay's own
+  /// engine rebuilds them with [LocaleLibrary.words], so it starts without
+  /// reading or unpacking the archive.
+  Map<String, Object?> export(String language) => {
+    'language': _files.containsKey(language) ? language : fallback,
+    'files': {
+      for (final namespace in registry.namespaces)
+        namespace: _merged(namespace, language),
+    },
+  };
+
+  /// One language's words, as [export] sent them.
+  static LocaleLibrary words(LocaleRegistry registry, Object exported) {
+    final map = exported as Map;
+    final language = map['language'] as String;
+    Map<String, Object?> cast(Object? value) =>
+        (value as Map).map((key, value) => MapEntry(key as String, value));
+    return LocaleLibrary(registry, {
+      language: {
+        for (final MapEntry(:key, :value) in (map['files'] as Map).entries)
+          key as String: {
+            for (final MapEntry(key: section, value: texts) in cast(
+              value,
+            ).entries)
+              section: cast(texts),
+          },
+      },
+    }, fallback: language);
+  }
+
   /// [language]'s file for [namespace] over the fallback's, section by
   /// section and key by key.
   Map<String, Object?> _merged(String namespace, String language) {

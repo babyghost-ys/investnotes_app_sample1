@@ -1,40 +1,45 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/features/connectivity/widgets/network_lost_bar.dart';
 
 /// Routes of the strip below the status bar (see [NativeOverlayContainer]).
+///
+/// On iOS the strip is drawn natively from its symbol and text, so it runs
+/// no engine of its own; elsewhere [build] draws it in the app's isolate.
 abstract final class CommonOverlay {
   static const networkLost = 'networkLost';
 
-  /// The words, loaded by whichever engine draws the strip: the app's own
-  /// in `main`, the overlay's in `commonOverlayMain`.
-  static LocaleLibrary? library;
-
-  /// Builds a route's content, in the overlay's own engine on iOS and in
-  /// the app's isolate elsewhere. It speaks the language the app spoke
-  /// when it was shown, sent in [arguments].
-  static Widget build(BuildContext context, String route, Object? arguments) {
-    final language = (arguments as Map?)?['language'] as String? ?? 'en';
-    return BlocProvider(
-      create: (_) =>
-          LocalisationBloc.fixed(library: library!, language: language),
-      child: switch (route) {
-        networkLost => const NetworkLostBar(),
+  /// Builds a route's content where the strip is not native (not iOS). Its
+  /// words come in [arguments], already in the app's language.
+  static Widget build(BuildContext context, String route, Object? arguments) =>
+      switch (route) {
+        networkLost => NetworkLostBar(
+          text: (arguments! as Map)['text']! as String,
+        ),
         _ => throw ArgumentError.value(route, 'route', 'Unknown overlay'),
-      },
+      };
+
+  /// Shown in the language [localisation] speaks.
+  static Future<void> showNetworkLost(LocalisationBloc localisation) {
+    final words =
+        localisation.state.catalogue[Locales.connectivity]
+            as ConnectivityLocale;
+    final text = words.labels.noConnection;
+    return NativeOverlayContainer.show(
+      networkLost,
+      color: NetworkLostBar.background,
+      arguments: {'text': text},
+      content: NativeOverlayContent(
+        sfSymbol: 'wifi.slash',
+        text: text,
+        foreground: NetworkLostBar.foreground,
+      ),
+      // Says it once and gets out of the way; it comes back on the next
+      // loss.
+      duration: const Duration(seconds: 3),
     );
   }
-
-  static Future<void> showNetworkLost(String language) =>
-      NativeOverlayContainer.show(
-        networkLost,
-        arguments: {'language': language},
-        color: NetworkLostBar.background,
-        // Says it once and gets out of the way; it comes back on the next
-        // loss.
-        duration: const Duration(seconds: 3),
-      );
 }

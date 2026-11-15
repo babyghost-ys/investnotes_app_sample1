@@ -2,12 +2,10 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
-import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
 import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
@@ -31,19 +29,13 @@ Future<void> runCommonSheetApp() async {
       _ => value,
     },
   );
-  final library = await LocaleLibrary.load(localeRegistry);
-  runApp(CommonSheetApp(configuration: configuration, library: library));
+  runApp(CommonSheetApp(configuration: configuration));
 }
 
 class CommonSheetApp extends StatelessWidget {
-  const CommonSheetApp({
-    super.key,
-    required this.configuration,
-    required this.library,
-  });
+  const CommonSheetApp({super.key, required this.configuration});
 
   final Map<String, dynamic> configuration;
-  final LocaleLibrary library;
 
   /// What the page opened the sheet with, without its language.
   Object? get _argument => SheetArguments.value(configuration['arguments']);
@@ -74,10 +66,7 @@ class CommonSheetApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     // The sheet speaks the language the app spoke when it opened it.
-    create: (_) => LocalisationBloc.fixed(
-      library: library,
-      language: SheetArguments.language(configuration['arguments']),
-    ),
+    create: (_) => SheetArguments.localisation(configuration['arguments']),
     child: _sheet(context),
   );
 

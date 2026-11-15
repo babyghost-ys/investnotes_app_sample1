@@ -13,6 +13,37 @@ import '../../core/platform_info.dart';
 typedef NativeOverlayBuilder =
     Widget Function(BuildContext context, String route, Object? arguments);
 
+/// A strip that is only a symbol and a line of text. On iOS it is drawn
+/// natively, so showing it starts no engine of its own.
+@immutable
+class NativeOverlayContent {
+  const NativeOverlayContent({
+    required this.sfSymbol,
+    required this.text,
+    required this.foreground,
+    this.fontSize = 15,
+    this.symbolSize = 15,
+  });
+
+  /// The SF Symbol drawn before [text], such as `wifi.slash`.
+  final String sfSymbol;
+
+  /// The line itself, in the app's language; VoiceOver says it as it
+  /// arrives.
+  final String text;
+  final Color foreground;
+  final double fontSize;
+  final double symbolSize;
+
+  Map<String, Object?> encode() => {
+    'symbol': sfSymbol,
+    'text': text,
+    'foreground': foreground.toARGB32(),
+    'fontSize': fontSize,
+    'symbolSize': symbolSize,
+  };
+}
+
 /// What a [NativeOverlayContainer] strip shows.
 @immutable
 class NativeOverlayRequest {
@@ -20,6 +51,7 @@ class NativeOverlayRequest {
     required this.route,
     required this.color,
     this.arguments,
+    this.content,
   });
 
   factory NativeOverlayRequest.decode(Map<Object?, Object?> data) =>
@@ -37,10 +69,14 @@ class NativeOverlayRequest {
   /// Codec-safe values for the content: on iOS they cross engines.
   final Object? arguments;
 
+  /// Set for a strip iOS draws natively, without an engine.
+  final NativeOverlayContent? content;
+
   Map<String, Object?> encode() => {
     'route': route,
     'color': color.toARGB32(),
     'arguments': arguments,
+    'content': ?content?.encode(),
   };
 }
 
@@ -52,11 +88,13 @@ class NativeOverlayRequest {
 /// keeps for an inline title); elsewhere it is the Material app bar's.
 ///
 /// On iOS the navigation bar is UIKit's and sits above the page's Flutter
-/// view, so the strip is a native container with an engine of its own: the
-/// app's `commonOverlayMain` entrypoint calls [run] with a builder. The
-/// engine starts on the first [show] and stays warm afterwards. Like native
-/// sheets, it runs the program as built, so a change to the content needs a
-/// relaunch in Debug.
+/// view, so the strip is a native container. A strip that is only a symbol
+/// and a line of text ([NativeOverlayContent]) is drawn natively there and
+/// needs nothing more. Any other content runs an engine of its own: the
+/// app's `commonOverlayMain` entrypoint calls [run] with a builder. That
+/// engine starts on the first such [show] and stays warm afterwards. Like
+/// native sheets, it runs the program as built, so a change to the content
+/// needs a relaunch in Debug.
 ///
 /// Elsewhere [NativeApp] lays the strip above its navigator in this isolate,
 /// with the builder given to [builder].
@@ -93,10 +131,14 @@ abstract final class NativeOverlayContainer {
   ///
   /// With [duration], the strip slides away again on its own once that time
   /// has passed, whatever caused it is still true.
+  ///
+  /// With [content], iOS draws its symbol and text natively and starts no
+  /// engine; elsewhere [builder] still draws [route] in this isolate.
   static Future<void> show(
     String route, {
     required Color color,
     Object? arguments,
+    NativeOverlayContent? content,
     Duration? duration,
   }) async {
     _autoHide?.cancel();
@@ -105,6 +147,7 @@ abstract final class NativeOverlayContainer {
       route: route,
       color: color,
       arguments: arguments,
+      content: content,
     );
     if (_native) {
       await _channel.invokeMethod<void>('show', request.encode());

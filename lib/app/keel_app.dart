@@ -98,9 +98,7 @@ class _KeelAppState extends State<KeelApp> {
               if (!network.offline) {
                 NativeOverlayContainer.hide();
               } else if (context.read<SplashBloc>().state.done) {
-                CommonOverlay.showNetworkLost(
-                  context.read<LocalisationBloc>().state.language,
-                );
+                CommonOverlay.showNetworkLost(context.read<LocalisationBloc>());
               }
             },
           ),
@@ -110,9 +108,7 @@ class _KeelAppState extends State<KeelApp> {
             listenWhen: (before, now) => now.done && !before.done,
             listener: (context, _) {
               if (context.read<ConnectivityBloc>().state.offline) {
-                CommonOverlay.showNetworkLost(
-                  context.read<LocalisationBloc>().state.language,
-                );
+                CommonOverlay.showNetworkLost(context.read<LocalisationBloc>());
               }
             },
           ),

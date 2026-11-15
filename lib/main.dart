@@ -32,7 +32,6 @@ Future<void> main() async {
   // opens in the language it was left in.
   const store = LanguageStore();
   final library = await LocaleLibrary.load(localeRegistry);
-  CommonOverlay.library = library;
   runApp(
     KeelApp(
       localisation: LocalisationBloc(
@@ -49,13 +48,4 @@ Future<void> main() async {
 @pragma('vm:entry-point')
 void commonSheetMain() {
   runCommonSheetApp();
-}
-
-/// The strip below the status bar runs in an engine of its own on iOS,
-/// started here (see [NativeOverlayContainer]).
-@pragma('vm:entry-point')
-Future<void> commonOverlayMain() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  CommonOverlay.library = await LocaleLibrary.load(localeRegistry);
-  await NativeOverlayContainer.run(CommonOverlay.build);
 }
