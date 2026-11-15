@@ -41,6 +41,8 @@ Future<void> openSignIn(BuildContext context) async {
     navigationBar: true,
     barColor: KeelColors.tide.of(context),
     barForeground: CupertinoColors.white,
+    // The same faint shadow under the bar as on the app's own pages.
+    barShadow: NativeTheme.of(context).barStyle.shadow,
     plainBarButtons: true,
     barTitleStyle: NativeTheme.of(context).barStyle.titleStyle,
     // The sheet runs its own engine and router; see the native sheet app.

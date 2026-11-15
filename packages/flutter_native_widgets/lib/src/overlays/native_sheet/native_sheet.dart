@@ -296,7 +296,8 @@ class NativeSheet {
   /// A [fullScreen] sheet with [navigationBar] sits in a native navigation
   /// controller, so UIKit draws its bar where the device keeps one: across
   /// the top, or on an iPhone Duo in the system's vertical bar. The bar is
-  /// [barColor] with [barForeground] controls, plain across the top when
+  /// [barColor] with [barForeground] controls, with UIKit's subtle shadow
+  /// below it when [barShadow], plain across the top when
   /// [plainBarButtons], its titles in [barTitleStyle] (family, size and
   /// weight; a font from Flutter assets needs
   /// [NativeFonts.registerAssets] first). The sheet's pages fill
@@ -314,6 +315,7 @@ class NativeSheet {
     bool navigationBar = false,
     Color? barColor,
     Color? barForeground,
+    bool barShadow = false,
     bool plainBarButtons = false,
     TextStyle? barTitleStyle,
   }) async {
@@ -361,6 +363,7 @@ class NativeSheet {
           'navigationBar': true,
           'barColor': ?barColor?.toARGB32(),
           'barForeground': ?barForeground?.toARGB32(),
+          'barShadow': barShadow,
           'plainButtons': plainBarButtons,
           if (barTitleStyle != null)
             'barTitleStyle': {

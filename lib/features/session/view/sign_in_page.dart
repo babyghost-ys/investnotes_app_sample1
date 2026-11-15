@@ -16,7 +16,7 @@ import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart
 
 typedef SignInForm = ({String name, String password, bool reveal});
 
-/// Sign-in: the brand band under the bar, two fields and one go control,
+/// Sign-in: the brand on the page under the bar, two fields and one go control,
 /// then the ways in for a forgotten username or password and a new account.
 class SignInPage extends StatefulWidget implements LocalisationConsumer {
   @override
@@ -75,6 +75,7 @@ class _SignInPageState extends State<SignInPage> {
 
         final muted = KeelColors.muted.of(context);
         final ink = KeelColors.ink.of(context);
+        final brand = KeelColors.tideInk.of(context);
         final hairline = Expanded(
           child: Container(height: 1, color: KeelColors.hairline.of(context)),
         );
@@ -96,45 +97,6 @@ class _SignInPageState extends State<SignInPage> {
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   children: [
-                    // The bar's tide blue, carried on down to hold the brand.
-                    Container(
-                      // The band runs edge to edge; its content keeps clear of
-                      // a side strip such as the iPhone Duo's status cluster.
-                      padding: EdgeInsets.fromLTRB(
-                        24 + insets.left,
-                        insets.top + 28,
-                        24 + insets.right,
-                        36,
-                      ),
-                      color: KeelColors.tide.of(context),
-                      child: Align(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: FlowPage.measure - 48,
-                          ),
-                          child: Row(
-                            children: [
-                              const KeelMark(
-                                color: CupertinoColors.white,
-                                size: 56,
-                                excludeFromSemantics: true,
-                              ),
-                              const SizedBox(width: 14),
-                              Text(
-                                session.labels.brand,
-                                style: const TextStyle(
-                                  color: CupertinoColors.white,
-                                  fontSize: 36,
-                                  height: 1,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -1,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
                     Align(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(
@@ -143,13 +105,41 @@ class _SignInPageState extends State<SignInPage> {
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(
                             24 + insets.left,
-                            32,
+                            insets.top + 36,
                             24 + insets.right,
                             0,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              // The brand on the page itself, as the mark
+                              // and name, nothing behind them.
+                              Semantics(
+                                header: true,
+                                label: session.labels.brand,
+                                excludeSemantics: true,
+                                child: Row(
+                                  children: [
+                                    KeelMark(
+                                      color: brand,
+                                      size: 52,
+                                      excludeFromSemantics: true,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      session.labels.brand,
+                                      style: TextStyle(
+                                        color: brand,
+                                        fontSize: 40,
+                                        height: 1,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: -1.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 36),
                               KeelField(
                                 controller: _name,
                                 icon: CupertinoIcons.person,

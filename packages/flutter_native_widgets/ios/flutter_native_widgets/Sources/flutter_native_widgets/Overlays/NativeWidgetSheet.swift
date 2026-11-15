@@ -291,6 +291,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             navigation.configure(
                 color: (args["barColor"] as? NSNumber)?.intValue,
                 foreground: (args["barForeground"] as? NSNumber).map { UIColor(argb: $0.intValue) },
+                shadow: args["barShadow"] as? Bool ?? false,
                 plainButtons: args["plainButtons"] as? Bool ?? false,
                 titleStyle: args["barTitleStyle"] as? [String: Any])
             navigation.send = { [weak level] method, arguments in
@@ -924,11 +925,11 @@ final class SheetNavigationController: UINavigationController,
         }
     }
 
-    func configure(color: Int?, foreground: UIColor?, plainButtons: Bool,
+    func configure(color: Int?, foreground: UIColor?, shadow: Bool = false, plainButtons: Bool,
                    titleStyle: [String: Any]? = nil) {
         self.plainButtons = plainButtons
         self.foreground = foreground
-        if let style = NativeBarAppearance.make(color: color, shadow: false, foreground: foreground,
+        if let style = NativeBarAppearance.make(color: color, shadow: shadow, foreground: foreground,
                                                 titleStyle: titleStyle) {
             navigationBar.standardAppearance = style
             navigationBar.scrollEdgeAppearance = style
