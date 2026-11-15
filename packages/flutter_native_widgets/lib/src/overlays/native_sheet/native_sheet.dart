@@ -253,6 +253,18 @@ class NativeSheet {
     unawaited(_send('ready'));
   }
 
+  /// Tells UIKit where the sheet's content scrolls, in the sheet's own
+  /// coordinates. Drags that start there belong to the content; the sheet
+  /// still drags from its grabber and the rest. Null when nothing scrolls.
+  static void _reportScrollRegion(Rect? region) {
+    if (!_hosted) return;
+    unawaited(
+      _send('setScrollRegion', {
+        if (region != null) ...{'top': region.top, 'bottom': region.bottom},
+      }),
+    );
+  }
+
   /// The isolate cannot show its sheet: the caller's [show] fails at once
   /// with [message].
   static void _failStartup(String message) {
@@ -704,16 +716,89 @@ class _NativeSheetContentState extends State<NativeSheetContent> {
                 _scheduleMeasurement();
                 return false;
               },
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.viewInsetsOf(context).bottom,
-                ),
-                child: SizeChangedLayoutNotifier(
-                  child: KeyedSubtree(key: _contentKey, child: widget.child),
+              child: NativeSheetScrollRegion(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: SizeChangedLayoutNotifier(
+                    child: KeyedSubtree(key: _contentKey, child: widget.child),
+                  ),
                 ),
               ),
             )
           : widget.child,
+    );
+  }
+}
+
+/// Marks [child], a scrolling list inside a [NativeSheetContent], as the
+/// part of the sheet that scrolls. While the list has more than fits, a drag
+/// that starts on it scrolls it alone: UIKit's sheet no longer takes the
+/// same drag to move itself, which made the content stall and jump. The
+/// sheet still drags from its grabber and from everything outside [child].
+class NativeSheetScrollRegion extends StatefulWidget {
+  const NativeSheetScrollRegion({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<NativeSheetScrollRegion> createState() =>
+      _NativeSheetScrollRegionState();
+}
+
+class _NativeSheetScrollRegionState extends State<NativeSheetScrollRegion> {
+  bool _scrolls = false;
+  Rect? _reported;
+  bool _scheduled = false;
+
+  @override
+  void dispose() {
+    if (_reported != null) NativeSheet._reportScrollRegion(null);
+    super.dispose();
+  }
+
+  bool _onMetrics(ScrollMetricsNotification notification) {
+    if (notification.depth == 0) {
+      _scrolls = notification.metrics.maxScrollExtent > 0;
+      _schedule();
+    }
+    return false;
+  }
+
+  void _schedule() {
+    if (_scheduled) return;
+    _scheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      if (mounted) _report();
+    });
+  }
+
+  void _report() {
+    Rect? region;
+    final box = context.findRenderObject();
+    if (_scrolls && box is RenderBox && box.attached && box.hasSize) {
+      region = box.localToGlobal(Offset.zero) & box.size;
+    }
+    final last = _reported;
+    final same = region == null
+        ? last == null
+        : last != null &&
+              (region.top - last.top).abs() < 0.5 &&
+              (region.bottom - last.bottom).abs() < 0.5;
+    if (same) return;
+    _reported = region;
+    NativeSheet._reportScrollRegion(region);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // The sheet resizes and turns; the region follows every layout.
+    _schedule();
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: _onMetrics,
+      child: widget.child,
     );
   }
 }

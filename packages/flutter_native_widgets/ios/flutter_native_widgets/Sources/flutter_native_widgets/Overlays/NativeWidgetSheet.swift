@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UIKit.UIGestureRecognizerSubclass
 
 /// Every visible sheet owns a continuously attached Flutter engine. The page
 /// keeps its engine; no surfaces, viewport metrics, native controls or snapshots
@@ -22,6 +23,8 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         let dismissible: Bool
         var window: UIWindow?
         var fitHeight: CGFloat
+        /// Keeps UIKit's sheet drag off the part of the content that scrolls.
+        let scrollGuard = SheetScrollGuard()
         var pendingFitHeight: CGFloat?
         var revision = 0
         var presented = false
@@ -183,6 +186,16 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         case "setHeight":
             if let source { setHeight(args, for: source) }
             result(nil)
+        case "setScrollRegion":
+            if let source {
+                if let top = (args["top"] as? NSNumber)?.doubleValue,
+                   let bottom = (args["bottom"] as? NSNumber)?.doubleValue, bottom > top {
+                    source.scrollGuard.region = CGFloat(top)..<CGFloat(bottom)
+                } else {
+                    source.scrollGuard.region = nil
+                }
+            }
+            result(nil)
         case "setBar":
             source?.navigation?.setBar(args)
             result(nil)
@@ -268,6 +281,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         // then its last frame stays unscaled at the top left of the view
         // rather than stretching to the view's new bounds.
         controller.view.contentMode = .topLeft
+        controller.view.addGestureRecognizer(level.scrollGuard)
         switch args["brightness"] as? String {
         case "dark": controller.overrideUserInterfaceStyle = .dark
         case "light": controller.overrideUserInterfaceStyle = .light
@@ -682,6 +696,85 @@ struct CoveredStatusBarStyle {
               controller.responds(to: NSSelectorFromString("setStatusBarStyle:")) else { return }
         controller.setValue(style.rawValue, forKey: "statusBarStyle")
         controller.setNeedsStatusBarAppearanceUpdate()
+    }
+}
+
+/// Holds UIKit's sheet pans back from drags that start where the Flutter
+/// content scrolls. A sheet has no UIScrollView for UIKit to coordinate
+/// with, so without this the sheet and the list both take the same vertical
+/// drag: the sheet stretches and springs back while the list stalls, and
+/// the content jumps. Drags that start outside [region], on the grabber or
+/// the content's fixed rows, still move the sheet.
+///
+/// It only ever recognises to block the sheet's own pans; it never delays
+/// or cancels touches, so Flutter receives every touch as before.
+final class SheetScrollGuard: UIGestureRecognizer {
+    /// The rows where the content scrolls, top to bottom in the
+    /// recogniser's view. Nil: nowhere.
+    var region: Range<CGFloat>?
+
+    override init(target: Any?, action: Selector?) {
+        super.init(target: target, action: action)
+        cancelsTouchesInView = false
+        delaysTouchesBegan = false
+        delaysTouchesEnded = false
+    }
+
+    convenience init() { self.init(target: nil, action: nil) }
+
+    /// A pan on a view that holds this one: the sheet's drag.
+    private func isSheetPan(_ other: UIGestureRecognizer) -> Bool {
+        guard other is UIPanGestureRecognizer, let mine = view,
+              let theirs = other.view, theirs !== mine else { return false }
+        return mine.isDescendant(of: theirs)
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesBegan(touches, with: event)
+        guard state == .possible else { return }
+        let inside = region.map { region in
+            touches.contains { region.contains($0.location(in: view).y) }
+        } ?? false
+        state = inside ? .began : .failed
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesMoved(touches, with: event)
+        if state == .began || state == .changed { state = .changed }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesEnded(touches, with: event)
+        finish(touches, with: event, as: .ended)
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesCancelled(touches, with: event)
+        finish(touches, with: event, as: .cancelled)
+    }
+
+    /// Ends once the last finger lifts.
+    private func finish(_ touches: Set<UITouch>, with event: UIEvent, as end: UIGestureRecognizer.State) {
+        let remaining = (event.touches(for: self) ?? []).subtracting(touches)
+            .filter { $0.phase != .ended && $0.phase != .cancelled }
+        guard remaining.isEmpty else { return }
+        switch state {
+        case .began, .changed: state = end
+        case .possible: state = .failed
+        default: break
+        }
+    }
+
+    override func canPrevent(_ preventedGestureRecognizer: UIGestureRecognizer) -> Bool {
+        isSheetPan(preventedGestureRecognizer)
+    }
+
+    override func canBePrevented(by preventingGestureRecognizer: UIGestureRecognizer) -> Bool {
+        false
+    }
+
+    override func shouldBeRequiredToFail(by otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        isSheetPan(otherGestureRecognizer)
     }
 }
 

@@ -117,9 +117,11 @@ class FilterSheetLayout extends StatelessWidget
             header,
             Container(height: 1, color: hairline),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                children: body,
+              child: NativeSheetScrollRegion(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  children: body,
+                ),
               ),
             ),
             Container(height: 1, color: hairline),
