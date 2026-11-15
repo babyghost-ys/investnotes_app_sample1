@@ -44,6 +44,14 @@ final class DuoTitleBand {
         ]
     }
 
+    /// Where UIKit starts page content below an inline-title bar in `host`'s
+    /// window, in `host.view`'s coordinates: across the top on a phone, or
+    /// the title band beside the iPhone Duo vertical bar.
+    static func inlineContentTop(in host: UIViewController) -> CGFloat? {
+        guard host.view.window != nil else { return nil }
+        return DuoTitleBand(hostProvider: { host }).layout(in: host, large: false)?.contentTop
+    }
+
     private func layout(
         in host: UIViewController, large: Bool
     ) -> (contentTop: CGFloat, title: CGRect, font: UIFont)? {

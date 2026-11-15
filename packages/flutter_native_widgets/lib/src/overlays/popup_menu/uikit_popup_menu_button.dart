@@ -689,8 +689,7 @@ class _UiKitPopupMenuButtonState<T> extends State<UiKitPopupMenuButton<T>> {
                 CupertinoActionSheetAction(
                   onPressed: () => Navigator.of(ctx).pop(i),
                   isDestructiveAction:
-                      (widget.items[i] as NativePopupMenuItem<T>)
-                          .isDestructive,
+                      (widget.items[i] as NativePopupMenuItem<T>).isDestructive,
                   child: _buildActionSheetItemContent(
                     widget.items[i] as NativePopupMenuItem<T>,
                   ),

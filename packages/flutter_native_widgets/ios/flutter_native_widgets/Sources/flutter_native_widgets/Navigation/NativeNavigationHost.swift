@@ -284,6 +284,7 @@ final class NativeNavigationHost {
             installed = host
             window.rootViewController = host.navigation
             host.navigation.view.backgroundColor = .systemBackground
+            NativeOverlayContainer.shared.rootChanged()
             let operations = pending
             pending.removeAll()
             for operation in operations { operation(host) }

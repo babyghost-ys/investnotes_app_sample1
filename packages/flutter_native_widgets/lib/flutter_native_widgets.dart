@@ -71,6 +71,7 @@ export 'src/overlays/action_sheet/native_action_sheet.dart';
 export 'src/overlays/bottom_sheet/native_bottom_sheet.dart';
 export 'src/overlays/filter_sheet/native_filter_sheet.dart';
 export 'src/overlays/native_sheet/native_sheet.dart';
+export 'src/overlays/overlay_container/native_overlay_container.dart';
 export 'src/controls/pickers/native_inline_date_picker.dart';
 export 'src/style/native_fonts.dart';
 

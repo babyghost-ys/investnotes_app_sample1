@@ -1,0 +1,263 @@
+import Flutter
+import UIKit
+
+/// Engines the package starts beside the page's own: native sheets and the
+/// overlay container. They spawn from one group, so each after the first
+/// shares the group's loaded program instead of starting from nothing.
+enum NativeEngines {
+    static let group = FlutterEngineGroup(name: "flutter_native_widgets.engines", project: nil)
+}
+
+/// A strip of Flutter content laid exactly over the native navigation bar,
+/// below the status bar, at the bar's own height; nothing moves for it.
+///
+/// The page's Flutter view lives under UIKit's bars, so nothing it draws can
+/// reach this band. The strip runs its own engine from the app's
+/// `commonOverlayMain` entrypoint instead (see `NativeOverlayContainer.run`
+/// in Dart), started on the first `show` and kept warm afterwards.
+///
+/// The strip is the topmost view of the window's root view controller, so
+/// presented sheets still slide over it. It takes the touches on it, so the
+/// bar buttons it covers cannot be pressed blind.
+final class NativeOverlayContainer {
+    static let shared = NativeOverlayContainer()
+
+    /// Finds the page's window. Set by the plugin of the page's engine.
+    var windowProvider: () -> UIWindow? = { nil }
+
+    private var engine: FlutterEngine?
+    private var controller: FlutterViewController?
+    private var contentChannel: FlutterMethodChannel?
+    private let strip = NativeOverlayStripView()
+    private weak var root: UIViewController?
+    /// The strip is on screen.
+    private var shown = false
+    /// The measured bottom of an inline-title bar, and what it was measured for.
+    private var measuredBottom: CGFloat = 0
+    private var measuredKey: String?
+    /// What `show` last asked for; nil once hidden.
+    private var request: [String: Any]?
+    /// The overlay engine has drawn its first frame.
+    private var ready = false
+    private var appeared = false
+
+    private init() {}
+
+    func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+        case "show":
+            show(call.arguments as? [String: Any] ?? [:])
+            result(nil)
+        case "hide":
+            request = nil
+            apply(animated: true)
+            result(nil)
+        default:
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
+    private func show(_ arguments: [String: Any]) {
+        request = arguments
+        if engine == nil {
+            start()
+        } else {
+            contentChannel?.invokeMethod("update", arguments: arguments)
+        }
+        apply(animated: true)
+    }
+
+    private func start() {
+        let options = FlutterEngineGroupOptions()
+        options.entrypoint = "commonOverlayMain"
+        let engine = NativeEngines.group.makeEngine(with: options)
+        self.engine = engine
+        let channel = FlutterMethodChannel(name: "flutter_native_widgets/overlay_content",
+                                           binaryMessenger: engine.binaryMessenger)
+        contentChannel = channel
+        channel.setMethodCallHandler { [weak self] call, result in
+            guard let self else { result(nil); return }
+            switch call.method {
+            case "bootstrap":
+                result(self.request ?? [:])
+            case "ready":
+                result(nil)
+                guard !self.ready else { return }
+                self.ready = true
+                self.apply(animated: true)
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        let controller = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+        controller.loadViewIfNeeded()
+        controller.view.isUserInteractionEnabled = false
+        controller.view.backgroundColor = .clear
+        self.controller = controller
+        strip.panel.addSubview(controller.view)
+    }
+
+    /// The window's root view controller changed (the native navigation took
+    /// over from the page's Flutter controller): move the strip onto it.
+    func rootChanged() {
+        apply(animated: false)
+    }
+
+    /// A navigation controller laid out: keep the strip on top and over the bar.
+    func relayout() {
+        guard shown else { return }
+        // The window's root can change under it (the search tabs take over).
+        if let root = windowProvider()?.rootViewController, root !== self.root {
+            apply(animated: false)
+        }
+        guard let parent = strip.superview else { return }
+        if parent.subviews.last !== strip { parent.bringSubviewToFront(strip) }
+        strip.setNeedsLayout()
+    }
+
+    private func apply(animated: Bool) {
+        guard let window = windowProvider(), let root = window.rootViewController else { return }
+        if self.root !== root { attach(to: root) }
+        if let color = (request?["color"] as? NSNumber)?.intValue {
+            strip.panel.backgroundColor = UIColor(argb: color)
+        }
+        root.view.bringSubviewToFront(strip)
+        let visible = ready && request != nil
+        guard visible != shown else { return }
+        shown = visible
+        if visible {
+            strip.isHidden = false
+            strip.setNeedsLayout()
+            strip.layoutIfNeeded()
+            appear()
+            // Slides down out from under the status bar into the bar's place.
+            strip.panel.transform = animated ? strip.raised : .identity
+            if animated {
+                UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 1,
+                               initialSpringVelocity: 0, options: [.beginFromCurrentState]) {
+                    self.strip.panel.transform = .identity
+                }
+            }
+        } else {
+            let close = { [self] in
+                // A show that arrived while the strip faded keeps it.
+                guard !shown else { strip.panel.transform = .identity; return }
+                strip.isHidden = true
+            }
+            if animated {
+                UIView.animate(withDuration: 0.25, delay: 0,
+                               options: [.curveEaseIn, .beginFromCurrentState],
+                               animations: { self.strip.panel.transform = self.strip.raised },
+                               completion: { _ in close() })
+            } else {
+                close()
+            }
+        }
+    }
+
+    /// The navigation bar's frame in `strip`'s coordinates: the band the
+    /// strip covers. The bar on screen when one
+    /// runs across the top. Otherwise (no native bar, or the iPhone Duo's in
+    /// the vertical strip) the band UIKit lays out for an inline title in this
+    /// window, measured, never assumed.
+    fileprivate func band(in strip: UIView) -> CGRect {
+        let insets = strip.safeAreaInsets
+        let top = insets.top
+        if let root, let bar = Self.visibleBar(in: root.view, excluding: strip) {
+            let frame = bar.convert(bar.bounds, to: strip)
+            if frame.height > 0 { return frame }
+        }
+        let width = max(0, strip.bounds.width - insets.left - insets.right)
+        let key = "\(strip.bounds.size)|\(insets)|\(strip.traitCollection.verticalSizeClass.rawValue)"
+        if measuredKey != key || measuredBottom <= top, let root,
+           let contentTop = DuoTitleBand.inlineContentTop(in: root) {
+            measuredKey = key
+            measuredBottom = root.view.convert(CGPoint(x: 0, y: contentTop), to: strip).y
+        }
+        return CGRect(x: insets.left, y: top, width: width, height: max(0, measuredBottom - top))
+    }
+
+    /// The navigation bar on screen that runs across the top, whichever
+    /// controller owns it (the root's, a tab's, search's): the visible
+    /// horizontal bar highest in `view`.
+    private static func visibleBar(in view: UIView, excluding strip: UIView) -> UINavigationBar? {
+        var best: (bar: UINavigationBar, top: CGFloat)?
+        func visit(_ node: UIView) {
+            guard node !== strip, !node.isHidden, node.alpha > 0.01 else { return }
+            if let bar = node as? UINavigationBar {
+                let frame = bar.convert(bar.bounds, to: view)
+                if frame.width > frame.height, frame.intersects(view.bounds),
+                   best.map({ frame.minY < $0.top }) ?? true {
+                    best = (bar, frame.minY)
+                }
+                return
+            }
+            node.subviews.forEach(visit)
+        }
+        visit(view)
+        return best?.bar
+    }
+
+    private func attach(to root: UIViewController) {
+        strip.removeFromSuperview()
+        strip.frame = root.view.bounds
+        strip.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        root.view.addSubview(strip)
+        self.root = root
+        // The new root's bars are laid out after this; measure again then.
+        strip.setNeedsLayout()
+        DispatchQueue.main.async { [weak self] in self?.strip.setNeedsLayout() }
+    }
+
+    /// The overlay controller has no parent controller, so UIKit sends it no
+    /// appearance; without one its engine never reports the view as shown.
+    private func appear() {
+        guard !appeared, let controller, controller.view.window != nil else { return }
+        appeared = true
+        controller.beginAppearanceTransition(true, animated: false)
+        controller.endAppearanceTransition()
+    }
+}
+
+/// Covers the root view and draws the overlay content over the navigation
+/// bar's band. Touches outside the band pass through.
+final class NativeOverlayStripView: UIView {
+    /// The bar's band; clips the panel as it slides in from above.
+    let content = UIView()
+    /// The strip's colour and Flutter content, moved as one.
+    let panel = UIView()
+
+    /// The panel's place just above the band, hidden by its clipping.
+    var raised: CGAffineTransform {
+        CGAffineTransform(translationX: 0, y: -max(content.bounds.height, 1))
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        content.clipsToBounds = true
+        addSubview(content)
+        content.addSubview(panel)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard !isHidden, content.frame.contains(point) else { return nil }
+        return content
+    }
+
+    override func safeAreaInsetsDidChange() {
+        super.safeAreaInsetsDidChange()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard !isHidden else { return }
+        content.frame = NativeOverlayContainer.shared.band(in: self)
+        panel.bounds = content.bounds
+        panel.center = CGPoint(x: content.bounds.midX, y: content.bounds.midY)
+        panel.subviews.first?.frame = panel.bounds
+    }
+}

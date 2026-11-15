@@ -79,6 +79,17 @@ public class FlutterNativeWidgetsPlugin: NSObject, FlutterPlugin {
                 manager.handle(call, result: result)
             }
             widgetSheets = manager
+
+            // A strip of Flutter content below the status bar, above the bars.
+            let overlayChannel = FlutterMethodChannel(
+                name: "flutter_native_widgets/overlay_container", binaryMessenger: registrar.messenger())
+            let overlay = NativeOverlayContainer.shared
+            overlay.windowProvider = {
+                NativeNavigationHost.installed?.window ?? registrar.viewController?.view.window
+            }
+            overlayChannel.setMethodCallHandler { call, result in
+                overlay.handle(call, result: result)
+            }
         } else {
             // The owning sheet manager installs this engine's channel, so
             // nested presentation returns to the correct parent isolate.

@@ -5,6 +5,7 @@ import '../core/native_style.dart';
 import '../core/theme/native_theme.dart';
 import '../core/platform_info.dart';
 import '../navigation/chrome/native_toolbar_host.dart';
+import '../overlays/overlay_container/native_overlay_container.dart';
 
 /// Platform-specific configuration for MaterialApp
 class MaterialAppData {
@@ -456,7 +457,10 @@ class NativeApp extends StatelessWidget {
       final dark = Theme.of(context).brightness == Brightness.dark;
       final hosted = NativeTheme(
         data: (dark ? _darkData : theme) ?? const NativeThemeData(),
-        child: NativeToolbarHost(child: child ?? const SizedBox.shrink()),
+        // The overlay strip, where it is not native (see NativeOverlayContainer).
+        child: NativeOverlayHost(
+          child: NativeToolbarHost(child: child ?? const SizedBox.shrink()),
+        ),
       );
       return builder != null ? builder!(context, hosted) : hosted;
     }

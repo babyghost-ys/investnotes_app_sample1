@@ -72,6 +72,10 @@ final class NativeNavigationController: UINavigationController, UINavigationCont
         layoutTransitionBackdrop()
         layoutNavigationSafeAreaBackground()
         layoutStripShadowMask()
+        // The overlay strip stays above the bar and its transition views.
+        // The overlay strip follows any bar's height as it changes (a large
+        // title folding, a tab's own bar) and stays above the bars.
+        NativeOverlayContainer.shared.relayout()
         completedLayout?()
     }
     /// Keeps the bar's shadow off the iPhone Duo vertical bar strip, so the

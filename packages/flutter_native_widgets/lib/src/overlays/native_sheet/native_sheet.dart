@@ -632,12 +632,10 @@ class NativeSheetContent extends StatefulWidget {
   final Color? backgroundColor;
 
   @override
-  State<NativeSheetContent> createState() =>
-      _NativeSheetContentState();
+  State<NativeSheetContent> createState() => _NativeSheetContentState();
 }
 
-class _NativeSheetContentState
-    extends State<NativeSheetContent> {
+class _NativeSheetContentState extends State<NativeSheetContent> {
   final _contentKey = GlobalKey();
   Timer? _heightTimer;
   double? _height;
@@ -689,9 +687,7 @@ class _NativeSheetContentState
 
   void _reportHeight(double height) {
     unawaited(
-      NativeSheet._channel.invokeMethod<void>('setHeight', {
-        'height': height,
-      }),
+      NativeSheet._channel.invokeMethod<void>('setHeight', {'height': height}),
     );
   }
 

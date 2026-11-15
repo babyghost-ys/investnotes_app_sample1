@@ -119,13 +119,13 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
     /// resume a sheet isolate that a debugger left paused at start.
     private let pageChannel: FlutterMethodChannel
     private weak var originalHost: FlutterViewController?
-    /// Sheet engines spawn from this group's first engine, not from the page
-    /// engine: iOS exposes no public spawn on FlutterEngine, and the page's
-    /// implicit engine belongs to no group. In Debug the group's first engine
-    /// loads the bundle's kernel as built, so hot reloads and restarts never
-    /// reach sheet engines made later: a change to `commonSheetMain`, or any
-    /// sheet code, needs a relaunch to show.
-    private let engineGroup = FlutterEngineGroup(name: "flutter_native_widgets.sheets", project: nil)
+    /// Sheet engines spawn from the package's group (shared with the overlay
+    /// container), not from the page engine: iOS exposes no public spawn on
+    /// FlutterEngine, and the page's implicit engine belongs to no group. In
+    /// Debug the group's first engine loads the bundle's kernel as built, so
+    /// hot reloads and restarts never reach sheet engines made later: a
+    /// change to `commonSheetMain`, or any sheet code, needs a relaunch to show.
+    private var engineGroup: FlutterEngineGroup { NativeEngines.group }
     private var levels: [Level] = []
     private var measuredHeights: [String: CGFloat] = [:]
     private var heightTransitions: Set<ObjectIdentifier> = []

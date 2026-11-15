@@ -20,8 +20,7 @@ class NativePopupMenuButton<T> {
     Key? key,
     required String label,
     required List<NativePopupMenuEntry> items,
-    required void Function(int index, NativePopupMenuItem<T> entry)
-    onSelected,
+    required void Function(int index, NativePopupMenuItem<T> entry) onSelected,
     Color? tint,
     double height = 32.0,
     bool shrinkWrap = false,
@@ -54,8 +53,7 @@ class NativePopupMenuButton<T> {
   static Widget widget<T>({
     Key? key,
     required List<NativePopupMenuEntry> items,
-    required void Function(int index, NativePopupMenuItem<T> entry)
-    onSelected,
+    required void Function(int index, NativePopupMenuItem<T> entry) onSelected,
     Color? tint,
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
     bool triggerOnLongPress = false,
@@ -99,8 +97,7 @@ class NativePopupMenuButton<T> {
     Key? key,
     required NativeIcon icon,
     required List<NativePopupMenuEntry> items,
-    required void Function(int index, NativePopupMenuItem<T> entry)
-    onSelected,
+    required void Function(int index, NativePopupMenuItem<T> entry) onSelected,
     Color? tint,
     double size = 44.0,
     double? iconSize,
@@ -136,8 +133,7 @@ class NativePopupMenuButton<T> {
   static Future<void> show<T>(
     BuildContext context, {
     required List<NativePopupMenuEntry> items,
-    required void Function(int index, NativePopupMenuItem<T> entry)
-    onSelected,
+    required void Function(int index, NativePopupMenuItem<T> entry) onSelected,
     NavigatorState? navigator,
   }) async {
     final menuContext =
