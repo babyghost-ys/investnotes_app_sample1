@@ -275,8 +275,8 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         level.window = window
         let controller = level.controller
         controller.loadViewIfNeeded()
-        controller.view.backgroundColor = (args["backgroundColor"] as? NSNumber)
-            .map { UIColor(argb: $0.intValue) } ?? .systemBackground
+        controller.view.backgroundColor = UIColor.adaptive(
+            args["backgroundColor"], dark: args["backgroundColorDark"]) ?? .systemBackground
         // Flutter draws the sheet's new size half way through a turn; until
         // then its last frame stays unscaled at the top left of the view
         // rather than stretching to the view's new bounds.
@@ -290,6 +290,7 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
         if let navigation = level.navigation {
             navigation.configure(
                 color: (args["barColor"] as? NSNumber)?.intValue,
+                darkColor: (args["barColorDark"] as? NSNumber)?.intValue,
                 foreground: (args["barForeground"] as? NSNumber).map { UIColor(argb: $0.intValue) },
                 shadow: args["barShadow"] as? Bool ?? false,
                 plainButtons: args["plainButtons"] as? Bool ?? false,
@@ -925,11 +926,13 @@ final class SheetNavigationController: UINavigationController,
         }
     }
 
-    func configure(color: Int?, foreground: UIColor?, shadow: Bool = false, plainButtons: Bool,
+    func configure(color: Int?, darkColor: Int? = nil, foreground: UIColor?,
+                   shadow: Bool = false, plainButtons: Bool,
                    titleStyle: [String: Any]? = nil) {
         self.plainButtons = plainButtons
         self.foreground = foreground
-        if let style = NativeBarAppearance.make(color: color, shadow: shadow, foreground: foreground,
+        if let style = NativeBarAppearance.make(color: color, darkColor: darkColor, shadow: shadow,
+                                                foreground: foreground,
                                                 titleStyle: titleStyle) {
             navigationBar.standardAppearance = style
             navigationBar.scrollEdgeAppearance = style
@@ -937,7 +940,7 @@ final class SheetNavigationController: UINavigationController,
             navigationBar.compactScrollEdgeAppearance = style
         }
         navigationBar.tintColor = foreground
-        topBackdrop.backgroundColor = color.map { UIColor(argb: $0) }
+        topBackdrop.backgroundColor = color.map { UIColor.adaptive($0, dark: darkColor) }
     }
 
     /// Moves the Flutter view into [page], beneath anything covering it.

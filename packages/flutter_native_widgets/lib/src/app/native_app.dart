@@ -358,6 +358,7 @@ class NativeApp extends StatelessWidget {
               : SystemUiOverlayStyle.dark,
           child: NativeTheme(
             data: (isDark ? _darkData : theme) ?? const NativeThemeData(),
+            mode: themeMode ?? ThemeMode.system,
             child: Theme(
               data: materialTheme,
               child: CupertinoTheme(data: cupertinoTheme, child: child!),

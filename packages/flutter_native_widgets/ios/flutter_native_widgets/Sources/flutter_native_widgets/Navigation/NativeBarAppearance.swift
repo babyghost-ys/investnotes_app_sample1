@@ -8,12 +8,13 @@ enum NativeBarAppearance {
     /// which otherwise replaces every title font with its own.
     static let titleFontKey = NSAttributedString.Key("flutter_native_widgets.titleFont")
 
-    static func make(color: Int?, shadow: Bool, foreground: UIColor?,
+    static func make(color: Int?, darkColor: Int? = nil, shadow: Bool, foreground: UIColor?,
                      titleStyle: [String: Any]? = nil) -> UINavigationBarAppearance? {
         guard let color else { return nil }
         let style = UINavigationBarAppearance()
         style.configureWithOpaqueBackground()
-        style.backgroundColor = UIColor(argb: color)
+        // With a dark variant the bar switches with light and dark mode.
+        style.backgroundColor = UIColor.adaptive(color, dark: darkColor)
         if shadow {
             // A short fade UIKit draws below the bar, tinted faintly.
             style.shadowImage = shadowImage
@@ -99,4 +100,20 @@ enum NativeBarAppearance {
         }
         return image.withRenderingMode(.alwaysTemplate)
     }()
+}
+
+extension UIColor {
+    /// `light` (ARGB), switching to `dark` in dark mode when there is one,
+    /// so a view coloured once follows light and dark mode as it changes.
+    static func adaptive(_ light: Int, dark: Int?) -> UIColor {
+        guard let dark else { return UIColor(argb: light) }
+        let day = UIColor(argb: light), night = UIColor(argb: dark)
+        return UIColor { $0.userInterfaceStyle == .dark ? night : day }
+    }
+
+    /// The same, from channel arguments: nil when `light` is missing.
+    static func adaptive(_ light: Any?, dark: Any?) -> UIColor? {
+        guard let light = (light as? NSNumber)?.intValue else { return nil }
+        return adaptive(light, dark: (dark as? NSNumber)?.intValue)
+    }
 }

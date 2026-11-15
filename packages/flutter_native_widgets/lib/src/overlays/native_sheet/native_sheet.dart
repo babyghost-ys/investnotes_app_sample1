@@ -19,11 +19,13 @@ import 'package:material_ui/material_ui.dart'
         MaterialPageRoute,
         ModalBottomSheetRoute,
         PopScope,
+        ThemeMode,
         kMinInteractiveDimension;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/native_style.dart';
+import '../../core/theme/native_theme.dart';
 import '../../devices/duo/duo_layout.dart';
 import '../../devices/duo/system_vertical_bar.dart';
 import '../../navigation/app_bar/uikit_toolbar.dart';
@@ -354,14 +356,19 @@ class NativeSheet {
         'arguments': arguments,
         'detents': fullScreen ? 'fullScreen' : detents.name,
         'dismissible': isDismissible && !fullScreen,
-        'backgroundColor':
-            (backgroundColor ??
-                    CupertinoColors.systemBackground.resolveFrom(context))
-                .toARGB32(),
-        'brightness': CupertinoTheme.brightnessOf(context).name,
+        ..._colour(
+          'backgroundColor',
+          backgroundColor ??
+              CupertinoColors.systemBackground.resolveFrom(context),
+        ),
+        // A sheet follows the system's light and dark mode as it changes,
+        // as the app's own pages do; only a forced mode pins it.
+        'brightness': NativeTheme.modeOf(context) == ThemeMode.system
+            ? 'system'
+            : CupertinoTheme.brightnessOf(context).name,
         if (fullScreen && navigationBar) ...{
           'navigationBar': true,
-          'barColor': ?barColor?.toARGB32(),
+          if (barColor != null) ..._colour('barColor', barColor),
           'barForeground': ?barForeground?.toARGB32(),
           'barShadow': barShadow,
           'plainButtons': plainBarButtons,
@@ -885,3 +892,12 @@ class NativeSheetBarAction {
   final String label;
   final VoidCallback onPressed;
 }
+
+/// [color] under [key] for the native side, with its dark-mode variant
+/// under `<key>Dark` when it adapts, so UIKit can switch it live.
+Map<String, int> _colour(String key, Color color) => {
+  key: color is CupertinoDynamicColor
+      ? color.color.toARGB32()
+      : color.toARGB32(),
+  if (color is CupertinoDynamicColor) '${key}Dark': color.darkColor.toARGB32(),
+};

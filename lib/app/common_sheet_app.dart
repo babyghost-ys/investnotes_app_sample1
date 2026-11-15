@@ -71,13 +71,22 @@ class CommonSheetApp extends StatelessWidget {
   );
 
   Widget _sheet(BuildContext context) {
-    final brightness = configuration['brightness'] == 'dark'
-        ? Brightness.dark
-        : Brightness.light;
+    // The app's forced mode, or the system's as it changes: the sheet's
+    // window follows the system live, and this rebuilds with it.
+    final brightness = switch (configuration['brightness']) {
+      'dark' => Brightness.dark,
+      'light' => Brightness.light,
+      _ => MediaQuery.platformBrightnessOf(context),
+    };
     final theme = brightness == Brightness.dark
         ? KeelTheme.dark
         : KeelTheme.light;
-    final background = configuration['backgroundColor'] as int?;
+    final background =
+        (brightness == Brightness.dark
+                ? configuration['backgroundColorDark']
+                : null)
+            as int? ??
+        configuration['backgroundColor'] as int?;
 
     Widget themed(BuildContext context, Widget child) => MediaQuery(
       data: MediaQuery.of(context).copyWith(platformBrightness: brightness),

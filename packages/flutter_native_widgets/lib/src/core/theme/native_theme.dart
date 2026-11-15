@@ -130,9 +130,24 @@ class NativeThemeData {
 
 /// Provides the current [NativeThemeData]. `NativeApp` installs it.
 class NativeTheme extends InheritedWidget {
-  const NativeTheme({super.key, required this.data, required super.child});
+  const NativeTheme({
+    super.key,
+    required this.data,
+    this.mode = ThemeMode.system,
+    required super.child,
+  });
 
   final NativeThemeData data;
+
+  /// Whether the app follows the system's light and dark mode or forces
+  /// one. Native views outside Flutter (a sheet's own window) follow the
+  /// system live unless the app forces a mode.
+  final ThemeMode mode;
+
+  /// The nearest app's theme mode; [ThemeMode.system] when none is set.
+  static ThemeMode modeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<NativeTheme>()?.mode ??
+      ThemeMode.system;
 
   static const _fallback = NativeThemeData();
 
@@ -142,5 +157,6 @@ class NativeTheme extends InheritedWidget {
       _fallback;
 
   @override
-  bool updateShouldNotify(NativeTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(NativeTheme oldWidget) =>
+      data != oldWidget.data || mode != oldWidget.mode;
 }
