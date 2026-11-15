@@ -23,6 +23,7 @@ abstract final class KeelTheme {
     barStyle: NativeBarStyle.solid(
       _tide,
       foreground: Colors.white,
+      shadow: true,
       plainButtons: true,
       titleStyle: barTitle,
       duoStripGradient: LinearGradient(
@@ -39,6 +40,7 @@ abstract final class KeelTheme {
     barStyle: NativeBarStyle.solid(
       _tideDark,
       foreground: Colors.white,
+      shadow: true,
       plainButtons: true,
       titleStyle: barTitle,
       duoStripGradient: LinearGradient(

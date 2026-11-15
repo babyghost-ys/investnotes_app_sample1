@@ -79,6 +79,11 @@ extension _MaterialScaffold on NativeScaffoldState {
     return AppBar(
       backgroundColor: appBar.navigationBarColor,
       foregroundColor: appBar.tintColor,
+      // The subtle shadow below the bar that NativeBarStyle.shadow asks
+      // for, also while content scrolls under it.
+      elevation: appBar.navigationBarShadow == true ? 2 : null,
+      scrolledUnderElevation: appBar.navigationBarShadow == true ? 2 : null,
+      shadowColor: appBar.navigationBarShadow == true ? Colors.black : null,
       // A partial style (a family, a weight) keeps the bar's own size and
       // colour: AppBar would otherwise use it as the whole style.
       titleTextStyle: appBar.titleStyle == null
