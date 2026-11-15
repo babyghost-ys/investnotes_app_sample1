@@ -61,7 +61,10 @@ class _KeelAppState extends State<KeelApp> {
               BiometricBloc(BiometricRepository())
                 ..add(const BiometricStarted()),
         ),
-        BlocProvider(create: (_) => OfferingsBloc(_repository)),
+        BlocProvider(
+          create: (_) =>
+              OfferingsBloc(_repository)..add(const OfferingsRequested()),
+        ),
         BlocProvider(create: (_) => IssuedBloc(_repository)),
         BlocProvider(
           create: (_) => MyNotesBloc(_repository)..add(const MyNotesStarted()),

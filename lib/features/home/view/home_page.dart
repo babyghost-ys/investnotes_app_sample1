@@ -100,25 +100,32 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (var i = 0; i < 5; i++) ...[
-                            if (i > 0) const SizedBox(width: 12),
-                            ClosingCard(
-                              offering: closing[i],
-                              onTap: () => openOffering(context, closing[i]),
-                            ),
+                  // Offerings closing soon, once they have loaded.
+                  if (closing.isNotEmpty) ...[
+                    const SizedBox(height: 28),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (
+                              var i = 0;
+                              i < closing.length && i < 5;
+                              i++
+                            ) ...[
+                              if (i > 0) const SizedBox(width: 12),
+                              ClosingCard(
+                                offering: closing[i],
+                                onTap: () => openOffering(context, closing[i]),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 28),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),

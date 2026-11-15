@@ -15,6 +15,17 @@ class NotesRepository {
 
   final DateTime _now;
 
+  /// The open offerings, from the service. Fails when the service cannot
+  /// be reached.
+  Future<List<Offering>> fetchOfferings() async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    // TEMP: the service fails for the first 10 seconds after launch.
+    if (DateTime.now().difference(_now).inSeconds < 10) {
+      throw const OfferingsUnavailable();
+    }
+    return offerings;
+  }
+
   DateTime _in(int days) => _now.add(Duration(days: days));
   DateTime _ago(int days) => _now.subtract(Duration(days: days));
 
@@ -570,4 +581,9 @@ class NotesRepository {
       ],
     ),
   ];
+}
+
+/// The service could not hand over the offerings.
+class OfferingsUnavailable implements Exception {
+  const OfferingsUnavailable();
 }

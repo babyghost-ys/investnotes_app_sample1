@@ -1,13 +1,14 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 
+import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
+
 /// The strip shown below the status bar while the device has no network.
 /// It runs in the overlay's own engine on iOS, so it reads nothing from the
 /// app's theme: its colours are fixed and hold in light and dark mode.
 class NetworkLostBar extends StatelessWidget {
   const NetworkLostBar({super.key});
 
-  /// Charcoal: reads as a system state, apart from Keel's blues.
-  static const Color background = Color(0xFF34383E);
+  static const Color background = KeelColors.charcoal;
 
   static const Color _foreground = Color(0xFFF2F4F7);
 

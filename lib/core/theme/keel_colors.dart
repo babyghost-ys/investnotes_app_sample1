@@ -55,6 +55,10 @@ abstract final class KeelColors {
     darkColor: Color(0xFF1C2A40),
   );
 
+  /// System states the app reports (no connection, a failed load): reads
+  /// apart from Keel's blues in light and dark mode.
+  static const charcoal = Color(0xFF34383E);
+
   /// Losses only: a muted slate red, kept apart from the blues.
   static const loss = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFB4485A),

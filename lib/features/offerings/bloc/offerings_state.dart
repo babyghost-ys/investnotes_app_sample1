@@ -2,13 +2,15 @@ part of 'offerings_bloc.dart';
 
 final class OfferingsState extends Equatable {
   const OfferingsState({
-    required this.all,
+    this.all = const [],
+    this.status = LoadStatus.loading,
     this.type = NoteType.mld,
     this.filter = const OfferingFilter(),
     this.saved = const {},
   });
 
   final List<Offering> all;
+  final LoadStatus status;
   final NoteType type;
   final OfferingFilter filter;
   final Set<String> saved;
@@ -25,16 +27,19 @@ final class OfferingsState extends Equatable {
   Offering byId(String id) => all.firstWhere((o) => o.id == id);
 
   OfferingsState copyWith({
+    List<Offering>? all,
+    LoadStatus? status,
     NoteType? type,
     OfferingFilter? filter,
     Set<String>? saved,
   }) => OfferingsState(
-    all: all,
+    all: all ?? this.all,
+    status: status ?? this.status,
     type: type ?? this.type,
     filter: filter ?? this.filter,
     saved: saved ?? this.saved,
   );
 
   @override
-  List<Object?> get props => [all, type, filter, saved];
+  List<Object?> get props => [all, status, type, filter, saved];
 }
