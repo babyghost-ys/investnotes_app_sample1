@@ -5,104 +5,212 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "finder" namespace.
-final class FinderLocale extends LocaleBundle {
-  FinderLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = FinderLabels._(LocaleText.section(json, 'labels')),
-      semantics = FinderSemantics._(LocaleText.section(json, 'semantics'));
-
+class FinderLocale extends LocaleBundle {
   final FinderLabels labels;
 
   /// What assistive technologies say, where it differs.
   final FinderSemantics semantics;
+
+  const FinderLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory FinderLocale.fromJson(String language, Map<String, Object?> json) =>
+      FinderLocale(
+        language: language,
+        labels: FinderLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: FinderSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class FinderLabels {
-  const FinderLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Closest
-  String get closest => _text['closest']!;
-
-  /// Which currency will you invest in?
-  String get currencyPrompt => _text['currencyPrompt']!;
-
-  /// {count} fit
-  String fit({required Object count}) =>
-      LocaleText.fill(_text['fit']!, {'count': count});
-
-  /// Commodities
-  String get followCommodities => _text['followCommodities']!;
-
-  /// A mix
-  String get followMix => _text['followMix']!;
-
-  /// What should your return follow?
-  String get followPrompt => _text['followPrompt']!;
-
-  /// Interest rates
-  String get followRates => _text['followRates']!;
-
-  /// Shares
-  String get followShares => _text['followShares']!;
-
-  /// {hits}/{of}
-  String hits({required Object hits, required Object of}) =>
-      LocaleText.fill(_text['hits']!, {'hits': hits, 'of': of});
-
-  /// All of it, whatever happens
-  String get principalAll => _text['principalAll']!;
-
-  /// I want income and accept risk
-  String get principalIncome => _text['principalIncome']!;
-
-  /// Most of it, with a buffer
-  String get principalMost => _text['principalMost']!;
-
-  /// How much of your principal must come back?
-  String get principalPrompt => _text['principalPrompt']!;
-
-  /// Where do you want exposure?
-  String get regionPrompt => _text['regionPrompt']!;
+class FinderLabels {
+  /// Find my note
+  final String title;
 
   /// Your notes
-  String get resultsTitle => _text['resultsTitle']!;
+  final String resultsTitle;
 
-  /// 6 years or more
-  String get termLong => _text['termLong']!;
+  /// Which currency will you invest in?
+  final String currencyPrompt;
 
-  /// 4 to 5 years
-  String get termMedium => _text['termMedium']!;
+  /// How much of your principal must come back?
+  final String principalPrompt;
+
+  /// All of it, whatever happens
+  final String principalAll;
+
+  /// Most of it, with a buffer
+  final String principalMost;
+
+  /// I want income and accept risk
+  final String principalIncome;
+
+  /// What should your return follow?
+  final String followPrompt;
+
+  /// Shares
+  final String followShares;
+
+  /// Commodities
+  final String followCommodities;
+
+  /// Interest rates
+  final String followRates;
+
+  /// A mix
+  final String followMix;
 
   /// How long can you leave the money?
-  String get termPrompt => _text['termPrompt']!;
+  final String termPrompt;
 
   /// Up to 3 years
-  String get termShort => _text['termShort']!;
+  final String termShort;
 
-  /// Find my note
-  String get title => _text['title']!;
+  /// 4 to 5 years
+  final String termMedium;
+
+  /// 6 years or more
+  final String termLong;
+
+  /// Where do you want exposure?
+  final String regionPrompt;
+
+  /// {count} fit
+  final String _fit;
+
+  /// Closest
+  final String closest;
+
+  /// {hits}/{of}
+  final String _hits;
+
+  const FinderLabels({
+    required this.title,
+    required this.resultsTitle,
+    required this.currencyPrompt,
+    required this.principalPrompt,
+    required this.principalAll,
+    required this.principalMost,
+    required this.principalIncome,
+    required this.followPrompt,
+    required this.followShares,
+    required this.followCommodities,
+    required this.followRates,
+    required this.followMix,
+    required this.termPrompt,
+    required this.termShort,
+    required this.termMedium,
+    required this.termLong,
+    required this.regionPrompt,
+    required this._fit,
+    required this.closest,
+    required this._hits,
+  });
+
+  factory FinderLabels.fromJson(Map<String, Object?> json) => FinderLabels(
+    title: json['title'] as String,
+    resultsTitle: json['resultsTitle'] as String,
+    currencyPrompt: json['currencyPrompt'] as String,
+    principalPrompt: json['principalPrompt'] as String,
+    principalAll: json['principalAll'] as String,
+    principalMost: json['principalMost'] as String,
+    principalIncome: json['principalIncome'] as String,
+    followPrompt: json['followPrompt'] as String,
+    followShares: json['followShares'] as String,
+    followCommodities: json['followCommodities'] as String,
+    followRates: json['followRates'] as String,
+    followMix: json['followMix'] as String,
+    termPrompt: json['termPrompt'] as String,
+    termShort: json['termShort'] as String,
+    termMedium: json['termMedium'] as String,
+    termLong: json['termLong'] as String,
+    regionPrompt: json['regionPrompt'] as String,
+    fit: json['fit'] as String,
+    closest: json['closest'] as String,
+    hits: json['hits'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'title': title,
+    'resultsTitle': resultsTitle,
+    'currencyPrompt': currencyPrompt,
+    'principalPrompt': principalPrompt,
+    'principalAll': principalAll,
+    'principalMost': principalMost,
+    'principalIncome': principalIncome,
+    'followPrompt': followPrompt,
+    'followShares': followShares,
+    'followCommodities': followCommodities,
+    'followRates': followRates,
+    'followMix': followMix,
+    'termPrompt': termPrompt,
+    'termShort': termShort,
+    'termMedium': termMedium,
+    'termLong': termLong,
+    'regionPrompt': regionPrompt,
+    'fit': _fit,
+    'closest': closest,
+    'hits': _hits,
+  };
+
+  String fit({required Object count}) =>
+      LocaleText.fill(_fit, {'count': count});
+
+  String hits({required Object hits, required Object of}) =>
+      LocaleText.fill(_hits, {'hits': hits, 'of': of});
 }
 
-final class FinderSemantics {
-  const FinderSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Done
-  String get done => _text['done']!;
-
-  /// {hits} of {of} answers match
-  String hits({required Object hits, required Object of}) =>
-      LocaleText.fill(_text['hits']!, {'hits': hits, 'of': of});
+class FinderSemantics {
+  /// Show my notes
+  final String showNotes;
 
   /// Next question
-  String get nextQuestion => _text['nextQuestion']!;
-
-  /// Show my notes
-  String get showNotes => _text['showNotes']!;
+  final String nextQuestion;
 
   /// Step {step} of {count}
+  final String _step;
+
+  /// {hits} of {of} answers match
+  final String _hits;
+
+  /// Done
+  final String done;
+
+  const FinderSemantics({
+    required this.showNotes,
+    required this.nextQuestion,
+    required this._step,
+    required this._hits,
+    required this.done,
+  });
+
+  factory FinderSemantics.fromJson(Map<String, Object?> json) =>
+      FinderSemantics(
+        showNotes: json['showNotes'] as String,
+        nextQuestion: json['nextQuestion'] as String,
+        step: json['step'] as String,
+        hits: json['hits'] as String,
+        done: json['done'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'showNotes': showNotes,
+    'nextQuestion': nextQuestion,
+    'step': _step,
+    'hits': _hits,
+    'done': done,
+  };
+
   String step({required Object count, required Object step}) =>
-      LocaleText.fill(_text['step']!, {'count': count, 'step': step});
+      LocaleText.fill(_step, {'count': count, 'step': step});
+
+  String hits({required Object hits, required Object of}) =>
+      LocaleText.fill(_hits, {'hits': hits, 'of': of});
 }

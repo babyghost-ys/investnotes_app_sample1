@@ -5,87 +5,179 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "offerings" namespace.
-final class OfferingsLocale extends LocaleBundle {
-  OfferingsLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = OfferingsLabels._(LocaleText.section(json, 'labels')),
-      semantics = OfferingsSemantics._(LocaleText.section(json, 'semantics'));
-
+class OfferingsLocale extends LocaleBundle {
   final OfferingsLabels labels;
 
   /// What assistive technologies say, where it differs.
   final OfferingsSemantics semantics;
+
+  const OfferingsLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory OfferingsLocale.fromJson(
+    String language,
+    Map<String, Object?> json,
+  ) => OfferingsLocale(
+    language: language,
+    labels: OfferingsLabels.fromJson((json['labels'] as Map).cast()),
+    semantics: OfferingsSemantics.fromJson((json['semantics'] as Map).cast()),
+  );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class OfferingsLabels {
-  const OfferingsLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Ascending
-  String get ascending => _text['ascending']!;
-
+class OfferingsLabels {
   /// ≥ {value}
-  String atLeast({required Object value}) =>
-      LocaleText.fill(_text['atLeast']!, {'value': value});
-
-  /// Descending
-  String get descending => _text['descending']!;
+  final String _atLeast;
 
   /// Closing
-  String get sortClosing => _text['sortClosing']!;
+  final String sortClosing;
 
   /// Headline
-  String get sortHeadline => _text['sortHeadline']!;
+  final String sortHeadline;
 
   /// Term
-  String get sortTerm => _text['sortTerm']!;
-}
-
-final class OfferingsSemantics {
-  const OfferingsSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Any closing date
-  String get anyClosingDate => _text['anyClosingDate']!;
+  final String sortTerm;
 
   /// Ascending
-  String get ascending => _text['ascending']!;
-
-  /// At least {value}
-  String atLeast({required Object value}) =>
-      LocaleText.fill(_text['atLeast']!, {'value': value});
-
-  /// Closes by
-  String get closesBy => _text['closesBy']!;
+  final String ascending;
 
   /// Descending
-  String get descending => _text['descending']!;
+  final String descending;
 
+  const OfferingsLabels({
+    required this._atLeast,
+    required this.sortClosing,
+    required this.sortHeadline,
+    required this.sortTerm,
+    required this.ascending,
+    required this.descending,
+  });
+
+  factory OfferingsLabels.fromJson(Map<String, Object?> json) =>
+      OfferingsLabels(
+        atLeast: json['atLeast'] as String,
+        sortClosing: json['sortClosing'] as String,
+        sortHeadline: json['sortHeadline'] as String,
+        sortTerm: json['sortTerm'] as String,
+        ascending: json['ascending'] as String,
+        descending: json['descending'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'atLeast': _atLeast,
+    'sortClosing': sortClosing,
+    'sortHeadline': sortHeadline,
+    'sortTerm': sortTerm,
+    'ascending': ascending,
+    'descending': descending,
+  };
+
+  String atLeast({required Object value}) =>
+      LocaleText.fill(_atLeast, {'value': value});
+}
+
+class OfferingsSemantics {
   /// Offerings didn’t load
-  String get didntLoad => _text['didntLoad']!;
-
-  /// Goal
-  String get goal => _text['goal']!;
+  final String didntLoad;
 
   /// Lowest cap or coupon
-  String get lowestHeadline => _text['lowestHeadline']!;
+  final String lowestHeadline;
 
-  /// Payout
-  String get payout => _text['payout']!;
+  /// At least {value}
+  final String _atLeast;
+
+  /// Closes by
+  final String closesBy;
+
+  /// Any closing date
+  final String anyClosingDate;
 
   /// Share class
-  String get shareClass => _text['shareClass']!;
+  final String shareClass;
 
-  /// Sort by closing date
-  String get sortClosing => _text['sortClosing']!;
+  /// Goal
+  final String goal;
 
-  /// Sort by cap or coupon
-  String get sortHeadline => _text['sortHeadline']!;
-
-  /// Sort by term
-  String get sortTerm => _text['sortTerm']!;
+  /// Payout
+  final String payout;
 
   /// Term
-  String get term => _text['term']!;
+  final String term;
+
+  /// Sort by closing date
+  final String sortClosing;
+
+  /// Sort by cap or coupon
+  final String sortHeadline;
+
+  /// Sort by term
+  final String sortTerm;
+
+  /// Ascending
+  final String ascending;
+
+  /// Descending
+  final String descending;
+
+  const OfferingsSemantics({
+    required this.didntLoad,
+    required this.lowestHeadline,
+    required this._atLeast,
+    required this.closesBy,
+    required this.anyClosingDate,
+    required this.shareClass,
+    required this.goal,
+    required this.payout,
+    required this.term,
+    required this.sortClosing,
+    required this.sortHeadline,
+    required this.sortTerm,
+    required this.ascending,
+    required this.descending,
+  });
+
+  factory OfferingsSemantics.fromJson(Map<String, Object?> json) =>
+      OfferingsSemantics(
+        didntLoad: json['didntLoad'] as String,
+        lowestHeadline: json['lowestHeadline'] as String,
+        atLeast: json['atLeast'] as String,
+        closesBy: json['closesBy'] as String,
+        anyClosingDate: json['anyClosingDate'] as String,
+        shareClass: json['shareClass'] as String,
+        goal: json['goal'] as String,
+        payout: json['payout'] as String,
+        term: json['term'] as String,
+        sortClosing: json['sortClosing'] as String,
+        sortHeadline: json['sortHeadline'] as String,
+        sortTerm: json['sortTerm'] as String,
+        ascending: json['ascending'] as String,
+        descending: json['descending'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'didntLoad': didntLoad,
+    'lowestHeadline': lowestHeadline,
+    'atLeast': _atLeast,
+    'closesBy': closesBy,
+    'anyClosingDate': anyClosingDate,
+    'shareClass': shareClass,
+    'goal': goal,
+    'payout': payout,
+    'term': term,
+    'sortClosing': sortClosing,
+    'sortHeadline': sortHeadline,
+    'sortTerm': sortTerm,
+    'ascending': ascending,
+    'descending': descending,
+  };
+
+  String atLeast({required Object value}) =>
+      LocaleText.fill(_atLeast, {'value': value});
 }

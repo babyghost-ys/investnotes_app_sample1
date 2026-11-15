@@ -5,86 +5,173 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "issued" namespace.
-final class IssuedLocale extends LocaleBundle {
-  IssuedLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = IssuedLabels._(LocaleText.section(json, 'labels')),
-      semantics = IssuedSemantics._(LocaleText.section(json, 'semantics'));
-
+class IssuedLocale extends LocaleBundle {
   final IssuedLabels labels;
 
   /// What assistive technologies say, where it differs.
   final IssuedSemantics semantics;
+
+  const IssuedLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory IssuedLocale.fromJson(String language, Map<String, Object?> json) =>
+      IssuedLocale(
+        language: language,
+        labels: IssuedLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: IssuedSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class IssuedLabels {
-  const IssuedLabels._(this._text);
-
-  final Map<String, String> _text;
-
+class IssuedLabels {
   /// All
-  String get periodAll => _text['periodAll']!;
-
-  /// Custom
-  String get periodCustom => _text['periodCustom']!;
-
-  /// 5Y
-  String get periodFiveYears => _text['periodFiveYears']!;
-
-  /// 3Y
-  String get periodThreeYears => _text['periodThreeYears']!;
+  final String periodAll;
 
   /// 1Y
-  String get periodYear => _text['periodYear']!;
+  final String periodYear;
+
+  /// 3Y
+  final String periodThreeYears;
+
+  /// 5Y
+  final String periodFiveYears;
+
+  /// Custom
+  final String periodCustom;
+
+  const IssuedLabels({
+    required this.periodAll,
+    required this.periodYear,
+    required this.periodThreeYears,
+    required this.periodFiveYears,
+    required this.periodCustom,
+  });
+
+  factory IssuedLabels.fromJson(Map<String, Object?> json) => IssuedLabels(
+    periodAll: json['periodAll'] as String,
+    periodYear: json['periodYear'] as String,
+    periodThreeYears: json['periodThreeYears'] as String,
+    periodFiveYears: json['periodFiveYears'] as String,
+    periodCustom: json['periodCustom'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'periodAll': periodAll,
+    'periodYear': periodYear,
+    'periodThreeYears': periodThreeYears,
+    'periodFiveYears': periodFiveYears,
+    'periodCustom': periodCustom,
+  };
 }
 
-final class IssuedSemantics {
-  const IssuedSemantics._(this._text);
-
-  final Map<String, String> _text;
-
+class IssuedSemantics {
   /// Active notes average {value}
-  String average({required Object value}) =>
-      LocaleText.fill(_text['average']!, {'value': value});
-
-  /// End date
-  String get endDate => _text['endDate']!;
-
-  /// From
-  String get from => _text['from']!;
-
-  /// Issued
-  String get issued => _text['issued']!;
-
-  /// Matures
-  String get matures => _text['matures']!;
-
-  /// All time
-  String get periodAll => _text['periodAll']!;
-
-  /// Custom dates
-  String get periodCustom => _text['periodCustom']!;
-
-  /// 5 years
-  String get periodFiveYears => _text['periodFiveYears']!;
-
-  /// 3 years
-  String get periodThreeYears => _text['periodThreeYears']!;
-
-  /// 1 year
-  String get periodYear => _text['periodYear']!;
-
-  /// Start date
-  String get startDate => _text['startDate']!;
+  final String _average;
 
   /// Status
-  String get status => _text['status']!;
+  final String status;
+
+  /// All time
+  final String periodAll;
+
+  /// 1 year
+  final String periodYear;
+
+  /// 3 years
+  final String periodThreeYears;
+
+  /// 5 years
+  final String periodFiveYears;
+
+  /// Custom dates
+  final String periodCustom;
+
+  /// From
+  final String from;
 
   /// To
-  String get to => _text['to']!;
+  final String to;
+
+  /// Issued
+  final String issued;
+
+  /// Matures
+  final String matures;
 
   /// Type and currency
-  String get typeAndCurrency => _text['typeAndCurrency']!;
+  final String typeAndCurrency;
+
+  /// Start date
+  final String startDate;
+
+  /// End date
+  final String endDate;
 
   /// Use this date
-  String get useDate => _text['useDate']!;
+  final String useDate;
+
+  const IssuedSemantics({
+    required this._average,
+    required this.status,
+    required this.periodAll,
+    required this.periodYear,
+    required this.periodThreeYears,
+    required this.periodFiveYears,
+    required this.periodCustom,
+    required this.from,
+    required this.to,
+    required this.issued,
+    required this.matures,
+    required this.typeAndCurrency,
+    required this.startDate,
+    required this.endDate,
+    required this.useDate,
+  });
+
+  factory IssuedSemantics.fromJson(Map<String, Object?> json) =>
+      IssuedSemantics(
+        average: json['average'] as String,
+        status: json['status'] as String,
+        periodAll: json['periodAll'] as String,
+        periodYear: json['periodYear'] as String,
+        periodThreeYears: json['periodThreeYears'] as String,
+        periodFiveYears: json['periodFiveYears'] as String,
+        periodCustom: json['periodCustom'] as String,
+        from: json['from'] as String,
+        to: json['to'] as String,
+        issued: json['issued'] as String,
+        matures: json['matures'] as String,
+        typeAndCurrency: json['typeAndCurrency'] as String,
+        startDate: json['startDate'] as String,
+        endDate: json['endDate'] as String,
+        useDate: json['useDate'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'average': _average,
+    'status': status,
+    'periodAll': periodAll,
+    'periodYear': periodYear,
+    'periodThreeYears': periodThreeYears,
+    'periodFiveYears': periodFiveYears,
+    'periodCustom': periodCustom,
+    'from': from,
+    'to': to,
+    'issued': issued,
+    'matures': matures,
+    'typeAndCurrency': typeAndCurrency,
+    'startDate': startDate,
+    'endDate': endDate,
+    'useDate': useDate,
+  };
+
+  String average({required Object value}) =>
+      LocaleText.fill(_average, {'value': value});
 }

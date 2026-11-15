@@ -5,79 +5,161 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "session" namespace.
-final class SessionLocale extends LocaleBundle {
-  SessionLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = SessionLabels._(LocaleText.section(json, 'labels')),
-      semantics = SessionSemantics._(LocaleText.section(json, 'semantics'));
-
+class SessionLocale extends LocaleBundle {
   final SessionLabels labels;
 
   /// What assistive technologies say, where it differs.
   final SessionSemantics semantics;
+
+  const SessionLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory SessionLocale.fromJson(String language, Map<String, Object?> json) =>
+      SessionLocale(
+        language: language,
+        labels: SessionLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: SessionSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class SessionLabels {
-  const SessionLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Keel
-  String get brand => _text['brand']!;
-
-  /// Forgot password?
-  String get forgotPassword => _text['forgotPassword']!;
-
-  /// Forgot username?
-  String get forgotUsername => _text['forgotUsername']!;
+class SessionLabels {
+  /// Sign in
+  final String signIn;
 
   /// Home
-  String get home => _text['home']!;
+  final String home;
 
-  /// New to Keel?
-  String get newToKeel => _text['newToKeel']!;
-
-  /// or
-  String get or => _text['or']!;
-
-  /// Password
-  String get password => _text['password']!;
-
-  /// Register
-  String get register => _text['register']!;
-
-  /// Sign in
-  String get signIn => _text['signIn']!;
+  /// Keel
+  final String brand;
 
   /// Username
-  String get username => _text['username']!;
+  final String username;
+
+  /// Password
+  final String password;
+
+  /// Forgot username?
+  final String forgotUsername;
+
+  /// Forgot password?
+  final String forgotPassword;
+
+  /// or
+  final String or;
+
+  /// New to Keel?
+  final String newToKeel;
+
+  /// Register
+  final String register;
+
+  const SessionLabels({
+    required this.signIn,
+    required this.home,
+    required this.brand,
+    required this.username,
+    required this.password,
+    required this.forgotUsername,
+    required this.forgotPassword,
+    required this.or,
+    required this.newToKeel,
+    required this.register,
+  });
+
+  factory SessionLabels.fromJson(Map<String, Object?> json) => SessionLabels(
+    signIn: json['signIn'] as String,
+    home: json['home'] as String,
+    brand: json['brand'] as String,
+    username: json['username'] as String,
+    password: json['password'] as String,
+    forgotUsername: json['forgotUsername'] as String,
+    forgotPassword: json['forgotPassword'] as String,
+    or: json['or'] as String,
+    newToKeel: json['newToKeel'] as String,
+    register: json['register'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'signIn': signIn,
+    'home': home,
+    'brand': brand,
+    'username': username,
+    'password': password,
+    'forgotUsername': forgotUsername,
+    'forgotPassword': forgotPassword,
+    'or': or,
+    'newToKeel': newToKeel,
+    'register': register,
+  };
 }
 
-final class SessionSemantics {
-  const SessionSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Sign in with {kind}
-  String biometric({required Object kind}) =>
-      LocaleText.fill(_text['biometric']!, {'kind': kind});
-
-  /// Sign in with {kind}, not recognised, try again
-  String biometricFailed({required Object kind}) =>
-      LocaleText.fill(_text['biometricFailed']!, {'kind': kind});
-
-  /// Sign in to Keel with {kind}
-  String biometricReason({required Object kind}) =>
-      LocaleText.fill(_text['biometricReason']!, {'kind': kind});
-
-  /// Hide password
-  String get hidePassword => _text['hidePassword']!;
+class SessionSemantics {
+  /// Sign in
+  final String signIn;
 
   /// Show password
-  String get showPassword => _text['showPassword']!;
+  final String showPassword;
 
-  /// Sign in
-  String get signIn => _text['signIn']!;
+  /// Hide password
+  final String hidePassword;
 
   /// Sign in with username and password
-  String get withPassword => _text['withPassword']!;
+  final String withPassword;
+
+  /// Sign in to Keel with {kind}
+  final String _biometricReason;
+
+  /// Sign in with {kind}
+  final String _biometric;
+
+  /// Sign in with {kind}, not recognised, try again
+  final String _biometricFailed;
+
+  const SessionSemantics({
+    required this.signIn,
+    required this.showPassword,
+    required this.hidePassword,
+    required this.withPassword,
+    required this._biometricReason,
+    required this._biometric,
+    required this._biometricFailed,
+  });
+
+  factory SessionSemantics.fromJson(Map<String, Object?> json) =>
+      SessionSemantics(
+        signIn: json['signIn'] as String,
+        showPassword: json['showPassword'] as String,
+        hidePassword: json['hidePassword'] as String,
+        withPassword: json['withPassword'] as String,
+        biometricReason: json['biometricReason'] as String,
+        biometric: json['biometric'] as String,
+        biometricFailed: json['biometricFailed'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'signIn': signIn,
+    'showPassword': showPassword,
+    'hidePassword': hidePassword,
+    'withPassword': withPassword,
+    'biometricReason': _biometricReason,
+    'biometric': _biometric,
+    'biometricFailed': _biometricFailed,
+  };
+
+  String biometricReason({required Object kind}) =>
+      LocaleText.fill(_biometricReason, {'kind': kind});
+
+  String biometric({required Object kind}) =>
+      LocaleText.fill(_biometric, {'kind': kind});
+
+  String biometricFailed({required Object kind}) =>
+      LocaleText.fill(_biometricFailed, {'kind': kind});
 }

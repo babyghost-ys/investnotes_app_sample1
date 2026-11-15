@@ -5,18 +5,30 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "connectivity" namespace.
-final class ConnectivityLocale extends LocaleBundle {
-  ConnectivityLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = ConnectivityLabels._(LocaleText.section(json, 'labels'));
-
+class ConnectivityLocale extends LocaleBundle {
   final ConnectivityLabels labels;
+
+  const ConnectivityLocale({required super.language, required this.labels});
+
+  factory ConnectivityLocale.fromJson(
+    String language,
+    Map<String, Object?> json,
+  ) => ConnectivityLocale(
+    language: language,
+    labels: ConnectivityLabels.fromJson((json['labels'] as Map).cast()),
+  );
+
+  Map<String, Object?> toJson() => {'labels': labels.toJson()};
 }
 
-final class ConnectivityLabels {
-  const ConnectivityLabels._(this._text);
-
-  final Map<String, String> _text;
-
+class ConnectivityLabels {
   /// No connection
-  String get noConnection => _text['noConnection']!;
+  final String noConnection;
+
+  const ConnectivityLabels({required this.noConnection});
+
+  factory ConnectivityLabels.fromJson(Map<String, Object?> json) =>
+      ConnectivityLabels(noConnection: json['noConnection'] as String);
+
+  Map<String, Object?> toJson() => {'noConnection': noConnection};
 }

@@ -5,68 +5,131 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "search" namespace.
-final class SearchLocale extends LocaleBundle {
-  SearchLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = SearchLabels._(LocaleText.section(json, 'labels')),
-      semantics = SearchSemantics._(LocaleText.section(json, 'semantics'));
-
+class SearchLocale extends LocaleBundle {
   final SearchLabels labels;
 
   /// What assistive technologies say, where it differs.
   final SearchSemantics semantics;
+
+  const SearchLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory SearchLocale.fromJson(String language, Map<String, Object?> json) =>
+      SearchLocale(
+        language: language,
+        labels: SearchLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: SearchSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class SearchLabels {
-  const SearchLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Called
-  String get called => _text['called']!;
-
-  /// Closes
-  String get closes => _text['closes']!;
-
-  /// Currency
-  String get currency => _text['currency']!;
-
-  /// FundSERV
-  String get fundserv => _text['fundserv']!;
-
-  /// Issued
-  String get issued => _text['issued']!;
-
-  /// Matures
-  String get matures => _text['matures']!;
-
-  /// Type
-  String get noteType => _text['noteType']!;
-
-  /// Nothing found
-  String get nothingFound => _text['nothingFound']!;
-
-  /// open
-  String get open => _text['open']!;
+class SearchLabels {
+  /// Search
+  final String title;
 
   /// Name, code, index
-  String get placeholder => _text['placeholder']!;
+  final String placeholder;
 
-  /// Price
-  String get price => _text['price']!;
+  /// Nothing found
+  final String nothingFound;
 
-  /// Search
-  String get title => _text['title']!;
+  /// FundSERV
+  final String fundserv;
+
+  /// Type
+  final String noteType;
 
   /// Underlying
-  String get underlying => _text['underlying']!;
+  final String underlying;
+
+  /// Currency
+  final String currency;
+
+  /// Closes
+  final String closes;
+
+  /// Issued
+  final String issued;
+
+  /// Called
+  final String called;
+
+  /// Matures
+  final String matures;
+
+  /// Price
+  final String price;
+
+  /// open
+  final String open;
+
+  const SearchLabels({
+    required this.title,
+    required this.placeholder,
+    required this.nothingFound,
+    required this.fundserv,
+    required this.noteType,
+    required this.underlying,
+    required this.currency,
+    required this.closes,
+    required this.issued,
+    required this.called,
+    required this.matures,
+    required this.price,
+    required this.open,
+  });
+
+  factory SearchLabels.fromJson(Map<String, Object?> json) => SearchLabels(
+    title: json['title'] as String,
+    placeholder: json['placeholder'] as String,
+    nothingFound: json['nothingFound'] as String,
+    fundserv: json['fundserv'] as String,
+    noteType: json['noteType'] as String,
+    underlying: json['underlying'] as String,
+    currency: json['currency'] as String,
+    closes: json['closes'] as String,
+    issued: json['issued'] as String,
+    called: json['called'] as String,
+    matures: json['matures'] as String,
+    price: json['price'] as String,
+    open: json['open'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'title': title,
+    'placeholder': placeholder,
+    'nothingFound': nothingFound,
+    'fundserv': fundserv,
+    'noteType': noteType,
+    'underlying': underlying,
+    'currency': currency,
+    'closes': closes,
+    'issued': issued,
+    'called': called,
+    'matures': matures,
+    'price': price,
+    'open': open,
+  };
 }
 
-final class SearchSemantics {
-  const SearchSemantics._(this._text);
-
-  final Map<String, String> _text;
-
+class SearchSemantics {
   /// Open until {date}
+  final String _openUntil;
+
+  const SearchSemantics({required this._openUntil});
+
+  factory SearchSemantics.fromJson(Map<String, Object?> json) =>
+      SearchSemantics(openUntil: json['openUntil'] as String);
+
+  Map<String, Object?> toJson() => {'openUntil': _openUntil};
+
   String openUntil({required Object date}) =>
-      LocaleText.fill(_text['openUntil']!, {'date': date});
+      LocaleText.fill(_openUntil, {'date': date});
 }

@@ -5,61 +5,124 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "settings" namespace.
-final class SettingsLocale extends LocaleBundle {
-  SettingsLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = SettingsLabels._(LocaleText.section(json, 'labels')),
-      semantics = SettingsSemantics._(LocaleText.section(json, 'semantics'));
-
+class SettingsLocale extends LocaleBundle {
   final SettingsLabels labels;
 
   /// What assistive technologies say, where it differs.
   final SettingsSemantics semantics;
+
+  const SettingsLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory SettingsLocale.fromJson(String language, Map<String, Object?> json) =>
+      SettingsLocale(
+        language: language,
+        labels: SettingsLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: SettingsSemantics.fromJson(
+          (json['semantics'] as Map).cast(),
+        ),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class SettingsLabels {
-  const SettingsLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// EN
-  String get english => _text['english']!;
-
-  /// FR
-  String get french => _text['french']!;
-
-  /// Haptics
-  String get haptics => _text['haptics']!;
-
-  /// Enable or disable haptic feedback
-  String get hapticsDetail => _text['hapticsDetail']!;
-
-  /// Choose the app’s language
-  String get languageDetail => _text['languageDetail']!;
+class SettingsLabels {
+  /// Settings
+  final String title;
 
   /// Language
-  String get languageTitle => _text['languageTitle']!;
+  final String languageTitle;
 
-  /// SYS
-  String get system => _text['system']!;
-
-  /// Settings
-  String get title => _text['title']!;
-}
-
-final class SettingsSemantics {
-  const SettingsSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// English
-  String get english => _text['english']!;
-
-  /// Français
-  String get french => _text['french']!;
+  /// Choose the app’s language
+  final String languageDetail;
 
   /// Haptics
-  String get haptics => _text['haptics']!;
+  final String haptics;
 
+  /// Enable or disable haptic feedback
+  final String hapticsDetail;
+
+  /// SYS
+  final String system;
+
+  /// EN
+  final String english;
+
+  /// FR
+  final String french;
+
+  const SettingsLabels({
+    required this.title,
+    required this.languageTitle,
+    required this.languageDetail,
+    required this.haptics,
+    required this.hapticsDetail,
+    required this.system,
+    required this.english,
+    required this.french,
+  });
+
+  factory SettingsLabels.fromJson(Map<String, Object?> json) => SettingsLabels(
+    title: json['title'] as String,
+    languageTitle: json['languageTitle'] as String,
+    languageDetail: json['languageDetail'] as String,
+    haptics: json['haptics'] as String,
+    hapticsDetail: json['hapticsDetail'] as String,
+    system: json['system'] as String,
+    english: json['english'] as String,
+    french: json['french'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'title': title,
+    'languageTitle': languageTitle,
+    'languageDetail': languageDetail,
+    'haptics': haptics,
+    'hapticsDetail': hapticsDetail,
+    'system': system,
+    'english': english,
+    'french': french,
+  };
+}
+
+class SettingsSemantics {
   /// System
-  String get system => _text['system']!;
+  final String system;
+
+  /// English
+  final String english;
+
+  /// Français
+  final String french;
+
+  /// Haptics
+  final String haptics;
+
+  const SettingsSemantics({
+    required this.system,
+    required this.english,
+    required this.french,
+    required this.haptics,
+  });
+
+  factory SettingsSemantics.fromJson(Map<String, Object?> json) =>
+      SettingsSemantics(
+        system: json['system'] as String,
+        english: json['english'] as String,
+        french: json['french'] as String,
+        haptics: json['haptics'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'system': system,
+    'english': english,
+    'french': french,
+    'haptics': haptics,
+  };
 }

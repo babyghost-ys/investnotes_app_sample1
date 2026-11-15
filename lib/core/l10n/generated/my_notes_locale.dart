@@ -5,46 +5,79 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "my-notes" namespace.
-final class MyNotesLocale extends LocaleBundle {
-  MyNotesLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = MyNotesLabels._(LocaleText.section(json, 'labels')),
-      semantics = MyNotesSemantics._(LocaleText.section(json, 'semantics'));
-
+class MyNotesLocale extends LocaleBundle {
   final MyNotesLabels labels;
 
   /// What assistive technologies say, where it differs.
   final MyNotesSemantics semantics;
+
+  const MyNotesLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory MyNotesLocale.fromJson(String language, Map<String, Object?> json) =>
+      MyNotesLocale(
+        language: language,
+        labels: MyNotesLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: MyNotesSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class MyNotesLabels {
-  const MyNotesLabels._(this._text);
-
-  final Map<String, String> _text;
-
+class MyNotesLabels {
   /// My Notes
-  String get title => _text['title']!;
+  final String title;
+
+  const MyNotesLabels({required this.title});
+
+  factory MyNotesLabels.fromJson(Map<String, Object?> json) =>
+      MyNotesLabels(title: json['title'] as String);
+
+  Map<String, Object?> toJson() => {'title': title};
 }
 
-final class MyNotesSemantics {
-  const MyNotesSemantics._(this._text);
-
-  final Map<String, String> _text;
-
+class MyNotesSemantics {
   /// No notes held
-  String get noNotes => _text['noNotes']!;
+  final String noNotes;
 
   /// Total value {value}
-  String totalValue({required Object value}) =>
-      LocaleText.fill(_text['totalValue']!, {'value': value});
+  final String _totalValue;
 
   /// {name}, worth {value}, {change}
+  final String _worth;
+
+  const MyNotesSemantics({
+    required this.noNotes,
+    required this._totalValue,
+    required this._worth,
+  });
+
+  factory MyNotesSemantics.fromJson(Map<String, Object?> json) =>
+      MyNotesSemantics(
+        noNotes: json['noNotes'] as String,
+        totalValue: json['totalValue'] as String,
+        worth: json['worth'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'noNotes': noNotes,
+    'totalValue': _totalValue,
+    'worth': _worth,
+  };
+
+  String totalValue({required Object value}) =>
+      LocaleText.fill(_totalValue, {'value': value});
+
   String worth({
     required Object change,
     required Object name,
     required Object value,
-  }) => LocaleText.fill(_text['worth']!, {
-    'change': change,
-    'name': name,
-    'value': value,
-  });
+  }) =>
+      LocaleText.fill(_worth, {'change': change, 'name': name, 'value': value});
 }

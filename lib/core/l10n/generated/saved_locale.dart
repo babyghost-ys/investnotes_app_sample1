@@ -5,31 +5,51 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "saved" namespace.
-final class SavedLocale extends LocaleBundle {
-  SavedLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = SavedLabels._(LocaleText.section(json, 'labels')),
-      semantics = SavedSemantics._(LocaleText.section(json, 'semantics'));
-
+class SavedLocale extends LocaleBundle {
   final SavedLabels labels;
 
   /// What assistive technologies say, where it differs.
   final SavedSemantics semantics;
+
+  const SavedLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory SavedLocale.fromJson(String language, Map<String, Object?> json) =>
+      SavedLocale(
+        language: language,
+        labels: SavedLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: SavedSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class SavedLabels {
-  const SavedLabels._(this._text);
-
-  final Map<String, String> _text;
-
+class SavedLabels {
   /// Saved
-  String get title => _text['title']!;
+  final String title;
+
+  const SavedLabels({required this.title});
+
+  factory SavedLabels.fromJson(Map<String, Object?> json) =>
+      SavedLabels(title: json['title'] as String);
+
+  Map<String, Object?> toJson() => {'title': title};
 }
 
-final class SavedSemantics {
-  const SavedSemantics._(this._text);
-
-  final Map<String, String> _text;
-
+class SavedSemantics {
   /// Nothing saved
-  String get nothingSaved => _text['nothingSaved']!;
+  final String nothingSaved;
+
+  const SavedSemantics({required this.nothingSaved});
+
+  factory SavedSemantics.fromJson(Map<String, Object?> json) =>
+      SavedSemantics(nothingSaved: json['nothingSaved'] as String);
+
+  Map<String, Object?> toJson() => {'nothingSaved': nothingSaved};
 }

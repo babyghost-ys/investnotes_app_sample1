@@ -5,67 +5,133 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "shell" namespace.
-final class ShellLocale extends LocaleBundle {
-  ShellLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = ShellLabels._(LocaleText.section(json, 'labels')),
-      semantics = ShellSemantics._(LocaleText.section(json, 'semantics'));
-
+class ShellLocale extends LocaleBundle {
   final ShellLabels labels;
 
   /// What assistive technologies say, where it differs.
   final ShellSemantics semantics;
+
+  const ShellLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory ShellLocale.fromJson(String language, Map<String, Object?> json) =>
+      ShellLocale(
+        language: language,
+        labels: ShellLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: ShellSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class ShellLabels {
-  const ShellLabels._(this._text);
-
-  final Map<String, String> _text;
-
+class ShellLabels {
   /// Keel
-  String get brand => _text['brand']!;
-
-  /// Find my note
-  String get findMyNote => _text['findMyNote']!;
+  final String brand;
 
   /// Home
-  String get home => _text['home']!;
-
-  /// Issued
-  String get issued => _text['issued']!;
-
-  /// Learn
-  String get learn => _text['learn']!;
+  final String home;
 
   /// My Notes
-  String get myNotes => _text['myNotes']!;
+  final String myNotes;
 
   /// Offerings
-  String get offerings => _text['offerings']!;
+  final String offerings;
+
+  /// Issued
+  final String issued;
+
+  /// Learn
+  final String learn;
 
   /// Saved
-  String get saved => _text['saved']!;
+  final String saved;
+
+  /// Find my note
+  final String findMyNote;
 
   /// Settings
-  String get settings => _text['settings']!;
+  final String settings;
+
+  const ShellLabels({
+    required this.brand,
+    required this.home,
+    required this.myNotes,
+    required this.offerings,
+    required this.issued,
+    required this.learn,
+    required this.saved,
+    required this.findMyNote,
+    required this.settings,
+  });
+
+  factory ShellLabels.fromJson(Map<String, Object?> json) => ShellLabels(
+    brand: json['brand'] as String,
+    home: json['home'] as String,
+    myNotes: json['myNotes'] as String,
+    offerings: json['offerings'] as String,
+    issued: json['issued'] as String,
+    learn: json['learn'] as String,
+    saved: json['saved'] as String,
+    findMyNote: json['findMyNote'] as String,
+    settings: json['settings'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'brand': brand,
+    'home': home,
+    'myNotes': myNotes,
+    'offerings': offerings,
+    'issued': issued,
+    'learn': learn,
+    'saved': saved,
+    'findMyNote': findMyNote,
+    'settings': settings,
+  };
 }
 
-final class ShellSemantics {
-  const ShellSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Keel menu
-  String get keelMenu => _text['keelMenu']!;
-
+class ShellSemantics {
   /// Menu
-  String get menu => _text['menu']!;
+  final String menu;
 
   /// Search
-  String get search => _text['search']!;
+  final String search;
+
+  /// Keel menu
+  final String keelMenu;
 
   /// Sign in
-  String get signIn => _text['signIn']!;
+  final String signIn;
 
   /// Sign out
-  String get signOut => _text['signOut']!;
+  final String signOut;
+
+  const ShellSemantics({
+    required this.menu,
+    required this.search,
+    required this.keelMenu,
+    required this.signIn,
+    required this.signOut,
+  });
+
+  factory ShellSemantics.fromJson(Map<String, Object?> json) => ShellSemantics(
+    menu: json['menu'] as String,
+    search: json['search'] as String,
+    keelMenu: json['keelMenu'] as String,
+    signIn: json['signIn'] as String,
+    signOut: json['signOut'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'menu': menu,
+    'search': search,
+    'keelMenu': keelMenu,
+    'signIn': signIn,
+    'signOut': signOut,
+  };
 }

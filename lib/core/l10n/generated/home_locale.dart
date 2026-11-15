@@ -5,44 +5,85 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "home" namespace.
-final class HomeLocale extends LocaleBundle {
-  HomeLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = HomeLabels._(LocaleText.section(json, 'labels')),
-      semantics = HomeSemantics._(LocaleText.section(json, 'semantics'));
-
+class HomeLocale extends LocaleBundle {
   final HomeLabels labels;
 
   /// What assistive technologies say, where it differs.
   final HomeSemantics semantics;
+
+  const HomeLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory HomeLocale.fromJson(String language, Map<String, Object?> json) =>
+      HomeLocale(
+        language: language,
+        labels: HomeLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: HomeSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class HomeLabels {
-  const HomeLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Find my note
-  String get findMyNote => _text['findMyNote']!;
-
+class HomeLabels {
   /// Upside, with a floor.
-  String get headline => _text['headline']!;
+  final String headline;
 
   /// Register Today
-  String get registerToday => _text['registerToday']!;
+  final String registerToday;
 
   /// Welcome
-  String get welcome => _text['welcome']!;
+  final String welcome;
+
+  /// Find my note
+  final String findMyNote;
+
+  const HomeLabels({
+    required this.headline,
+    required this.registerToday,
+    required this.welcome,
+    required this.findMyNote,
+  });
+
+  factory HomeLabels.fromJson(Map<String, Object?> json) => HomeLabels(
+    headline: json['headline'] as String,
+    registerToday: json['registerToday'] as String,
+    welcome: json['welcome'] as String,
+    findMyNote: json['findMyNote'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'headline': headline,
+    'registerToday': registerToday,
+    'welcome': welcome,
+    'findMyNote': findMyNote,
+  };
 }
 
-final class HomeSemantics {
-  const HomeSemantics._(this._text);
-
-  final Map<String, String> _text;
-
+class HomeSemantics {
   /// Register today
-  String get registerToday => _text['registerToday']!;
+  final String registerToday;
 
   /// Welcome, {name}
+  final String _welcome;
+
+  const HomeSemantics({required this.registerToday, required this._welcome});
+
+  factory HomeSemantics.fromJson(Map<String, Object?> json) => HomeSemantics(
+    registerToday: json['registerToday'] as String,
+    welcome: json['welcome'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'registerToday': registerToday,
+    'welcome': _welcome,
+  };
+
   String welcome({required Object name}) =>
-      LocaleText.fill(_text['welcome']!, {'name': name});
+      LocaleText.fill(_welcome, {'name': name});
 }

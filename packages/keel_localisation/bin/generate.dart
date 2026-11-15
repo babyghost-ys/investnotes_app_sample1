@@ -394,24 +394,7 @@ String _namespaceClass(_Namespace namespace) {
     ..writeln("import 'package:keel_localisation/keel_localisation.dart';")
     ..writeln()
     ..writeln('/// The "${namespace.name}" namespace.')
-    ..writeln('final class ${type}Locale extends LocaleBundle {')
-    ..writeln(
-      '  ${type}Locale.fromJson(super.language, Map<String, Object?> json)',
-    )
-    ..write(
-      "    : labels = ${type}Labels._(LocaleText.section(json, 'labels'))",
-    );
-  if (hasSemantics) {
-    buffer
-      ..writeln(',')
-      ..write(
-        '      semantics = ${type}Semantics._('
-        "LocaleText.section(json, 'semantics'))",
-      );
-  }
-  buffer
-    ..writeln(';')
-    ..writeln()
+    ..writeln('class ${type}Locale extends LocaleBundle {')
     ..writeln('  final ${type}Labels labels;');
   if (hasSemantics) {
     buffer
@@ -419,7 +402,39 @@ String _namespaceClass(_Namespace namespace) {
       ..writeln('  /// What assistive technologies say, where it differs.')
       ..writeln('  final ${type}Semantics semantics;');
   }
-  buffer.writeln('}');
+  buffer
+    ..writeln()
+    ..writeln('  const ${type}Locale({')
+    ..writeln('    required super.language,')
+    ..writeln('    required this.labels,');
+  if (hasSemantics) buffer.writeln('    required this.semantics,');
+  buffer
+    ..writeln('  });')
+    ..writeln()
+    ..writeln(
+      '  factory ${type}Locale.fromJson('
+      'String language, Map<String, Object?> json) =>',
+    )
+    ..writeln('      ${type}Locale(')
+    ..writeln('        language: language,')
+    ..writeln(
+      "        labels: ${type}Labels.fromJson((json['labels'] as Map).cast()),",
+    );
+  if (hasSemantics) {
+    buffer.writeln(
+      '        semantics: ${type}Semantics.fromJson('
+      "(json['semantics'] as Map).cast()),",
+    );
+  }
+  buffer
+    ..writeln('      );')
+    ..writeln()
+    ..writeln('  Map<String, Object?> toJson() => {')
+    ..writeln("    'labels': labels.toJson(),");
+  if (hasSemantics) buffer.writeln("    'semantics': semantics.toJson(),");
+  buffer
+    ..writeln('  };')
+    ..writeln('}');
   _section(buffer, '${type}Labels', file['labels']!);
   if (hasSemantics) {
     _section(buffer, '${type}Semantics', file['semantics']!);
@@ -427,29 +442,54 @@ String _namespaceClass(_Namespace namespace) {
   return buffer.toString();
 }
 
+/// One section as a plain class: a field per key, in the JSON's order.
+/// A key with placeholders keeps its text in a private field and is read
+/// through a method that fills them, such as `inDays(days: 3)`.
 void _section(StringBuffer buffer, String type, Map<String, String> texts) {
+  final keys = texts.keys.toList();
+  final names = {
+    for (final key in keys) key: (_placeholders(texts[key]!).toList()..sort()),
+  };
+  bool filled(String key) => names[key]!.isNotEmpty;
+  String field(String key) => filled(key) ? '_$key' : key;
+
   buffer
     ..writeln()
-    ..writeln('final class $type {')
-    ..writeln('  const $type._(this._text);')
-    ..writeln()
-    ..writeln('  final Map<String, String> _text;');
-  final keys = texts.keys.toList()..sort();
+    ..writeln('class $type {');
   for (final key in keys) {
-    final english = texts[key]!.replaceAll('\n', ' ');
-    final names = _placeholders(texts[key]!).toList()..sort();
+    buffer
+      ..writeln('  /// ${texts[key]!.replaceAll('\n', ' ')}')
+      ..writeln('  final String ${field(key)};');
+  }
+  buffer
+    ..writeln()
+    ..writeln('  const $type({');
+  // A private named parameter is passed by its public name: `atLeast:`.
+  for (final key in keys) {
+    buffer.writeln('    required this.${field(key)},');
+  }
+  buffer.writeln('  });');
+  buffer
+    ..writeln()
+    ..writeln('  factory $type.fromJson(Map<String, Object?> json) => $type(');
+  for (final key in keys) {
+    buffer.writeln("    $key: json['$key'] as String,");
+  }
+  buffer
+    ..writeln('  );')
+    ..writeln()
+    ..writeln('  Map<String, Object?> toJson() => {');
+  for (final key in keys) {
+    buffer.writeln("    '$key': ${field(key)},");
+  }
+  buffer.writeln('  };');
+  for (final key in keys.where(filled)) {
+    final parameters = names[key]!.map((n) => 'required Object $n').join(', ');
+    final values = names[key]!.map((n) => "'$n': $n").join(', ');
     buffer
       ..writeln()
-      ..writeln('  /// $english');
-    if (names.isEmpty) {
-      buffer.writeln("  String get $key => _text['$key']!;");
-    } else {
-      final parameters = names.map((n) => 'required Object $n').join(', ');
-      final values = names.map((n) => "'$n': $n").join(', ');
-      buffer
-        ..writeln('  String $key({$parameters}) =>')
-        ..writeln("      LocaleText.fill(_text['$key']!, {$values});");
-    }
+      ..writeln('  String $key({$parameters}) =>')
+      ..writeln('      LocaleText.fill(_$key, {$values});');
   }
   buffer.writeln('}');
 }

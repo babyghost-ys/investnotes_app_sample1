@@ -5,162 +5,312 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "account" namespace.
-final class AccountLocale extends LocaleBundle {
-  AccountLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = AccountLabels._(LocaleText.section(json, 'labels')),
-      semantics = AccountSemantics._(LocaleText.section(json, 'semantics'));
-
+class AccountLocale extends LocaleBundle {
   final AccountLabels labels;
 
   /// What assistive technologies say, where it differs.
   final AccountSemantics semantics;
+
+  const AccountLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory AccountLocale.fromJson(String language, Map<String, Object?> json) =>
+      AccountLocale(
+        language: language,
+        labels: AccountLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: AccountSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class AccountLabels {
-  const AccountLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Account ready
-  String get accountReady => _text['accountReady']!;
-
-  /// Do you invest through an adviser?
-  String get advisedQuestion => _text['advisedQuestion']!;
-
-  /// Are you a financial adviser?
-  String get adviserQuestion => _text['adviserQuestion']!;
-
-  /// 8 or more characters
-  String get checkLength => _text['checkLength']!;
-
-  /// Passwords match
-  String get checkMatch => _text['checkMatch']!;
-
-  /// Letters and numbers
-  String get checkMix => _text['checkMix']!;
-
-  /// Code sent to
-  String get codeSentTo => _text['codeSentTo']!;
-
-  /// Confirm password
-  String get confirmPassword => _text['confirmPassword']!;
-
-  /// Email
-  String get email => _text['email']!;
-
-  /// Find username
-  String get findUsername => _text['findUsername']!;
-
-  /// New password
-  String get newPassword => _text['newPassword']!;
-
-  /// No
-  String get no => _text['no']!;
-
-  /// Password
-  String get password => _text['password']!;
-
-  /// Password changed
-  String get passwordChanged => _text['passwordChanged']!;
-
+class AccountLabels {
   /// Register
-  String get register => _text['register']!;
+  final String register;
 
   /// Reset password
-  String get resetPassword => _text['resetPassword']!;
+  final String resetPassword;
 
-  /// Account
-  String get stepAccount => _text['stepAccount']!;
+  /// Find username
+  final String findUsername;
 
   /// Start
-  String get stepStart => _text['stepStart']!;
+  final String stepStart;
+
+  /// Account
+  final String stepAccount;
 
   /// Verify
-  String get stepVerify => _text['stepVerify']!;
+  final String stepVerify;
 
-  /// Username
-  String get username => _text['username']!;
+  /// Are you a financial adviser?
+  final String adviserQuestion;
 
-  /// Username sent
-  String get usernameSent => _text['usernameSent']!;
+  /// Do you invest through an adviser?
+  final String advisedQuestion;
 
   /// Yes
-  String get yes => _text['yes']!;
+  final String yes;
+
+  /// No
+  final String no;
+
+  /// Username
+  final String username;
+
+  /// Email
+  final String email;
+
+  /// Password
+  final String password;
+
+  /// Confirm password
+  final String confirmPassword;
+
+  /// New password
+  final String newPassword;
+
+  /// 8 or more characters
+  final String checkLength;
+
+  /// Letters and numbers
+  final String checkMix;
+
+  /// Passwords match
+  final String checkMatch;
+
+  /// Code sent to
+  final String codeSentTo;
+
+  /// Account ready
+  final String accountReady;
+
+  /// Password changed
+  final String passwordChanged;
+
+  /// Username sent
+  final String usernameSent;
+
+  const AccountLabels({
+    required this.register,
+    required this.resetPassword,
+    required this.findUsername,
+    required this.stepStart,
+    required this.stepAccount,
+    required this.stepVerify,
+    required this.adviserQuestion,
+    required this.advisedQuestion,
+    required this.yes,
+    required this.no,
+    required this.username,
+    required this.email,
+    required this.password,
+    required this.confirmPassword,
+    required this.newPassword,
+    required this.checkLength,
+    required this.checkMix,
+    required this.checkMatch,
+    required this.codeSentTo,
+    required this.accountReady,
+    required this.passwordChanged,
+    required this.usernameSent,
+  });
+
+  factory AccountLabels.fromJson(Map<String, Object?> json) => AccountLabels(
+    register: json['register'] as String,
+    resetPassword: json['resetPassword'] as String,
+    findUsername: json['findUsername'] as String,
+    stepStart: json['stepStart'] as String,
+    stepAccount: json['stepAccount'] as String,
+    stepVerify: json['stepVerify'] as String,
+    adviserQuestion: json['adviserQuestion'] as String,
+    advisedQuestion: json['advisedQuestion'] as String,
+    yes: json['yes'] as String,
+    no: json['no'] as String,
+    username: json['username'] as String,
+    email: json['email'] as String,
+    password: json['password'] as String,
+    confirmPassword: json['confirmPassword'] as String,
+    newPassword: json['newPassword'] as String,
+    checkLength: json['checkLength'] as String,
+    checkMix: json['checkMix'] as String,
+    checkMatch: json['checkMatch'] as String,
+    codeSentTo: json['codeSentTo'] as String,
+    accountReady: json['accountReady'] as String,
+    passwordChanged: json['passwordChanged'] as String,
+    usernameSent: json['usernameSent'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'register': register,
+    'resetPassword': resetPassword,
+    'findUsername': findUsername,
+    'stepStart': stepStart,
+    'stepAccount': stepAccount,
+    'stepVerify': stepVerify,
+    'adviserQuestion': adviserQuestion,
+    'advisedQuestion': advisedQuestion,
+    'yes': yes,
+    'no': no,
+    'username': username,
+    'email': email,
+    'password': password,
+    'confirmPassword': confirmPassword,
+    'newPassword': newPassword,
+    'checkLength': checkLength,
+    'checkMix': checkMix,
+    'checkMatch': checkMatch,
+    'codeSentTo': codeSentTo,
+    'accountReady': accountReady,
+    'passwordChanged': passwordChanged,
+    'usernameSent': usernameSent,
+  };
 }
 
-final class AccountSemantics {
-  const AccountSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Back a step
-  String get backStep => _text['backStep']!;
-
-  /// Back to sign in
-  String get backToSignIn => _text['backToSignIn']!;
-
-  /// Change password
-  String get changePassword => _text['changePassword']!;
-
-  /// {check}, done
-  String checkMet({required Object check}) =>
-      LocaleText.fill(_text['checkMet']!, {'check': check});
-
-  /// {check}, not yet
-  String checkUnmet({required Object check}) =>
-      LocaleText.fill(_text['checkUnmet']!, {'check': check});
-
-  /// Code
-  String get code => _text['code']!;
-
-  /// Continue signed in
-  String get continueSignedIn => _text['continueSignedIn']!;
-
-  /// Hide passwords
-  String get hidePasswords => _text['hidePasswords']!;
-
-  /// Looks right
-  String get looksRight => _text['looksRight']!;
-
-  /// {first}, then hidden, at {domain}
-  String maskedEmail({required Object domain, required Object first}) =>
-      LocaleText.fill(_text['maskedEmail']!, {
-        'domain': domain,
-        'first': first,
-      });
-
-  /// New code sent
-  String get newCodeSent => _text['newCodeSent']!;
+class AccountSemantics {
+  /// Previous step
+  final String previousStep;
 
   /// Next
-  String get next => _text['next']!;
-
-  /// Previous step
-  String get previousStep => _text['previousStep']!;
+  final String next;
 
   /// Send code
-  String get sendCode => _text['sendCode']!;
+  final String sendCode;
 
-  /// Send a new code
-  String get sendNewCode => _text['sendNewCode']!;
+  /// Verify
+  final String verify;
+
+  /// Change password
+  final String changePassword;
 
   /// Send username
-  String get sendUsername => _text['sendUsername']!;
+  final String sendUsername;
+
+  /// Continue signed in
+  final String continueSignedIn;
+
+  /// Back to sign in
+  final String backToSignIn;
 
   /// Show passwords
-  String get showPasswords => _text['showPasswords']!;
+  final String showPasswords;
+
+  /// Hide passwords
+  final String hidePasswords;
+
+  /// {check}, done
+  final String _checkMet;
+
+  /// {check}, not yet
+  final String _checkUnmet;
 
   /// Step {step} of {count}, {title}
+  final String _stepOf;
+
+  /// Back a step
+  final String backStep;
+
+  /// New code sent
+  final String newCodeSent;
+
+  /// Send a new code
+  final String sendNewCode;
+
+  /// Code
+  final String code;
+
+  /// Looks right
+  final String looksRight;
+
+  /// {first}, then hidden, at {domain}
+  final String _maskedEmail;
+
+  const AccountSemantics({
+    required this.previousStep,
+    required this.next,
+    required this.sendCode,
+    required this.verify,
+    required this.changePassword,
+    required this.sendUsername,
+    required this.continueSignedIn,
+    required this.backToSignIn,
+    required this.showPasswords,
+    required this.hidePasswords,
+    required this._checkMet,
+    required this._checkUnmet,
+    required this._stepOf,
+    required this.backStep,
+    required this.newCodeSent,
+    required this.sendNewCode,
+    required this.code,
+    required this.looksRight,
+    required this._maskedEmail,
+  });
+
+  factory AccountSemantics.fromJson(Map<String, Object?> json) =>
+      AccountSemantics(
+        previousStep: json['previousStep'] as String,
+        next: json['next'] as String,
+        sendCode: json['sendCode'] as String,
+        verify: json['verify'] as String,
+        changePassword: json['changePassword'] as String,
+        sendUsername: json['sendUsername'] as String,
+        continueSignedIn: json['continueSignedIn'] as String,
+        backToSignIn: json['backToSignIn'] as String,
+        showPasswords: json['showPasswords'] as String,
+        hidePasswords: json['hidePasswords'] as String,
+        checkMet: json['checkMet'] as String,
+        checkUnmet: json['checkUnmet'] as String,
+        stepOf: json['stepOf'] as String,
+        backStep: json['backStep'] as String,
+        newCodeSent: json['newCodeSent'] as String,
+        sendNewCode: json['sendNewCode'] as String,
+        code: json['code'] as String,
+        looksRight: json['looksRight'] as String,
+        maskedEmail: json['maskedEmail'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'previousStep': previousStep,
+    'next': next,
+    'sendCode': sendCode,
+    'verify': verify,
+    'changePassword': changePassword,
+    'sendUsername': sendUsername,
+    'continueSignedIn': continueSignedIn,
+    'backToSignIn': backToSignIn,
+    'showPasswords': showPasswords,
+    'hidePasswords': hidePasswords,
+    'checkMet': _checkMet,
+    'checkUnmet': _checkUnmet,
+    'stepOf': _stepOf,
+    'backStep': backStep,
+    'newCodeSent': newCodeSent,
+    'sendNewCode': sendNewCode,
+    'code': code,
+    'looksRight': looksRight,
+    'maskedEmail': _maskedEmail,
+  };
+
+  String checkMet({required Object check}) =>
+      LocaleText.fill(_checkMet, {'check': check});
+
+  String checkUnmet({required Object check}) =>
+      LocaleText.fill(_checkUnmet, {'check': check});
+
   String stepOf({
     required Object count,
     required Object step,
     required Object title,
-  }) => LocaleText.fill(_text['stepOf']!, {
-    'count': count,
-    'step': step,
-    'title': title,
-  });
+  }) =>
+      LocaleText.fill(_stepOf, {'count': count, 'step': step, 'title': title});
 
-  /// Verify
-  String get verify => _text['verify']!;
+  String maskedEmail({required Object domain, required Object first}) =>
+      LocaleText.fill(_maskedEmail, {'domain': domain, 'first': first});
 }

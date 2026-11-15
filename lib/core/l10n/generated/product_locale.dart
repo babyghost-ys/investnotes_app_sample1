@@ -5,248 +5,471 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "product" namespace.
-final class ProductLocale extends LocaleBundle {
-  ProductLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = ProductLabels._(LocaleText.section(json, 'labels')),
-      semantics = ProductSemantics._(LocaleText.section(json, 'semantics'));
-
+class ProductLocale extends LocaleBundle {
   final ProductLabels labels;
 
   /// What assistive technologies say, where it differs.
   final ProductSemantics semantics;
-}
 
-final class ProductLabels {
-  const ProductLabels._(this._text);
-
-  final Map<String, String> _text;
-
-  /// {value} barrier
-  String barrier({required Object value}) =>
-      LocaleText.fill(_text['barrier']!, {'value': value});
-
-  /// {value} buffer
-  String buffer({required Object value}) =>
-      LocaleText.fill(_text['buffer']!, {'value': value});
-
-  /// {times} to {cap}
-  String capped({required Object cap, required Object times}) =>
-      LocaleText.fill(_text['capped']!, {'cap': cap, 'times': times});
-
-  /// {value} coupon
-  String coupon({required Object value}) =>
-      LocaleText.fill(_text['coupon']!, {'value': value});
-
-  /// Events
-  String get events => _text['events']!;
-
-  /// 100% principal
-  String get fullPrincipal => _text['fullPrincipal']!;
-
-  /// History
-  String get history => _text['history']!;
-
-  /// Market
-  String get market => _text['market']!;
-
-  /// Note
-  String get note => _text['note']!;
-
-  /// Overview
-  String get overview => _text['overview']!;
-
-  /// Payoff
-  String get payoff => _text['payoff']!;
-
-  /// / 100
-  String get perHundred => _text['perHundred']!;
-
-  /// Scenarios
-  String get scenarios => _text['scenarios']!;
-
-  /// Pays {coupon} if {underlying} ends no lower than {barrier}. Below that, the note falls with it.
-  String summaryAuto({
-    required Object barrier,
-    required Object coupon,
-    required Object underlying,
-  }) => LocaleText.fill(_text['summaryAuto']!, {
-    'barrier': barrier,
-    'coupon': coupon,
-    'underlying': underlying,
+  const ProductLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
   });
 
-  /// Earns {upside}. The first {buffer} of a fall costs nothing; beyond it, losses follow the market.
-  String summaryBuffered({required Object buffer, required Object upside}) =>
-      LocaleText.fill(_text['summaryBuffered']!, {
-        'buffer': buffer,
-        'upside': upside,
-      });
+  factory ProductLocale.fromJson(String language, Map<String, Object?> json) =>
+      ProductLocale(
+        language: language,
+        labels: ProductLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: ProductSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
 
-  /// All principal back at maturity, plus {upside}.
-  String summaryProtected({required Object upside}) =>
-      LocaleText.fill(_text['summaryProtected']!, {'upside': upside});
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
+}
 
-  /// {times} upside
-  String uncapped({required Object times}) =>
-      LocaleText.fill(_text['uncapped']!, {'times': times});
+class ProductLabels {
+  /// Overview
+  final String overview;
+
+  /// Payoff
+  final String payoff;
+
+  /// Scenarios
+  final String scenarios;
+
+  /// History
+  final String history;
+
+  /// Value
+  final String value;
+
+  /// Events
+  final String events;
 
   /// {times} any rise in {underlying}
-  String upside({required Object times, required Object underlying}) =>
-      LocaleText.fill(_text['upside']!, {
-        'times': times,
-        'underlying': underlying,
-      });
+  final String _upside;
 
   /// {times} any rise in {underlying}, up to {cap}
+  final String _upsideCapped;
+
+  /// All principal back at maturity, plus {upside}.
+  final String _summaryProtected;
+
+  /// Earns {upside}. The first {buffer} of a fall costs nothing; beyond it, losses follow the market.
+  final String _summaryBuffered;
+
+  /// Pays {coupon} if {underlying} ends no lower than {barrier}. Below that, the note falls with it.
+  final String _summaryAuto;
+
+  /// 100% principal
+  final String fullPrincipal;
+
+  /// {value} buffer
+  final String _buffer;
+
+  /// {value} barrier
+  final String _barrier;
+
+  /// {value} coupon
+  final String _coupon;
+
+  /// {times} upside
+  final String _uncapped;
+
+  /// {times} to {cap}
+  final String _capped;
+
+  /// Market
+  final String market;
+
+  /// Note
+  final String note;
+
+  /// / 100
+  final String perHundred;
+
+  const ProductLabels({
+    required this.overview,
+    required this.payoff,
+    required this.scenarios,
+    required this.history,
+    required this.value,
+    required this.events,
+    required this._upside,
+    required this._upsideCapped,
+    required this._summaryProtected,
+    required this._summaryBuffered,
+    required this._summaryAuto,
+    required this.fullPrincipal,
+    required this._buffer,
+    required this._barrier,
+    required this._coupon,
+    required this._uncapped,
+    required this._capped,
+    required this.market,
+    required this.note,
+    required this.perHundred,
+  });
+
+  factory ProductLabels.fromJson(Map<String, Object?> json) => ProductLabels(
+    overview: json['overview'] as String,
+    payoff: json['payoff'] as String,
+    scenarios: json['scenarios'] as String,
+    history: json['history'] as String,
+    value: json['value'] as String,
+    events: json['events'] as String,
+    upside: json['upside'] as String,
+    upsideCapped: json['upsideCapped'] as String,
+    summaryProtected: json['summaryProtected'] as String,
+    summaryBuffered: json['summaryBuffered'] as String,
+    summaryAuto: json['summaryAuto'] as String,
+    fullPrincipal: json['fullPrincipal'] as String,
+    buffer: json['buffer'] as String,
+    barrier: json['barrier'] as String,
+    coupon: json['coupon'] as String,
+    uncapped: json['uncapped'] as String,
+    capped: json['capped'] as String,
+    market: json['market'] as String,
+    note: json['note'] as String,
+    perHundred: json['perHundred'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'overview': overview,
+    'payoff': payoff,
+    'scenarios': scenarios,
+    'history': history,
+    'value': value,
+    'events': events,
+    'upside': _upside,
+    'upsideCapped': _upsideCapped,
+    'summaryProtected': _summaryProtected,
+    'summaryBuffered': _summaryBuffered,
+    'summaryAuto': _summaryAuto,
+    'fullPrincipal': fullPrincipal,
+    'buffer': _buffer,
+    'barrier': _barrier,
+    'coupon': _coupon,
+    'uncapped': _uncapped,
+    'capped': _capped,
+    'market': market,
+    'note': note,
+    'perHundred': perHundred,
+  };
+
+  String upside({required Object times, required Object underlying}) =>
+      LocaleText.fill(_upside, {'times': times, 'underlying': underlying});
+
   String upsideCapped({
     required Object cap,
     required Object times,
     required Object underlying,
-  }) => LocaleText.fill(_text['upsideCapped']!, {
+  }) => LocaleText.fill(_upsideCapped, {
     'cap': cap,
     'times': times,
     'underlying': underlying,
   });
 
-  /// Value
-  String get value => _text['value']!;
+  String summaryProtected({required Object upside}) =>
+      LocaleText.fill(_summaryProtected, {'upside': upside});
+
+  String summaryBuffered({required Object buffer, required Object upside}) =>
+      LocaleText.fill(_summaryBuffered, {'buffer': buffer, 'upside': upside});
+
+  String summaryAuto({
+    required Object barrier,
+    required Object coupon,
+    required Object underlying,
+  }) => LocaleText.fill(_summaryAuto, {
+    'barrier': barrier,
+    'coupon': coupon,
+    'underlying': underlying,
+  });
+
+  String buffer({required Object value}) =>
+      LocaleText.fill(_buffer, {'value': value});
+
+  String barrier({required Object value}) =>
+      LocaleText.fill(_barrier, {'value': value});
+
+  String coupon({required Object value}) =>
+      LocaleText.fill(_coupon, {'value': value});
+
+  String uncapped({required Object times}) =>
+      LocaleText.fill(_uncapped, {'times': times});
+
+  String capped({required Object cap, required Object times}) =>
+      LocaleText.fill(_capped, {'cap': cap, 'times': times});
 }
 
-final class ProductSemantics {
-  const ProductSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// Asset class {value}
-  String assetClass({required Object value}) =>
-      LocaleText.fill(_text['assetClass']!, {'value': value});
-
-  /// Barrier at {value}
-  String barrier({required Object value}) =>
-      LocaleText.fill(_text['barrier']!, {'value': value});
-
-  /// Losses buffered up to {value}
-  String buffer({required Object value}) =>
-      LocaleText.fill(_text['buffer']!, {'value': value});
-
-  /// Participation {times}, capped at {cap}
-  String capped({required Object cap, required Object times}) =>
-      LocaleText.fill(_text['capped']!, {'cap': cap, 'times': times});
-
-  /// Copy FundSERV code
-  String get copyFundserv => _text['copyFundserv']!;
-
-  /// Coupon {value} over the term
-  String coupon({required Object value}) =>
-      LocaleText.fill(_text['coupon']!, {'value': value});
-
-  /// Currency {value}
-  String currency({required Object value}) =>
-      LocaleText.fill(_text['currency']!, {'value': value});
-
-  /// Done
-  String get done => _text['done']!;
-
-  /// {state}, {event}, {date}
-  String event({
-    required Object date,
-    required Object event,
-    required Object state,
-  }) => LocaleText.fill(_text['event']!, {
-    'date': date,
-    'event': event,
-    'state': state,
-  });
-
-  /// Principal fully protected at maturity
-  String get fullPrincipal => _text['fullPrincipal']!;
-
-  /// FundSERV code {code}
-  String fundserv({required Object code}) =>
-      LocaleText.fill(_text['fundserv']!, {'code': code});
-
-  /// High {value}
-  String high({required Object value}) =>
-      LocaleText.fill(_text['high']!, {'value': value});
-
-  /// Low {value}
-  String low({required Object value}) =>
-      LocaleText.fill(_text['low']!, {'value': value});
-
-  /// Market move
-  String get marketMove => _text['marketMove']!;
-
-  /// Market moves {value}
-  String marketMoves({required Object value}) =>
-      LocaleText.fill(_text['marketMoves']!, {'value': value});
-
-  /// Next
-  String get next => _text['next']!;
-
-  /// Note returns {value}
-  String noteReturns({required Object value}) =>
-      LocaleText.fill(_text['noteReturns']!, {'value': value});
-
-  /// Open, {closes}
-  String open({required Object closes}) =>
-      LocaleText.fill(_text['open']!, {'closes': closes});
-
-  /// Indicative price {value} per 100
-  String price({required Object value}) =>
-      LocaleText.fill(_text['price']!, {'value': value});
-
-  /// Region {value}
-  String region({required Object value}) =>
-      LocaleText.fill(_text['region']!, {'value': value});
-
-  /// Return since issue {value}
-  String returnSinceIssue({required Object value}) =>
-      LocaleText.fill(_text['returnSinceIssue']!, {'value': value});
-
+class ProductSemantics {
   /// Save
-  String get save => _text['save']!;
-
-  /// Market {move}, note {result}
-  String scenario({required Object move, required Object result}) =>
-      LocaleText.fill(_text['scenario']!, {'move': move, 'result': result});
-
-  /// Term {value}
-  String term({required Object value}) =>
-      LocaleText.fill(_text['term']!, {'value': value});
-
-  /// {percent} of the term gone, {from} to {to}
-  String termGone({
-    required Object from,
-    required Object percent,
-    required Object to,
-  }) => LocaleText.fill(_text['termGone']!, {
-    'from': from,
-    'percent': percent,
-    'to': to,
-  });
-
-  /// Participation {times}, uncapped
-  String uncapped({required Object times}) =>
-      LocaleText.fill(_text['uncapped']!, {'times': times});
-
-  /// Underlying {name}
-  String underlying({required Object name}) =>
-      LocaleText.fill(_text['underlying']!, {'name': name});
+  final String save;
 
   /// Remove from saved
-  String get unsave => _text['unsave']!;
+  final String unsave;
 
-  /// Upcoming
-  String get upcoming => _text['upcoming']!;
+  /// Open, {closes}
+  final String _open;
+
+  /// Term {value}
+  final String _term;
+
+  /// Principal fully protected at maturity
+  final String fullPrincipal;
+
+  /// Losses buffered up to {value}
+  final String _buffer;
+
+  /// Barrier at {value}
+  final String _barrier;
+
+  /// Coupon {value} over the term
+  final String _coupon;
+
+  /// Participation {times}, uncapped
+  final String _uncapped;
+
+  /// Participation {times}, capped at {cap}
+  final String _capped;
+
+  /// Currency {value}
+  final String _currency;
+
+  /// Region {value}
+  final String _region;
+
+  /// Asset class {value}
+  final String _assetClass;
+
+  /// Underlying {name}
+  final String _underlying;
+
+  /// FundSERV code {code}
+  final String _fundserv;
+
+  /// Copy FundSERV code
+  final String copyFundserv;
+
+  /// Return since issue {value}
+  final String _returnSinceIssue;
 
   /// Value from {from} to {to}, {change}
+  final String _valueRange;
+
+  /// High {value}
+  final String _high;
+
+  /// Low {value}
+  final String _low;
+
+  /// Market {move}, note {result}
+  final String _scenario;
+
+  /// Done
+  final String done;
+
+  /// Next
+  final String next;
+
+  /// Upcoming
+  final String upcoming;
+
+  /// {state}, {event}, {date}
+  final String _event;
+
+  /// Indicative price {value} per 100
+  final String _price;
+
+  /// {percent} of the term gone, {from} to {to}
+  final String _termGone;
+
+  /// Note returns {value}
+  final String _noteReturns;
+
+  /// Market moves {value}
+  final String _marketMoves;
+
+  /// Market move
+  final String marketMove;
+
+  const ProductSemantics({
+    required this.save,
+    required this.unsave,
+    required this._open,
+    required this._term,
+    required this.fullPrincipal,
+    required this._buffer,
+    required this._barrier,
+    required this._coupon,
+    required this._uncapped,
+    required this._capped,
+    required this._currency,
+    required this._region,
+    required this._assetClass,
+    required this._underlying,
+    required this._fundserv,
+    required this.copyFundserv,
+    required this._returnSinceIssue,
+    required this._valueRange,
+    required this._high,
+    required this._low,
+    required this._scenario,
+    required this.done,
+    required this.next,
+    required this.upcoming,
+    required this._event,
+    required this._price,
+    required this._termGone,
+    required this._noteReturns,
+    required this._marketMoves,
+    required this.marketMove,
+  });
+
+  factory ProductSemantics.fromJson(Map<String, Object?> json) =>
+      ProductSemantics(
+        save: json['save'] as String,
+        unsave: json['unsave'] as String,
+        open: json['open'] as String,
+        term: json['term'] as String,
+        fullPrincipal: json['fullPrincipal'] as String,
+        buffer: json['buffer'] as String,
+        barrier: json['barrier'] as String,
+        coupon: json['coupon'] as String,
+        uncapped: json['uncapped'] as String,
+        capped: json['capped'] as String,
+        currency: json['currency'] as String,
+        region: json['region'] as String,
+        assetClass: json['assetClass'] as String,
+        underlying: json['underlying'] as String,
+        fundserv: json['fundserv'] as String,
+        copyFundserv: json['copyFundserv'] as String,
+        returnSinceIssue: json['returnSinceIssue'] as String,
+        valueRange: json['valueRange'] as String,
+        high: json['high'] as String,
+        low: json['low'] as String,
+        scenario: json['scenario'] as String,
+        done: json['done'] as String,
+        next: json['next'] as String,
+        upcoming: json['upcoming'] as String,
+        event: json['event'] as String,
+        price: json['price'] as String,
+        termGone: json['termGone'] as String,
+        noteReturns: json['noteReturns'] as String,
+        marketMoves: json['marketMoves'] as String,
+        marketMove: json['marketMove'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'save': save,
+    'unsave': unsave,
+    'open': _open,
+    'term': _term,
+    'fullPrincipal': fullPrincipal,
+    'buffer': _buffer,
+    'barrier': _barrier,
+    'coupon': _coupon,
+    'uncapped': _uncapped,
+    'capped': _capped,
+    'currency': _currency,
+    'region': _region,
+    'assetClass': _assetClass,
+    'underlying': _underlying,
+    'fundserv': _fundserv,
+    'copyFundserv': copyFundserv,
+    'returnSinceIssue': _returnSinceIssue,
+    'valueRange': _valueRange,
+    'high': _high,
+    'low': _low,
+    'scenario': _scenario,
+    'done': done,
+    'next': next,
+    'upcoming': upcoming,
+    'event': _event,
+    'price': _price,
+    'termGone': _termGone,
+    'noteReturns': _noteReturns,
+    'marketMoves': _marketMoves,
+    'marketMove': marketMove,
+  };
+
+  String open({required Object closes}) =>
+      LocaleText.fill(_open, {'closes': closes});
+
+  String term({required Object value}) =>
+      LocaleText.fill(_term, {'value': value});
+
+  String buffer({required Object value}) =>
+      LocaleText.fill(_buffer, {'value': value});
+
+  String barrier({required Object value}) =>
+      LocaleText.fill(_barrier, {'value': value});
+
+  String coupon({required Object value}) =>
+      LocaleText.fill(_coupon, {'value': value});
+
+  String uncapped({required Object times}) =>
+      LocaleText.fill(_uncapped, {'times': times});
+
+  String capped({required Object cap, required Object times}) =>
+      LocaleText.fill(_capped, {'cap': cap, 'times': times});
+
+  String currency({required Object value}) =>
+      LocaleText.fill(_currency, {'value': value});
+
+  String region({required Object value}) =>
+      LocaleText.fill(_region, {'value': value});
+
+  String assetClass({required Object value}) =>
+      LocaleText.fill(_assetClass, {'value': value});
+
+  String underlying({required Object name}) =>
+      LocaleText.fill(_underlying, {'name': name});
+
+  String fundserv({required Object code}) =>
+      LocaleText.fill(_fundserv, {'code': code});
+
+  String returnSinceIssue({required Object value}) =>
+      LocaleText.fill(_returnSinceIssue, {'value': value});
+
   String valueRange({
     required Object change,
     required Object from,
     required Object to,
-  }) => LocaleText.fill(_text['valueRange']!, {
-    'change': change,
-    'from': from,
-    'to': to,
-  });
+  }) =>
+      LocaleText.fill(_valueRange, {'change': change, 'from': from, 'to': to});
+
+  String high({required Object value}) =>
+      LocaleText.fill(_high, {'value': value});
+
+  String low({required Object value}) =>
+      LocaleText.fill(_low, {'value': value});
+
+  String scenario({required Object move, required Object result}) =>
+      LocaleText.fill(_scenario, {'move': move, 'result': result});
+
+  String event({
+    required Object date,
+    required Object event,
+    required Object state,
+  }) => LocaleText.fill(_event, {'date': date, 'event': event, 'state': state});
+
+  String price({required Object value}) =>
+      LocaleText.fill(_price, {'value': value});
+
+  String termGone({
+    required Object from,
+    required Object percent,
+    required Object to,
+  }) =>
+      LocaleText.fill(_termGone, {'from': from, 'percent': percent, 'to': to});
+
+  String noteReturns({required Object value}) =>
+      LocaleText.fill(_noteReturns, {'value': value});
+
+  String marketMoves({required Object value}) =>
+      LocaleText.fill(_marketMoves, {'value': value});
 }

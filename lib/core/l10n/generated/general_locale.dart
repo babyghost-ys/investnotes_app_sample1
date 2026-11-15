@@ -5,312 +5,636 @@
 import 'package:keel_localisation/keel_localisation.dart';
 
 /// The "general" namespace.
-final class GeneralLocale extends LocaleBundle {
-  GeneralLocale.fromJson(super.language, Map<String, Object?> json)
-    : labels = GeneralLabels._(LocaleText.section(json, 'labels')),
-      semantics = GeneralSemantics._(LocaleText.section(json, 'semantics'));
-
+class GeneralLocale extends LocaleBundle {
   final GeneralLabels labels;
 
   /// What assistive technologies say, where it differs.
   final GeneralSemantics semantics;
+
+  const GeneralLocale({
+    required super.language,
+    required this.labels,
+    required this.semantics,
+  });
+
+  factory GeneralLocale.fromJson(String language, Map<String, Object?> json) =>
+      GeneralLocale(
+        language: language,
+        labels: GeneralLabels.fromJson((json['labels'] as Map).cast()),
+        semantics: GeneralSemantics.fromJson((json['semantics'] as Map).cast()),
+      );
+
+  Map<String, Object?> toJson() => {
+    'labels': labels.toJson(),
+    'semantics': semantics.toJson(),
+  };
 }
 
-final class GeneralLabels {
-  const GeneralLabels._(this._text);
+class GeneralLabels {
+  /// Market-linked deposits
+  final String typeMld;
 
-  final Map<String, String> _text;
+  /// Principal protected notes
+  final String typePpn;
 
-  /// Any
-  String get any => _text['any']!;
+  /// Buffered notes
+  final String typePar;
 
-  /// Commodity
-  String get assetCommodity => _text['assetCommodity']!;
+  /// Autocallable notes
+  final String typeAuto;
+
+  /// Global
+  final String regionGlobal;
+
+  /// Americas
+  final String regionAmericas;
+
+  /// Europe
+  final String regionEurope;
+
+  /// Asia-Pacific
+  final String regionAsiaPacific;
 
   /// Equity
-  String get assetEquity => _text['assetEquity']!;
+  final String assetEquity;
 
-  /// Multi-asset
-  String get assetMultiAsset => _text['assetMultiAsset']!;
+  /// Commodity
+  final String assetCommodity;
 
   /// Rates
-  String get assetRates => _text['assetRates']!;
+  final String assetRates;
+
+  /// Multi-asset
+  final String assetMultiAsset;
+
+  /// Active
+  final String statusActive;
+
+  /// Called
+  final String statusCalled;
+
+  /// Matured
+  final String statusMatured;
+
+  /// A-class
+  final String shareClassA;
+
+  /// F-class
+  final String shareClassF;
+
+  /// Income
+  final String goalIncome;
+
+  /// Growth
+  final String goalGrowth;
+
+  /// Income & growth
+  final String goalBoth;
+
+  /// Up to 3 yrs
+  final String termShort;
+
+  /// 4–5 yrs
+  final String termMedium;
+
+  /// 6+ yrs
+  final String termLong;
+
+  /// At maturity
+  final String payoutMaturity;
+
+  /// Annual
+  final String payoutAnnual;
+
+  /// Quarterly
+  final String payoutQuarterly;
+
+  /// Subscription closes
+  final String eventCloses;
+
+  /// Issued
+  final String eventIssued;
+
+  /// Call check
+  final String eventCallCheck;
+
+  /// Called
+  final String eventCalled;
+
+  /// Matures
+  final String eventMatures;
+
+  /// Today
+  final String today;
+
+  /// Tomorrow
+  final String tomorrow;
+
+  /// Yesterday
+  final String yesterday;
+
+  /// In {days} days
+  final String _inDays;
+
+  /// {days} days ago
+  final String _daysAgo;
+
+  /// 1 yr
+  final String yearOne;
+
+  /// {count} yrs
+  final String _years;
+
+  /// Jan
+  final String monthJan;
+
+  /// Feb
+  final String monthFeb;
+
+  /// Mar
+  final String monthMar;
+
+  /// Apr
+  final String monthApr;
+
+  /// May
+  final String monthMay;
+
+  /// Jun
+  final String monthJun;
+
+  /// Jul
+  final String monthJul;
+
+  /// Aug
+  final String monthAug;
+
+  /// Sep
+  final String monthSep;
+
+  /// Oct
+  final String monthOct;
+
+  /// Nov
+  final String monthNov;
+
+  /// Dec
+  final String monthDec;
 
   /// {day} {month}
-  String dayMonth({required Object day, required Object month}) =>
-      LocaleText.fill(_text['dayMonth']!, {'day': day, 'month': month});
+  final String _dayMonth;
 
   /// {day} {month} {year}
+  final String _dayMonthYear;
+
+  /// .
+  final String decimalSeparator;
+
+  /// ,
+  final String groupSeparator;
+
+  /// {value}%
+  final String _percent;
+
+  /// {value}×
+  final String _times;
+
+  /// ${value}
+  final String _dollars;
+
+  /// No matches
+  final String noMatches;
+
+  /// Filters
+  final String filters;
+
+  /// Any
+  final String any;
+
+  /// {day}
+  final String _firstOfMonth;
+
+  const GeneralLabels({
+    required this.typeMld,
+    required this.typePpn,
+    required this.typePar,
+    required this.typeAuto,
+    required this.regionGlobal,
+    required this.regionAmericas,
+    required this.regionEurope,
+    required this.regionAsiaPacific,
+    required this.assetEquity,
+    required this.assetCommodity,
+    required this.assetRates,
+    required this.assetMultiAsset,
+    required this.statusActive,
+    required this.statusCalled,
+    required this.statusMatured,
+    required this.shareClassA,
+    required this.shareClassF,
+    required this.goalIncome,
+    required this.goalGrowth,
+    required this.goalBoth,
+    required this.termShort,
+    required this.termMedium,
+    required this.termLong,
+    required this.payoutMaturity,
+    required this.payoutAnnual,
+    required this.payoutQuarterly,
+    required this.eventCloses,
+    required this.eventIssued,
+    required this.eventCallCheck,
+    required this.eventCalled,
+    required this.eventMatures,
+    required this.today,
+    required this.tomorrow,
+    required this.yesterday,
+    required this._inDays,
+    required this._daysAgo,
+    required this.yearOne,
+    required this._years,
+    required this.monthJan,
+    required this.monthFeb,
+    required this.monthMar,
+    required this.monthApr,
+    required this.monthMay,
+    required this.monthJun,
+    required this.monthJul,
+    required this.monthAug,
+    required this.monthSep,
+    required this.monthOct,
+    required this.monthNov,
+    required this.monthDec,
+    required this._dayMonth,
+    required this._dayMonthYear,
+    required this.decimalSeparator,
+    required this.groupSeparator,
+    required this._percent,
+    required this._times,
+    required this._dollars,
+    required this.noMatches,
+    required this.filters,
+    required this.any,
+    required this._firstOfMonth,
+  });
+
+  factory GeneralLabels.fromJson(Map<String, Object?> json) => GeneralLabels(
+    typeMld: json['typeMld'] as String,
+    typePpn: json['typePpn'] as String,
+    typePar: json['typePar'] as String,
+    typeAuto: json['typeAuto'] as String,
+    regionGlobal: json['regionGlobal'] as String,
+    regionAmericas: json['regionAmericas'] as String,
+    regionEurope: json['regionEurope'] as String,
+    regionAsiaPacific: json['regionAsiaPacific'] as String,
+    assetEquity: json['assetEquity'] as String,
+    assetCommodity: json['assetCommodity'] as String,
+    assetRates: json['assetRates'] as String,
+    assetMultiAsset: json['assetMultiAsset'] as String,
+    statusActive: json['statusActive'] as String,
+    statusCalled: json['statusCalled'] as String,
+    statusMatured: json['statusMatured'] as String,
+    shareClassA: json['shareClassA'] as String,
+    shareClassF: json['shareClassF'] as String,
+    goalIncome: json['goalIncome'] as String,
+    goalGrowth: json['goalGrowth'] as String,
+    goalBoth: json['goalBoth'] as String,
+    termShort: json['termShort'] as String,
+    termMedium: json['termMedium'] as String,
+    termLong: json['termLong'] as String,
+    payoutMaturity: json['payoutMaturity'] as String,
+    payoutAnnual: json['payoutAnnual'] as String,
+    payoutQuarterly: json['payoutQuarterly'] as String,
+    eventCloses: json['eventCloses'] as String,
+    eventIssued: json['eventIssued'] as String,
+    eventCallCheck: json['eventCallCheck'] as String,
+    eventCalled: json['eventCalled'] as String,
+    eventMatures: json['eventMatures'] as String,
+    today: json['today'] as String,
+    tomorrow: json['tomorrow'] as String,
+    yesterday: json['yesterday'] as String,
+    inDays: json['inDays'] as String,
+    daysAgo: json['daysAgo'] as String,
+    yearOne: json['yearOne'] as String,
+    years: json['years'] as String,
+    monthJan: json['monthJan'] as String,
+    monthFeb: json['monthFeb'] as String,
+    monthMar: json['monthMar'] as String,
+    monthApr: json['monthApr'] as String,
+    monthMay: json['monthMay'] as String,
+    monthJun: json['monthJun'] as String,
+    monthJul: json['monthJul'] as String,
+    monthAug: json['monthAug'] as String,
+    monthSep: json['monthSep'] as String,
+    monthOct: json['monthOct'] as String,
+    monthNov: json['monthNov'] as String,
+    monthDec: json['monthDec'] as String,
+    dayMonth: json['dayMonth'] as String,
+    dayMonthYear: json['dayMonthYear'] as String,
+    decimalSeparator: json['decimalSeparator'] as String,
+    groupSeparator: json['groupSeparator'] as String,
+    percent: json['percent'] as String,
+    times: json['times'] as String,
+    dollars: json['dollars'] as String,
+    noMatches: json['noMatches'] as String,
+    filters: json['filters'] as String,
+    any: json['any'] as String,
+    firstOfMonth: json['firstOfMonth'] as String,
+  );
+
+  Map<String, Object?> toJson() => {
+    'typeMld': typeMld,
+    'typePpn': typePpn,
+    'typePar': typePar,
+    'typeAuto': typeAuto,
+    'regionGlobal': regionGlobal,
+    'regionAmericas': regionAmericas,
+    'regionEurope': regionEurope,
+    'regionAsiaPacific': regionAsiaPacific,
+    'assetEquity': assetEquity,
+    'assetCommodity': assetCommodity,
+    'assetRates': assetRates,
+    'assetMultiAsset': assetMultiAsset,
+    'statusActive': statusActive,
+    'statusCalled': statusCalled,
+    'statusMatured': statusMatured,
+    'shareClassA': shareClassA,
+    'shareClassF': shareClassF,
+    'goalIncome': goalIncome,
+    'goalGrowth': goalGrowth,
+    'goalBoth': goalBoth,
+    'termShort': termShort,
+    'termMedium': termMedium,
+    'termLong': termLong,
+    'payoutMaturity': payoutMaturity,
+    'payoutAnnual': payoutAnnual,
+    'payoutQuarterly': payoutQuarterly,
+    'eventCloses': eventCloses,
+    'eventIssued': eventIssued,
+    'eventCallCheck': eventCallCheck,
+    'eventCalled': eventCalled,
+    'eventMatures': eventMatures,
+    'today': today,
+    'tomorrow': tomorrow,
+    'yesterday': yesterday,
+    'inDays': _inDays,
+    'daysAgo': _daysAgo,
+    'yearOne': yearOne,
+    'years': _years,
+    'monthJan': monthJan,
+    'monthFeb': monthFeb,
+    'monthMar': monthMar,
+    'monthApr': monthApr,
+    'monthMay': monthMay,
+    'monthJun': monthJun,
+    'monthJul': monthJul,
+    'monthAug': monthAug,
+    'monthSep': monthSep,
+    'monthOct': monthOct,
+    'monthNov': monthNov,
+    'monthDec': monthDec,
+    'dayMonth': _dayMonth,
+    'dayMonthYear': _dayMonthYear,
+    'decimalSeparator': decimalSeparator,
+    'groupSeparator': groupSeparator,
+    'percent': _percent,
+    'times': _times,
+    'dollars': _dollars,
+    'noMatches': noMatches,
+    'filters': filters,
+    'any': any,
+    'firstOfMonth': _firstOfMonth,
+  };
+
+  String inDays({required Object days}) =>
+      LocaleText.fill(_inDays, {'days': days});
+
+  String daysAgo({required Object days}) =>
+      LocaleText.fill(_daysAgo, {'days': days});
+
+  String years({required Object count}) =>
+      LocaleText.fill(_years, {'count': count});
+
+  String dayMonth({required Object day, required Object month}) =>
+      LocaleText.fill(_dayMonth, {'day': day, 'month': month});
+
   String dayMonthYear({
     required Object day,
     required Object month,
     required Object year,
-  }) => LocaleText.fill(_text['dayMonthYear']!, {
+  }) => LocaleText.fill(_dayMonthYear, {
     'day': day,
     'month': month,
     'year': year,
   });
 
-  /// {days} days ago
-  String daysAgo({required Object days}) =>
-      LocaleText.fill(_text['daysAgo']!, {'days': days});
-
-  /// .
-  String get decimalSeparator => _text['decimalSeparator']!;
-
-  /// ${value}
-  String dollars({required Object value}) =>
-      LocaleText.fill(_text['dollars']!, {'value': value});
-
-  /// Call check
-  String get eventCallCheck => _text['eventCallCheck']!;
-
-  /// Called
-  String get eventCalled => _text['eventCalled']!;
-
-  /// Subscription closes
-  String get eventCloses => _text['eventCloses']!;
-
-  /// Issued
-  String get eventIssued => _text['eventIssued']!;
-
-  /// Matures
-  String get eventMatures => _text['eventMatures']!;
-
-  /// Filters
-  String get filters => _text['filters']!;
-
-  /// {day}
-  String firstOfMonth({required Object day}) =>
-      LocaleText.fill(_text['firstOfMonth']!, {'day': day});
-
-  /// Income & growth
-  String get goalBoth => _text['goalBoth']!;
-
-  /// Growth
-  String get goalGrowth => _text['goalGrowth']!;
-
-  /// Income
-  String get goalIncome => _text['goalIncome']!;
-
-  /// ,
-  String get groupSeparator => _text['groupSeparator']!;
-
-  /// In {days} days
-  String inDays({required Object days}) =>
-      LocaleText.fill(_text['inDays']!, {'days': days});
-
-  /// Apr
-  String get monthApr => _text['monthApr']!;
-
-  /// Aug
-  String get monthAug => _text['monthAug']!;
-
-  /// Dec
-  String get monthDec => _text['monthDec']!;
-
-  /// Feb
-  String get monthFeb => _text['monthFeb']!;
-
-  /// Jan
-  String get monthJan => _text['monthJan']!;
-
-  /// Jul
-  String get monthJul => _text['monthJul']!;
-
-  /// Jun
-  String get monthJun => _text['monthJun']!;
-
-  /// Mar
-  String get monthMar => _text['monthMar']!;
-
-  /// May
-  String get monthMay => _text['monthMay']!;
-
-  /// Nov
-  String get monthNov => _text['monthNov']!;
-
-  /// Oct
-  String get monthOct => _text['monthOct']!;
-
-  /// Sep
-  String get monthSep => _text['monthSep']!;
-
-  /// No matches
-  String get noMatches => _text['noMatches']!;
-
-  /// Annual
-  String get payoutAnnual => _text['payoutAnnual']!;
-
-  /// At maturity
-  String get payoutMaturity => _text['payoutMaturity']!;
-
-  /// Quarterly
-  String get payoutQuarterly => _text['payoutQuarterly']!;
-
-  /// {value}%
   String percent({required Object value}) =>
-      LocaleText.fill(_text['percent']!, {'value': value});
+      LocaleText.fill(_percent, {'value': value});
 
-  /// Americas
-  String get regionAmericas => _text['regionAmericas']!;
-
-  /// Asia-Pacific
-  String get regionAsiaPacific => _text['regionAsiaPacific']!;
-
-  /// Europe
-  String get regionEurope => _text['regionEurope']!;
-
-  /// Global
-  String get regionGlobal => _text['regionGlobal']!;
-
-  /// A-class
-  String get shareClassA => _text['shareClassA']!;
-
-  /// F-class
-  String get shareClassF => _text['shareClassF']!;
-
-  /// Active
-  String get statusActive => _text['statusActive']!;
-
-  /// Called
-  String get statusCalled => _text['statusCalled']!;
-
-  /// Matured
-  String get statusMatured => _text['statusMatured']!;
-
-  /// 6+ yrs
-  String get termLong => _text['termLong']!;
-
-  /// 4–5 yrs
-  String get termMedium => _text['termMedium']!;
-
-  /// Up to 3 yrs
-  String get termShort => _text['termShort']!;
-
-  /// {value}×
   String times({required Object value}) =>
-      LocaleText.fill(_text['times']!, {'value': value});
+      LocaleText.fill(_times, {'value': value});
 
-  /// Today
-  String get today => _text['today']!;
+  String dollars({required Object value}) =>
+      LocaleText.fill(_dollars, {'value': value});
 
-  /// Tomorrow
-  String get tomorrow => _text['tomorrow']!;
-
-  /// Autocallable notes
-  String get typeAuto => _text['typeAuto']!;
-
-  /// Market-linked deposits
-  String get typeMld => _text['typeMld']!;
-
-  /// Buffered notes
-  String get typePar => _text['typePar']!;
-
-  /// Principal protected notes
-  String get typePpn => _text['typePpn']!;
-
-  /// 1 yr
-  String get yearOne => _text['yearOne']!;
-
-  /// {count} yrs
-  String years({required Object count}) =>
-      LocaleText.fill(_text['years']!, {'count': count});
-
-  /// Yesterday
-  String get yesterday => _text['yesterday']!;
+  String firstOfMonth({required Object day}) =>
+      LocaleText.fill(_firstOfMonth, {'day': day});
 }
 
-final class GeneralSemantics {
-  const GeneralSemantics._(this._text);
-
-  final Map<String, String> _text;
-
-  /// any
-  String get any => _text['any']!;
-
-  /// Asset class
-  String get assetClass => _text['assetClass']!;
-
-  /// capped at {value}
-  String cappedAt({required Object value}) =>
-      LocaleText.fill(_text['cappedAt']!, {'value': value});
-
-  /// Clear filters
-  String get clearFilters => _text['clearFilters']!;
-
+class GeneralSemantics {
   /// Close
-  String get close => _text['close']!;
-
-  /// closes in {days} days
-  String closesIn({required Object days}) =>
-      LocaleText.fill(_text['closesIn']!, {'days': days});
-
-  /// closes {date}
-  String closesOn({required Object date}) =>
-      LocaleText.fill(_text['closesOn']!, {'date': date});
-
-  /// closes today
-  String get closesToday => _text['closesToday']!;
-
-  /// closes tomorrow
-  String get closesTomorrow => _text['closesTomorrow']!;
-
-  /// coupon {value}
-  String coupon({required Object value}) =>
-      LocaleText.fill(_text['coupon']!, {'value': value});
-
-  /// Currency
-  String get currency => _text['currency']!;
-
-  /// Didn’t load
-  String get didntLoad => _text['didntLoad']!;
-
-  /// down {value} since issue
-  String downSinceIssue({required Object value}) =>
-      LocaleText.fill(_text['downSinceIssue']!, {'value': value});
-
-  /// Filters
-  String get filters => _text['filters']!;
-
-  /// Filters, {count} on
-  String filtersOn({required Object count}) =>
-      LocaleText.fill(_text['filtersOn']!, {'count': count});
-
-  /// Keel
-  String get keel => _text['keel']!;
-
-  /// Loading
-  String get loading => _text['loading']!;
-
-  /// Note type
-  String get noteType => _text['noteType']!;
-
-  /// Open {name}
-  String openItem({required Object name}) =>
-      LocaleText.fill(_text['openItem']!, {'name': name});
-
-  /// {value} times participation
-  String participation({required Object value}) =>
-      LocaleText.fill(_text['participation']!, {'value': value});
-
-  /// Region
-  String get region => _text['region']!;
-
-  /// Reset
-  String get reset => _text['reset']!;
-
-  /// Show {count} results
-  String showResults({required Object count}) =>
-      LocaleText.fill(_text['showResults']!, {'count': count});
+  final String close;
 
   /// Try again
-  String get tryAgain => _text['tryAgain']!;
+  final String tryAgain;
 
-  /// unchanged since issue
-  String get unchangedSinceIssue => _text['unchangedSinceIssue']!;
+  /// Clear filters
+  final String clearFilters;
+
+  /// Reset
+  final String reset;
+
+  /// Filters
+  final String filters;
+
+  /// Filters, {count} on
+  final String _filtersOn;
+
+  /// Show {count} results
+  final String _showResults;
+
+  /// Loading
+  final String loading;
+
+  /// Didn’t load
+  final String didntLoad;
+
+  /// Open {name}
+  final String _openItem;
+
+  /// Keel
+  final String keel;
+
+  /// Currency
+  final String currency;
+
+  /// Note type
+  final String noteType;
+
+  /// Region
+  final String region;
+
+  /// Asset class
+  final String assetClass;
+
+  /// capped at {value}
+  final String _cappedAt;
+
+  /// coupon {value}
+  final String _coupon;
+
+  /// {value} times participation
+  final String _participation;
+
+  /// closes today
+  final String closesToday;
+
+  /// closes tomorrow
+  final String closesTomorrow;
+
+  /// closes in {days} days
+  final String _closesIn;
+
+  /// closes {date}
+  final String _closesOn;
 
   /// up {value} since issue
+  final String _upSinceIssue;
+
+  /// down {value} since issue
+  final String _downSinceIssue;
+
+  /// unchanged since issue
+  final String unchangedSinceIssue;
+
+  /// any
+  final String any;
+
+  const GeneralSemantics({
+    required this.close,
+    required this.tryAgain,
+    required this.clearFilters,
+    required this.reset,
+    required this.filters,
+    required this._filtersOn,
+    required this._showResults,
+    required this.loading,
+    required this.didntLoad,
+    required this._openItem,
+    required this.keel,
+    required this.currency,
+    required this.noteType,
+    required this.region,
+    required this.assetClass,
+    required this._cappedAt,
+    required this._coupon,
+    required this._participation,
+    required this.closesToday,
+    required this.closesTomorrow,
+    required this._closesIn,
+    required this._closesOn,
+    required this._upSinceIssue,
+    required this._downSinceIssue,
+    required this.unchangedSinceIssue,
+    required this.any,
+  });
+
+  factory GeneralSemantics.fromJson(Map<String, Object?> json) =>
+      GeneralSemantics(
+        close: json['close'] as String,
+        tryAgain: json['tryAgain'] as String,
+        clearFilters: json['clearFilters'] as String,
+        reset: json['reset'] as String,
+        filters: json['filters'] as String,
+        filtersOn: json['filtersOn'] as String,
+        showResults: json['showResults'] as String,
+        loading: json['loading'] as String,
+        didntLoad: json['didntLoad'] as String,
+        openItem: json['openItem'] as String,
+        keel: json['keel'] as String,
+        currency: json['currency'] as String,
+        noteType: json['noteType'] as String,
+        region: json['region'] as String,
+        assetClass: json['assetClass'] as String,
+        cappedAt: json['cappedAt'] as String,
+        coupon: json['coupon'] as String,
+        participation: json['participation'] as String,
+        closesToday: json['closesToday'] as String,
+        closesTomorrow: json['closesTomorrow'] as String,
+        closesIn: json['closesIn'] as String,
+        closesOn: json['closesOn'] as String,
+        upSinceIssue: json['upSinceIssue'] as String,
+        downSinceIssue: json['downSinceIssue'] as String,
+        unchangedSinceIssue: json['unchangedSinceIssue'] as String,
+        any: json['any'] as String,
+      );
+
+  Map<String, Object?> toJson() => {
+    'close': close,
+    'tryAgain': tryAgain,
+    'clearFilters': clearFilters,
+    'reset': reset,
+    'filters': filters,
+    'filtersOn': _filtersOn,
+    'showResults': _showResults,
+    'loading': loading,
+    'didntLoad': didntLoad,
+    'openItem': _openItem,
+    'keel': keel,
+    'currency': currency,
+    'noteType': noteType,
+    'region': region,
+    'assetClass': assetClass,
+    'cappedAt': _cappedAt,
+    'coupon': _coupon,
+    'participation': _participation,
+    'closesToday': closesToday,
+    'closesTomorrow': closesTomorrow,
+    'closesIn': _closesIn,
+    'closesOn': _closesOn,
+    'upSinceIssue': _upSinceIssue,
+    'downSinceIssue': _downSinceIssue,
+    'unchangedSinceIssue': unchangedSinceIssue,
+    'any': any,
+  };
+
+  String filtersOn({required Object count}) =>
+      LocaleText.fill(_filtersOn, {'count': count});
+
+  String showResults({required Object count}) =>
+      LocaleText.fill(_showResults, {'count': count});
+
+  String openItem({required Object name}) =>
+      LocaleText.fill(_openItem, {'name': name});
+
+  String cappedAt({required Object value}) =>
+      LocaleText.fill(_cappedAt, {'value': value});
+
+  String coupon({required Object value}) =>
+      LocaleText.fill(_coupon, {'value': value});
+
+  String participation({required Object value}) =>
+      LocaleText.fill(_participation, {'value': value});
+
+  String closesIn({required Object days}) =>
+      LocaleText.fill(_closesIn, {'days': days});
+
+  String closesOn({required Object date}) =>
+      LocaleText.fill(_closesOn, {'date': date});
+
   String upSinceIssue({required Object value}) =>
-      LocaleText.fill(_text['upSinceIssue']!, {'value': value});
+      LocaleText.fill(_upSinceIssue, {'value': value});
+
+  String downSinceIssue({required Object value}) =>
+      LocaleText.fill(_downSinceIssue, {'value': value});
 }
