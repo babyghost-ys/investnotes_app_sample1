@@ -1,6 +1,7 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/common_overlay.dart';
@@ -23,7 +24,10 @@ import 'package:investnotes_app_sample1/features/splash/bloc/splash_bloc.dart';
 import 'package:investnotes_app_sample1/features/splash/view/splash_page.dart';
 
 class KeelApp extends StatefulWidget {
-  const KeelApp({super.key});
+  const KeelApp({super.key, required this.localisation});
+
+  /// The language the app speaks, loaded before the first frame.
+  final LocalisationBloc localisation;
 
   @override
   State<KeelApp> createState() => _KeelAppState();
@@ -53,6 +57,7 @@ class _KeelAppState extends State<KeelApp> {
     value: _repository,
     child: MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: widget.localisation),
         BlocProvider(create: (_) => SplashBloc()),
         BlocProvider(create: (_) => ShellBloc()),
         BlocProvider(create: (_) => SessionBloc()),
@@ -93,7 +98,9 @@ class _KeelAppState extends State<KeelApp> {
               if (!network.offline) {
                 NativeOverlayContainer.hide();
               } else if (context.read<SplashBloc>().state.done) {
-                CommonOverlay.showNetworkLost();
+                CommonOverlay.showNetworkLost(
+                  context.read<LocalisationBloc>().state.language,
+                );
               }
             },
           ),
@@ -103,31 +110,36 @@ class _KeelAppState extends State<KeelApp> {
             listenWhen: (before, now) => now.done && !before.done,
             listener: (context, _) {
               if (context.read<ConnectivityBloc>().state.offline) {
-                CommonOverlay.showNetworkLost();
+                CommonOverlay.showNetworkLost(
+                  context.read<LocalisationBloc>().state.language,
+                );
               }
             },
           ),
         ],
-        child: Builder(
-          // Sign-in as a page of this router (Android): finishing returns home.
-          builder: (context) => SignInScope(
-            base: KeelRoutes.signIn,
-            biometric: switch (context.watch<BiometricBloc>().state) {
-              BiometricState(:final name?, :final kind?) => (
-                name: name,
-                kind: kind,
+        // Follows the device's language while no other is chosen.
+        child: SystemLocaleListener(
+          child: Builder(
+            // Sign-in as a page of this router (Android): finishing returns home.
+            builder: (context) => SignInScope(
+              base: KeelRoutes.signIn,
+              biometric: switch (context.watch<BiometricBloc>().state) {
+                BiometricState(:final name?, :final kind?) => (
+                  name: name,
+                  kind: kind,
+                ),
+                _ => null,
+              },
+              onSignedIn: (name) {
+                context.read<SessionBloc>().add(SessionSignedIn(name));
+                _router.go(KeelRoutes.home);
+              },
+              onClose: () => _router.go(KeelRoutes.home),
+              // The opening screen first; the app once it has had its time.
+              child: BlocBuilder<SplashBloc, SplashState>(
+                builder: (context, splash) =>
+                    splash.done ? _app : const SplashPage(),
               ),
-              _ => null,
-            },
-            onSignedIn: (name) {
-              context.read<SessionBloc>().add(SessionSignedIn(name));
-              _router.go(KeelRoutes.home);
-            },
-            onClose: () => _router.go(KeelRoutes.home),
-            // The opening screen first; the app once it has had its time.
-            child: BlocBuilder<SplashBloc, SplashState>(
-              builder: (context, splash) =>
-                  splash.done ? _app : const SplashPage(),
             ),
           ),
         ),

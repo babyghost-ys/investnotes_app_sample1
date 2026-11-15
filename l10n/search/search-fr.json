@@ -1,0 +1,20 @@
+{
+  "labels": {
+    "title": "Recherche",
+    "placeholder": "Nom, code, indice",
+    "nothingFound": "Aucun résultat",
+    "fundserv": "FundSERV",
+    "noteType": "Type",
+    "underlying": "Sous-jacent",
+    "currency": "Devise",
+    "closes": "Fin",
+    "issued": "Émission",
+    "called": "Rappel",
+    "matures": "Échéance",
+    "price": "Prix",
+    "open": "ouvert"
+  },
+  "semantics": {
+    "openUntil": "Ouvert jusqu’à {date}"
+  }
+}

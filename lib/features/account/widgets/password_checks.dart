@@ -1,10 +1,12 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/credentials.dart';
 
 /// What a new password still needs, ticked off as it is typed.
-class PasswordChecks extends StatelessWidget {
+class PasswordChecks extends StatelessWidget implements LocalisationConsumer {
   const PasswordChecks({
     super.key,
     required this.password,
@@ -15,11 +17,19 @@ class PasswordChecks extends StatelessWidget {
   final String confirm;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.account];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as AccountLocale),
+  );
+
+  Widget _build(BuildContext context, AccountLocale account) {
     final checks = [
-      ('8 or more characters', Credentials.longEnough(password)),
-      ('Letters and numbers', Credentials.lettersAndDigits(password)),
-      ('Passwords match', confirm.isNotEmpty && confirm == password),
+      (account.labels.checkLength, Credentials.longEnough(password)),
+      (account.labels.checkMix, Credentials.lettersAndDigits(password)),
+      (account.labels.checkMatch, confirm.isNotEmpty && confirm == password),
     ];
     final azure = KeelColors.azure.of(context);
     final muted = KeelColors.muted.of(context);
@@ -28,7 +38,9 @@ class PasswordChecks extends StatelessWidget {
       children: [
         for (final (text, met) in checks)
           Semantics(
-            label: '$text, ${met ? 'done' : 'not yet'}',
+            label: met
+                ? account.semantics.checkMet(check: text)
+                : account.semantics.checkUnmet(check: text),
             excludeSemantics: true,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),

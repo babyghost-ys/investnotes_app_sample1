@@ -1,12 +1,15 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/note_event.dart';
 
 /// The note's dated steps down a line: past ones filled, the next one
 /// ringed, later ones open.
-class EventsSection extends StatelessWidget {
+class EventsSection extends StatelessWidget implements LocalisationConsumer {
   const EventsSection({super.key, required this.events});
 
   final List<NoteEvent> events;
@@ -20,7 +23,20 @@ class EventsSection extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.product, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as ProductLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    ProductLocale words,
+    GeneralLocale general,
+  ) {
     final now = DateTime.now();
     final next = events.indexWhere((e) => e.date.isAfter(now));
     return Column(
@@ -32,6 +48,8 @@ class EventsSection extends StatelessWidget {
             next: i == next,
             first: i == 0,
             last: i == events.length - 1,
+            words: words,
+            general: general,
           ),
       ],
     );
@@ -45,9 +63,13 @@ class _Step extends StatelessWidget {
     required this.next,
     required this.first,
     required this.last,
+    required this.words,
+    required this.general,
   });
 
   final NoteEvent event;
+  final ProductLocale words;
+  final GeneralLocale general;
   final bool past;
   final bool next;
   final bool first;
@@ -60,13 +82,20 @@ class _Step extends StatelessWidget {
     final muted = KeelColors.muted.of(context);
     // Within the week, the relative day leads; it reads faster than a date.
     final soon = !past && event.date.difference(DateTime.now()).inDays < 7;
+    final f = Formats(general);
     final date = soon
-        ? '${Formats.until(event.date)} · ${Formats.fullDate(event.date)}'
-        : Formats.fullDate(event.date);
-    final state = past ? 'Done' : (next ? 'Next' : 'Upcoming');
+        ? '${f.until(event.date)} · ${f.fullDate(event.date)}'
+        : f.fullDate(event.date);
+    final state = past
+        ? words.semantics.done
+        : (next ? words.semantics.next : words.semantics.upcoming);
     return Semantics(
       container: true,
-      label: '$state, ${event.kind.title}, ${Formats.fullDate(event.date)}',
+      label: words.semantics.event(
+        state: state,
+        event: event.kind.title(general),
+        date: f.fullDate(event.date),
+      ),
       excludeSemantics: true,
       child: IntrinsicHeight(
         child: Row(
@@ -121,7 +150,7 @@ class _Step extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      event.kind.title,
+                      event.kind.title(general),
                       style: TextStyle(
                         color: KeelColors.ink.of(context),
                         fontSize: 17,

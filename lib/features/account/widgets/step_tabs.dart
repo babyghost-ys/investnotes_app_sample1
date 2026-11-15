@@ -1,11 +1,13 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// The steps of a flow along the top: the current one in ink with its bar
 /// lit, the finished ones lit, the ones ahead faint. A finished step opens
 /// again when tapped.
-class StepTabs extends StatelessWidget {
+class StepTabs extends StatelessWidget implements LocalisationConsumer {
   const StepTabs({
     super.key,
     required this.titles,
@@ -20,13 +22,25 @@ class StepTabs extends StatelessWidget {
   final VoidCallback onBack;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.account];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as AccountLocale),
+  );
+
+  Widget _build(BuildContext context, AccountLocale account) {
     final azure = KeelColors.azure.of(context);
     final hairline = KeelColors.hairline.of(context);
     return Semantics(
-      label: 'Step ${current + 1} of ${titles.length}, ${titles[current]}',
+      label: account.semantics.stepOf(
+        step: current + 1,
+        count: titles.length,
+        title: titles[current],
+      ),
       onTap: current > 0 ? onBack : null,
-      onTapHint: current > 0 ? 'Back a step' : null,
+      onTapHint: current > 0 ? account.semantics.backStep : null,
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 18, 24, 0),

@@ -1,18 +1,28 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// The way into "find my note": five steps drawn as a rising path of dots.
-class FinderBanner extends StatelessWidget {
+class FinderBanner extends StatelessWidget implements LocalisationConsumer {
   const FinderBanner({super.key, required this.onTap});
 
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Semantics(
+  List<String> get namespaces => const [Locales.home];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as HomeLocale),
+  );
+
+  Widget _build(BuildContext context, HomeLocale home) => Semantics(
     button: true,
-    label: 'Find my note',
+    label: home.labels.findMyNote,
     excludeSemantics: true,
     child: GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -39,10 +49,10 @@ class FinderBanner extends StatelessWidget {
               size: 30,
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Find my note',
-                style: TextStyle(
+                home.labels.findMyNote,
+                style: const TextStyle(
                   color: CupertinoColors.white,
                   fontSize: 21,
                   fontWeight: FontWeight.w700,

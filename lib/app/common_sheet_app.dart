@@ -1,9 +1,13 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
+import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
 import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
@@ -27,16 +31,25 @@ Future<void> runCommonSheetApp() async {
       _ => value,
     },
   );
-  runApp(CommonSheetApp(configuration: configuration));
+  final library = await LocaleLibrary.load(localeRegistry);
+  runApp(CommonSheetApp(configuration: configuration, library: library));
 }
 
 class CommonSheetApp extends StatelessWidget {
-  const CommonSheetApp({super.key, required this.configuration});
+  const CommonSheetApp({
+    super.key,
+    required this.configuration,
+    required this.library,
+  });
 
   final Map<String, dynamic> configuration;
+  final LocaleLibrary library;
+
+  /// What the page opened the sheet with, without its language.
+  Object? get _argument => SheetArguments.value(configuration['arguments']);
 
   Widget _content() {
-    final argument = configuration['arguments'];
+    final argument = _argument;
     final repository = NotesRepository();
     return switch (configuration['route']) {
       'offeringsFilter' => OfferingsFilterSheet(
@@ -59,7 +72,16 @@ class CommonSheetApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => BlocProvider(
+    // The sheet speaks the language the app spoke when it opened it.
+    create: (_) => LocalisationBloc.fixed(
+      library: library,
+      language: SheetArguments.language(configuration['arguments']),
+    ),
+    child: _sheet(context),
+  );
+
+  Widget _sheet(BuildContext context) {
     final brightness = configuration['brightness'] == 'dark'
         ? Brightness.dark
         : Brightness.light;
@@ -80,7 +102,7 @@ class CommonSheetApp extends StatelessWidget {
       return NativeStyleScope(
         style: NativeStyle.native,
         child: _SignInSheetApp(
-          biometric: switch (configuration['arguments']) {
+          biometric: switch (_argument) {
             {
               'biometricName': final String name,
               'biometricKind': final String kind,

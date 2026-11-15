@@ -1,6 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/loading/page_load_bloc.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
@@ -12,7 +14,7 @@ import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
 /// it loads, then [child], faded in over it. A failed load offers to try
 /// again. Loading starts the first time the page is on screen, so a tab
 /// kept behind another loads when it is opened, not at launch.
-class PageLoader extends StatelessWidget {
+class PageLoader extends StatelessWidget implements LocalisationConsumer {
   const PageLoader({super.key, required this.skeleton, required this.child});
 
   /// The page's layout in placeholder shapes, drawn on the page's colour.
@@ -21,7 +23,15 @@ class PageLoader extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  List<String> get namespaces => const [Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) => BlocProvider(
     create: (_) => PageLoadBloc(),
     child: _StartWhenShown(
       child: BlocBuilder<PageLoadBloc, PageLoadState>(
@@ -43,10 +53,10 @@ class PageLoader extends StatelessWidget {
               child: Center(
                 child: EmptyState(
                   icon: CupertinoIcons.exclamationmark_circle,
-                  semanticLabel: 'Didn’t load',
+                  semanticLabel: general.semantics.didntLoad,
                   action: RoundIconButton(
                     icon: CupertinoIcons.arrow_clockwise,
-                    label: 'Try again',
+                    label: general.semantics.tryAgain,
                     foreground: KeelColors.azure.of(context),
                     background: KeelColors.mist.of(context),
                     onPressed: () => context.read<PageLoadBloc>().add(

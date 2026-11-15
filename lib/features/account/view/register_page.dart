@@ -2,7 +2,9 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_native_widgets/flutter_native_widgets.dart'
     show NativeSheetBarAction;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
@@ -24,11 +26,19 @@ import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart
 
 /// Opening an account in three steps. Once the emailed code checks out the
 /// new account is signed in and the sign-in flow ends.
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget implements LocalisationConsumer {
   const RegisterPage({super.key});
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  List<String> get namespaces => const [Locales.account];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as AccountLocale),
+  );
+
+  Widget _build(BuildContext context, AccountLocale account) => BlocProvider(
     create: (_) => RegisterBloc(),
     child: BlocBuilder<RegisterBloc, RegisterState>(
       builder: (context, state) {
@@ -41,7 +51,7 @@ class RegisterPage extends StatelessWidget {
           action: hasPrevious
               ? NativeSheetBarAction(
                   sfSymbol: 'backward',
-                  label: 'Previous step',
+                  label: account.semantics.previousStep,
                   onPressed: () => bloc.add(const RegisterStepBack()),
                 )
               : null,
@@ -50,9 +60,9 @@ class RegisterPage extends StatelessWidget {
                 ? null
                 : StepTabs(
                     titles: [
-                      RegisterStep.start.title,
-                      RegisterStep.account.title,
-                      RegisterStep.verify.title,
+                      account.labels.stepStart,
+                      account.labels.stepAccount,
+                      account.labels.stepVerify,
                     ],
                     current: state.step.index,
                     onBack: () => bloc.add(const RegisterStepBack()),
@@ -60,13 +70,13 @@ class RegisterPage extends StatelessWidget {
             child: StepSwitcher(
               step: state.step,
               child: switch (state.step) {
-                RegisterStep.start => _start(context, state, bloc),
-                RegisterStep.account => _account(context, state, bloc),
-                RegisterStep.verify => _verify(state, bloc),
+                RegisterStep.start => _start(context, state, bloc, account),
+                RegisterStep.account => _account(context, state, bloc, account),
+                RegisterStep.verify => _verify(state, bloc, account),
                 RegisterStep.done => FlowDone(
-                  title: 'Account ready',
+                  title: account.labels.accountReady,
                   detail: state.username.trim(),
-                  actionLabel: 'Continue signed in',
+                  actionLabel: account.semantics.continueSignedIn,
                   onAction: () =>
                       SignInScope.of(context).onSignedIn(state.username.trim()),
                 ),
@@ -78,7 +88,12 @@ class RegisterPage extends StatelessWidget {
     ),
   );
 
-  Widget _start(BuildContext context, RegisterState state, RegisterBloc bloc) {
+  Widget _start(
+    BuildContext context,
+    RegisterState state,
+    RegisterBloc bloc,
+    AccountLocale account,
+  ) {
     final hairline = Container(
       height: 1,
       color: KeelColors.hairline.of(context),
@@ -86,7 +101,7 @@ class RegisterPage extends StatelessWidget {
     return FlowBody(
       children: [
         QuestionRow(
-          question: 'Are you a financial adviser?',
+          question: account.labels.adviserQuestion,
           value: state.adviser,
           onChanged: (v) => bloc.add(RegisterRoleAnswered(adviser: v)),
         ),
@@ -100,7 +115,7 @@ class RegisterPage extends StatelessWidget {
                   children: [
                     hairline,
                     QuestionRow(
-                      question: 'Do you invest through an adviser?',
+                      question: account.labels.advisedQuestion,
                       value: state.advised,
                       onChanged: (v) =>
                           bloc.add(RegisterRoleAnswered(advised: v)),
@@ -110,7 +125,7 @@ class RegisterPage extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         AdvanceButton(
-          label: 'Next',
+          label: account.semantics.next,
           onPressed: () => bloc.add(const RegisterAdvanced()),
         ),
       ],
@@ -121,13 +136,14 @@ class RegisterPage extends StatelessWidget {
     BuildContext context,
     RegisterState state,
     RegisterBloc bloc,
+    AccountLocale account,
   ) {
     void advance() => bloc.add(const RegisterAdvanced());
     return FlowBody(
       children: [
         KeelField(
           icon: CupertinoIcons.person,
-          placeholder: 'Username',
+          placeholder: account.labels.username,
           initialValue: state.username,
           autofocus: state.username.isEmpty,
           onChanged: (v) => bloc.add(RegisterUsernameChanged(v)),
@@ -136,7 +152,7 @@ class RegisterPage extends StatelessWidget {
         const SizedBox(height: 12),
         KeelField(
           icon: CupertinoIcons.envelope,
-          placeholder: 'Email',
+          placeholder: account.labels.email,
           initialValue: state.email,
           keyboard: TextInputType.emailAddress,
           onChanged: (v) => bloc.add(RegisterEmailChanged(v)),
@@ -145,13 +161,15 @@ class RegisterPage extends StatelessWidget {
         const SizedBox(height: 12),
         KeelField(
           icon: CupertinoIcons.lock,
-          placeholder: 'Password',
+          placeholder: account.labels.password,
           initialValue: state.password,
           obscure: !state.reveal,
           onChanged: (v) => bloc.add(RegisterPasswordChanged(v)),
           trailing: RoundIconButton(
             icon: state.reveal ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-            label: state.reveal ? 'Hide passwords' : 'Show passwords',
+            label: state.reveal
+                ? account.semantics.hidePasswords
+                : account.semantics.showPasswords,
             foreground: KeelColors.muted.of(context),
             size: 40,
             iconSize: 18,
@@ -161,7 +179,7 @@ class RegisterPage extends StatelessWidget {
         const SizedBox(height: 12),
         KeelField(
           icon: CupertinoIcons.lock_rotation,
-          placeholder: 'Confirm password',
+          placeholder: account.labels.confirmPassword,
           initialValue: state.confirm,
           obscure: !state.reveal,
           action: TextInputAction.go,
@@ -173,14 +191,18 @@ class RegisterPage extends StatelessWidget {
         PasswordChecks(password: state.password, confirm: state.confirm),
         const SizedBox(height: 28),
         AdvanceButton(
-          label: 'Send code',
+          label: account.semantics.sendCode,
           onPressed: state.accountReady ? advance : null,
         ),
       ],
     );
   }
 
-  Widget _verify(RegisterState state, RegisterBloc bloc) => FlowBody(
+  Widget _verify(
+    RegisterState state,
+    RegisterBloc bloc,
+    AccountLocale account,
+  ) => FlowBody(
     children: [
       CodeSentHeader(
         email: state.email,
@@ -194,7 +216,7 @@ class RegisterPage extends StatelessWidget {
       ),
       const SizedBox(height: 32),
       AdvanceButton(
-        label: 'Verify',
+        label: account.semantics.verify,
         icon: CupertinoIcons.checkmark_alt,
         onPressed: state.canAdvance
             ? () => bloc.add(const RegisterAdvanced())

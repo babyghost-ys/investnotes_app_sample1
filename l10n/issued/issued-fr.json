@@ -1,0 +1,26 @@
+{
+  "labels": {
+    "periodAll": "Tout",
+    "periodYear": "1 an",
+    "periodThreeYears": "3 ans",
+    "periodFiveYears": "5 ans",
+    "periodCustom": "Dates"
+  },
+  "semantics": {
+    "average": "Moyenne des billets actifs {value}",
+    "status": "Statut",
+    "periodAll": "Toute la période",
+    "periodYear": "1 an",
+    "periodThreeYears": "3 ans",
+    "periodFiveYears": "5 ans",
+    "periodCustom": "Dates personnalisées",
+    "from": "Du",
+    "to": "Au",
+    "issued": "Émission",
+    "matures": "Échéance",
+    "typeAndCurrency": "Type et devise",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "useDate": "Utiliser cette date"
+  }
+}

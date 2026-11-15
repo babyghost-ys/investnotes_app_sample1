@@ -2,7 +2,9 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
@@ -24,7 +26,10 @@ import 'package:investnotes_app_sample1/features/shell/widgets/keel_drawer.dart'
 
 /// The app's frame: the native bar, the native tab bar, and the menu that
 /// slides in from the left.
-class ShellPage extends StatefulWidget {
+class ShellPage extends StatefulWidget implements LocalisationConsumer {
+  @override
+  List<String> get namespaces => const [Locales.shell, Locales.product];
+
   const ShellPage({super.key});
 
   @override
@@ -35,7 +40,17 @@ class _ShellPageState extends State<ShellPage> {
   final _scaffold = GlobalKey<NativeScaffoldState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: widget,
+    builder: (context, locale) =>
+        _build(context, locale[0] as ShellLocale, locale[1] as ProductLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    ShellLocale shell,
+    ProductLocale product,
+  ) {
     final signedIn = context.select<SessionBloc, bool>((b) => b.state.signedIn);
     return BlocListener<SessionBloc, SessionState>(
       // Signing out takes My Notes away; whoever was on it goes home.
@@ -46,12 +61,19 @@ class _ShellPageState extends State<ShellPage> {
         }
       },
       child: BlocBuilder<ShellBloc, ShellState>(
-        builder: (context, state) => _frame(context, state, signedIn),
+        builder: (context, state) =>
+            _frame(context, state, signedIn, shell, product),
       ),
     );
   }
 
-  Widget _frame(BuildContext context, ShellState state, bool signedIn) {
+  Widget _frame(
+    BuildContext context,
+    ShellState state,
+    bool signedIn,
+    ShellLocale shell,
+    ProductLocale product,
+  ) {
     final tab = !signedIn && state.tab == ShellTab.myNotes
         ? ShellTab.home
         : state.tab;
@@ -70,14 +92,14 @@ class _ShellPageState extends State<ShellPage> {
       extendBodyBehindSides: true,
       backgroundColor: KeelColors.page.of(context),
       appBar: NativeAppBar(
-        title: tab == ShellTab.home ? 'Keel' : null,
+        title: tab == ShellTab.home ? shell.labels.brand : null,
         actions: [
           NativeAppBarAction(
             icon: const NativeIcon(
               sfSymbol: 'line.3.horizontal',
               icon: Icons.menu_rounded,
             ),
-            label: 'Menu',
+            label: shell.semantics.menu,
             spacerAfter: ToolbarSpacerType.flexible,
             onPressed: () => _scaffold.currentState?.openDrawer(),
           ),
@@ -86,11 +108,16 @@ class _ShellPageState extends State<ShellPage> {
               sfSymbol: 'magnifyingglass',
               icon: Icons.search,
             ),
-            label: 'Search',
+            label: shell.semantics.search,
             onPressed: () => context.push<void>(KeelRoutes.search),
           ),
           if (beside != null)
-            bookmarkAction(context, beside.$1, saved: beside.$2),
+            bookmarkAction(
+              context,
+              beside.$1,
+              saved: beside.$2,
+              product: product,
+            ),
         ],
       ),
       drawer: NativeDrawer.custom(
@@ -105,42 +132,54 @@ class _ShellPageState extends State<ShellPage> {
           context.read<ShellBloc>().add(ShellTabSelected(shown[i]));
         },
         items: [
-          const NativeNavigationDestination(
-            icon: NativeIcon(sfSymbol: 'house', icon: Icons.home_outlined),
-            selectedIcon: NativeIcon(sfSymbol: 'house.fill', icon: Icons.home),
-            label: 'Home',
+          NativeNavigationDestination(
+            icon: const NativeIcon(
+              sfSymbol: 'house',
+              icon: Icons.home_outlined,
+            ),
+            selectedIcon: const NativeIcon(
+              sfSymbol: 'house.fill',
+              icon: Icons.home,
+            ),
+            label: shell.labels.home,
           ),
           if (signedIn)
-            const NativeNavigationDestination(
-              icon: NativeIcon(sfSymbol: 'briefcase', icon: Icons.work_outline),
-              selectedIcon: NativeIcon(
+            NativeNavigationDestination(
+              icon: const NativeIcon(
+                sfSymbol: 'briefcase',
+                icon: Icons.work_outline,
+              ),
+              selectedIcon: const NativeIcon(
                 sfSymbol: 'briefcase.fill',
                 icon: Icons.work,
               ),
-              label: 'My Notes',
+              label: shell.labels.myNotes,
             ),
-          const NativeNavigationDestination(
-            icon: NativeIcon(sfSymbol: 'tag', icon: Icons.sell_outlined),
-            selectedIcon: NativeIcon(sfSymbol: 'tag.fill', icon: Icons.sell),
-            label: 'Offerings',
+          NativeNavigationDestination(
+            icon: const NativeIcon(sfSymbol: 'tag', icon: Icons.sell_outlined),
+            selectedIcon: const NativeIcon(
+              sfSymbol: 'tag.fill',
+              icon: Icons.sell,
+            ),
+            label: shell.labels.offerings,
           ),
-          const NativeNavigationDestination(
-            icon: NativeIcon(
+          NativeNavigationDestination(
+            icon: const NativeIcon(
               sfSymbol: 'clock.arrow.circlepath',
               icon: Icons.history,
             ),
-            label: 'Issued',
+            label: shell.labels.issued,
           ),
-          const NativeNavigationDestination(
-            icon: NativeIcon(
+          NativeNavigationDestination(
+            icon: const NativeIcon(
               sfSymbol: 'graduationcap',
               icon: Icons.school_outlined,
             ),
-            selectedIcon: NativeIcon(
+            selectedIcon: const NativeIcon(
               sfSymbol: 'graduationcap.fill',
               icon: Icons.school,
             ),
-            label: 'Learn',
+            label: shell.labels.learn,
           ),
         ],
       ),

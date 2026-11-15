@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/app/keel_page.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_detail_page.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
@@ -51,8 +53,10 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             final article = repository.articles.firstWhere((a) => a.id == id);
             return keelPage(
               state,
-              title: article.type.code,
-              semanticTitle: article.type.title,
+              namespaces: const [Locales.general],
+              title: (_) => article.type.code,
+              semanticTitle: (locale) =>
+                  article.type.title(locale[0] as GeneralLocale),
               child: PageLoader(
                 skeleton: const ArticleSkeleton(),
                 child: ArticlePage(article: article),
@@ -64,7 +68,8 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
           path: 'search',
           pageBuilder: (context, state) => keelPage(
             state,
-            title: 'Search',
+            namespaces: const [Locales.search],
+            title: (locale) => (locale[0] as SearchLocale).labels.title,
             // Nothing to load before typing: the field shows at once.
             child: const SearchPage(),
           ),
@@ -73,7 +78,8 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
           path: 'saved',
           pageBuilder: (context, state) => keelPage(
             state,
-            title: 'Saved',
+            namespaces: const [Locales.saved],
+            title: (locale) => (locale[0] as SavedLocale).labels.title,
             child: const PageLoader(
               skeleton: SavedSkeleton(),
               child: SavedPage(),
@@ -84,7 +90,8 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
           path: 'finder/step/:step',
           pageBuilder: (context, state) => keelPage(
             state,
-            title: 'Find my note',
+            namespaces: const [Locales.finder],
+            title: (locale) => (locale[0] as FinderLocale).labels.title,
             child: FinderPage(step: int.parse(state.pathParameters['step']!)),
           ),
         ),
@@ -92,14 +99,15 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
           path: 'finder/results',
           pageBuilder: (context, state) => keelPage(
             state,
-            title: 'Your notes',
-            actions: [
+            namespaces: const [Locales.finder],
+            title: (locale) => (locale[0] as FinderLocale).labels.resultsTitle,
+            actions: (locale) => [
               NativeAppBarAction(
                 icon: const NativeIcon(
                   sfSymbol: 'checkmark',
                   icon: CupertinoIcons.checkmark,
                 ),
-                label: 'Done',
+                label: (locale[0] as FinderLocale).semantics.done,
                 onPressed: () => context.go(KeelRoutes.home),
               ),
             ],
@@ -111,14 +119,21 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
         ),
         GoRoute(
           path: 'settings',
-          pageBuilder: (context, state) =>
-              keelPage(state, title: 'Settings', child: const SettingsPage()),
+          pageBuilder: (context, state) => keelPage(
+            state,
+            namespaces: const [Locales.settings],
+            title: (locale) => (locale[0] as SettingsLocale).labels.title,
+            child: const SettingsPage(),
+          ),
         ),
         GoRoute(
           path: 'settings/biometric',
           pageBuilder: (context, state) => keelPage(
             state,
-            title: context.read<BiometricBloc>().state.kind?.title ?? 'Face ID',
+            // Face ID and Touch ID are called so in every language.
+            namespaces: const [],
+            title: (_) =>
+                context.read<BiometricBloc>().state.kind?.title ?? 'Face ID',
             child: const BiometricSettingsPage(),
           ),
         ),

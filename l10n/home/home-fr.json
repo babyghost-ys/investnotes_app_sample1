@@ -1,0 +1,12 @@
+{
+  "labels": {
+    "headline": "Du potentiel, avec un plancher.",
+    "registerToday": "Ouvrir un compte",
+    "welcome": "Bienvenue",
+    "findMyNote": "Trouver mon billet"
+  },
+  "semantics": {
+    "registerToday": "Ouvrir un compte aujourd’hui",
+    "welcome": "Bienvenue, {name}"
+  }
+}

@@ -2,8 +2,11 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
 import 'package:investnotes_app_sample1/core/widgets/filter_icon_button.dart';
@@ -22,8 +25,11 @@ import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row_skeleton.dart';
 import 'package:investnotes_app_sample1/features/product/widgets/product_body.dart';
 
-class OfferingsPage extends StatelessWidget {
+class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
   const OfferingsPage({super.key});
+
+  @override
+  List<String> get namespaces => const [Locales.offerings, Locales.general];
 
   Future<void> _filter(BuildContext context, OfferingsState state) async {
     final bloc = context.read<OfferingsBloc>();
@@ -48,32 +54,55 @@ class OfferingsPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => LoadFailureNotice(
-    child: BlocBuilder<OfferingsBloc, OfferingsState>(
-      builder: (context, state) {
-        final detail = state.detail;
-        final product = detail == null
-            ? null
-            : context.read<NotesRepository>().productById(detail.id);
-        return ResponsiveMasterDetail(
-          master: Builder(builder: (context) => _list(context, state)),
-          detail: product == null
-              ? null
-              : ColoredBox(
-                  key: ValueKey(product.id),
-                  color: KeelColors.page.of(context),
-                  child: ProductBody(product: product),
-                ),
-          // Folded with an offering open: it carries on as its own page.
-          onCollapse: state.selectedId == null || detail == null
-              ? null
-              : () => _open(context, detail),
-        );
-      },
-    ),
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) {
+      final offerings = locale[0] as OfferingsLocale;
+      final general = locale[1] as GeneralLocale;
+      return LoadFailureNotice(
+        message: offerings.semantics.didntLoad,
+        child: BlocBuilder<OfferingsBloc, OfferingsState>(
+          builder: (context, state) =>
+              _split(context, state, offerings, general),
+        ),
+      );
+    },
   );
 
-  Widget _list(BuildContext context, OfferingsState state) {
+  Widget _split(
+    BuildContext context,
+    OfferingsState state,
+    OfferingsLocale offerings,
+    GeneralLocale general,
+  ) {
+    final detail = state.detail;
+    final product = detail == null
+        ? null
+        : context.read<NotesRepository>().productById(detail.id);
+    return ResponsiveMasterDetail(
+      master: Builder(
+        builder: (context) => _list(context, state, offerings, general),
+      ),
+      detail: product == null
+          ? null
+          : ColoredBox(
+              key: ValueKey(product.id),
+              color: KeelColors.page.of(context),
+              child: ProductBody(product: product),
+            ),
+      // Folded with an offering open: it carries on as its own page.
+      onCollapse: state.selectedId == null || detail == null
+          ? null
+          : () => _open(context, detail),
+    );
+  }
+
+  Widget _list(
+    BuildContext context,
+    OfferingsState state,
+    OfferingsLocale offerings,
+    GeneralLocale general,
+  ) {
     final insets = MediaQuery.paddingOf(context);
     final visible = state.visible;
     final split = ResponsiveMasterDetail.isSplit(context);
@@ -95,7 +124,9 @@ class OfferingsPage extends StatelessWidget {
           children: [
             NativeSegmentedControl(
               labels: [for (final t in NoteType.values) t.code],
-              semanticLabels: [for (final t in NoteType.values) t.title],
+              semanticLabels: [
+                for (final t in NoteType.values) t.title(general),
+              ],
               selectedIndex: state.type.index,
               onValueChanged: (i) => context.read<OfferingsBloc>().add(
                 OfferingsTypeSelected(NoteType.values[i]),
@@ -106,7 +137,7 @@ class OfferingsPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    state.type.title,
+                    state.type.title(general),
                     style: TextStyle(
                       color: KeelColors.ink.of(context),
                       fontSize: 24,
@@ -146,10 +177,10 @@ class OfferingsPage extends StatelessWidget {
               LoadingPhase.failed when state.all.isEmpty => [
                 EmptyState(
                   icon: CupertinoIcons.exclamationmark_circle,
-                  semanticLabel: 'Offerings didn’t load',
+                  semanticLabel: offerings.semantics.didntLoad,
                   action: RoundIconButton(
                     icon: CupertinoIcons.arrow_clockwise,
-                    label: 'Try again',
+                    label: general.semantics.tryAgain,
                     foreground: KeelColors.azure.of(context),
                     background: KeelColors.mist.of(context),
                     onPressed: () => context.read<OfferingsBloc>().add(
@@ -161,10 +192,10 @@ class OfferingsPage extends StatelessWidget {
               _ when visible.isEmpty => [
                 EmptyState(
                   icon: CupertinoIcons.line_horizontal_3_decrease,
-                  text: 'No matches',
+                  text: general.labels.noMatches,
                   action: RoundIconButton(
                     icon: CupertinoIcons.arrow_counterclockwise,
-                    label: 'Clear filters',
+                    label: general.semantics.clearFilters,
                     foreground: KeelColors.azure.of(context),
                     background: KeelColors.mist.of(context),
                     onPressed: () => context.read<OfferingsBloc>().add(

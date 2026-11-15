@@ -1,7 +1,9 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/biometric_glyph.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
@@ -10,11 +12,20 @@ import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart'
 /// Signing the account in with Face ID or Touch ID: the glyph large, lit
 /// while it is on, the account it signs in, and the switch. Turning it on
 /// asks for the face or finger first.
-class BiometricSettingsPage extends StatelessWidget {
+class BiometricSettingsPage extends StatelessWidget
+    implements LocalisationConsumer {
   const BiometricSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.session];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as SessionLocale),
+  );
+
+  Widget _build(BuildContext context, SessionLocale session) {
     final state = context.watch<BiometricBloc>().state;
     final name = context.watch<SessionBloc>().state.name;
     final kind = state.kind;
@@ -77,11 +88,17 @@ class BiometricSettingsPage extends StatelessWidget {
                 NativeSwitch(
                   value: on,
                   activeColor: azure,
-                  semanticLabel: 'Sign in with ${kind.title}',
+                  semanticLabel: session.semantics.biometric(kind: kind.title),
                   onChanged: state.checking
                       ? null
                       : (value) => context.read<BiometricBloc>().add(
-                          BiometricToggled(on: value, name: name),
+                          BiometricToggled(
+                            on: value,
+                            name: name,
+                            reason: session.semantics.biometricReason(
+                              kind: kind.title,
+                            ),
+                          ),
                         ),
                 ),
               ],

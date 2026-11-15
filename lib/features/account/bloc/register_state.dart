@@ -1,15 +1,6 @@
 part of 'register_bloc.dart';
 
-enum RegisterStep {
-  start('Start'),
-  account('Account'),
-  verify('Verify'),
-  done('Done');
-
-  const RegisterStep(this.title);
-
-  final String title;
-}
+enum RegisterStep { start, account, verify, done }
 
 final class RegisterState extends Equatable {
   const RegisterState({

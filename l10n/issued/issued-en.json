@@ -1,0 +1,26 @@
+{
+  "labels": {
+    "periodAll": "All",
+    "periodYear": "1Y",
+    "periodThreeYears": "3Y",
+    "periodFiveYears": "5Y",
+    "periodCustom": "Custom"
+  },
+  "semantics": {
+    "average": "Active notes average {value}",
+    "status": "Status",
+    "periodAll": "All time",
+    "periodYear": "1 year",
+    "periodThreeYears": "3 years",
+    "periodFiveYears": "5 years",
+    "periodCustom": "Custom dates",
+    "from": "From",
+    "to": "To",
+    "issued": "Issued",
+    "matures": "Matures",
+    "typeAndCurrency": "Type and currency",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "useDate": "Use this date"
+  }
+}

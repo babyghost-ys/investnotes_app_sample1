@@ -1,6 +1,9 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
@@ -10,72 +13,89 @@ import 'package:investnotes_app_sample1/data/models/product.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/fact_tile.dart';
 
 /// What the note does in one sentence, its terms, and the code to order it.
-class OverviewSection extends StatelessWidget {
+class OverviewSection extends StatelessWidget implements LocalisationConsumer {
   const OverviewSection({super.key, required this.product});
 
   final Product product;
 
   /// The payoff said plainly, from the note's own terms.
-  static String summary(Product p) {
+  static String summary(Product p, ProductLocale words, GeneralLocale general) {
     final o = p.payoff;
+    final f = Formats(general);
     final upside = o.cap == null
-        ? '${Formats.times(o.participation)} any rise in ${p.underlying}'
-        : '${Formats.times(o.participation)} any rise in ${p.underlying}, '
-              'up to ${Formats.percent(o.cap!)}';
+        ? words.labels.upside(
+            times: f.times(o.participation),
+            underlying: p.underlying,
+          )
+        : words.labels.upsideCapped(
+            times: f.times(o.participation),
+            underlying: p.underlying,
+            cap: f.percent(o.cap!),
+          );
     return switch (p.type) {
       NoteType.mld ||
-      NoteType.ppn => 'All principal back at maturity, plus $upside.',
-      NoteType.par =>
-        'Earns $upside. The first ${Formats.percent(o.buffer)} of a fall '
-            'costs nothing; beyond it, losses follow the market.',
-      NoteType.auto =>
-        'Pays ${Formats.percent(o.coupon)} if ${p.underlying} ends no lower '
-            'than ${Formats.percent(o.barrier)}. Below that, the note falls '
-            'with it.',
+      NoteType.ppn => words.labels.summaryProtected(upside: upside),
+      NoteType.par => words.labels.summaryBuffered(
+        upside: upside,
+        buffer: f.percent(o.buffer),
+      ),
+      NoteType.auto => words.labels.summaryAuto(
+        coupon: f.percent(o.coupon),
+        underlying: p.underlying,
+        barrier: f.percent(o.barrier),
+      ),
     };
   }
 
-  List<FactTile> _facts() {
+  List<FactTile> _facts(ProductLocale words, GeneralLocale general) {
     final p = product;
     final o = p.payoff;
+    final f = Formats(general);
+    final years = f.years(p.termYears);
     return [
       FactTile(
         icon: CupertinoIcons.hourglass,
-        value: Formats.years(p.termYears),
-        semantics: 'Term ${Formats.years(p.termYears)}',
+        value: years,
+        semantics: words.semantics.term(value: years),
       ),
       switch (p.type) {
-        NoteType.mld || NoteType.ppn => const FactTile(
+        NoteType.mld || NoteType.ppn => FactTile(
           icon: CupertinoIcons.shield_fill,
-          value: '100% principal',
-          semantics: 'Principal fully protected at maturity',
+          value: words.labels.fullPrincipal,
+          semantics: words.semantics.fullPrincipal,
         ),
         NoteType.par => FactTile(
           icon: CupertinoIcons.shield_lefthalf_fill,
-          value: '${Formats.percent(o.buffer)} buffer',
-          semantics: 'Losses buffered up to ${Formats.percent(o.buffer)}',
+          value: words.labels.buffer(value: f.percent(o.buffer)),
+          semantics: words.semantics.buffer(value: f.percent(o.buffer)),
         ),
         NoteType.auto => FactTile(
           icon: CupertinoIcons.arrow_down_to_line,
-          value: '${Formats.percent(o.barrier)} barrier',
-          semantics: 'Barrier at ${Formats.percent(o.barrier)}',
+          value: words.labels.barrier(value: f.percent(o.barrier)),
+          semantics: words.semantics.barrier(value: f.percent(o.barrier)),
         ),
       },
       if (p.type == NoteType.auto)
         FactTile(
           icon: CupertinoIcons.gift,
-          value: '${Formats.percent(o.coupon)} coupon',
-          semantics: 'Coupon ${Formats.percent(o.coupon)} over the term',
+          value: words.labels.coupon(value: f.percent(o.coupon)),
+          semantics: words.semantics.coupon(value: f.percent(o.coupon)),
         )
       else
         FactTile(
           icon: CupertinoIcons.arrow_up_right,
           value: o.cap == null
-              ? '${Formats.times(o.participation)} upside'
-              : '${Formats.times(o.participation)} to ${Formats.percent(o.cap!)}',
+              ? words.labels.uncapped(times: f.times(o.participation))
+              : words.labels.capped(
+                  times: f.times(o.participation),
+                  cap: f.percent(o.cap!),
+                ),
           semantics: o.cap == null
-              ? 'Participation ${Formats.times(o.participation)}, uncapped'
-              : 'Participation ${Formats.times(o.participation)}, capped at ${Formats.percent(o.cap!)}',
+              ? words.semantics.uncapped(times: f.times(o.participation))
+              : words.semantics.capped(
+                  times: f.times(o.participation),
+                  cap: f.percent(o.cap!),
+                ),
         ),
       FactTile(
         icon: switch (p.currency) {
@@ -84,30 +104,45 @@ class OverviewSection extends StatelessWidget {
           Currency.gbp => CupertinoIcons.money_pound,
         },
         value: p.currency.code,
-        semantics: 'Currency ${p.currency.code}',
+        semantics: words.semantics.currency(value: p.currency.code),
       ),
       FactTile(
         icon: NoteIcons.region(p.region),
-        value: p.region.title,
-        semantics: 'Region ${p.region.title}',
+        value: p.region.title(general),
+        semantics: words.semantics.region(value: p.region.title(general)),
       ),
       FactTile(
         icon: NoteIcons.assetClass(p.assetClass),
-        value: p.assetClass.title,
-        semantics: 'Asset class ${p.assetClass.title}',
+        value: p.assetClass.title(general),
+        semantics: words.semantics.assetClass(
+          value: p.assetClass.title(general),
+        ),
       ),
     ];
   }
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.product, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as ProductLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    ProductLocale words,
+    GeneralLocale general,
+  ) {
     final ink = KeelColors.ink.of(context);
-    final facts = _facts();
+    final facts = _facts(words, general);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          summary(product),
+          summary(product, words, general),
           style: TextStyle(
             color: ink,
             fontSize: 19,
@@ -117,7 +152,7 @@ class OverviewSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        _Underlying(name: product.underlying),
+        _Underlying(name: product.underlying, words: words),
         const SizedBox(height: 6),
         LayoutBuilder(
           builder: (context, box) {
@@ -132,7 +167,7 @@ class OverviewSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Container(height: 1, color: KeelColors.hairline.of(context)),
-        _Code(code: product.fundserv),
+        _Code(code: product.fundserv, words: words),
       ],
     );
   }
@@ -141,9 +176,10 @@ class OverviewSection extends StatelessWidget {
 /// The index or basket the note follows, given its own line: it is the
 /// note's subject.
 class _Underlying extends StatelessWidget {
-  const _Underlying({required this.name});
+  const _Underlying({required this.name, required this.words});
 
   final String name;
+  final ProductLocale words;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -153,7 +189,7 @@ class _Underlying extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
     ),
     child: Semantics(
-      label: 'Underlying $name',
+      label: words.semantics.underlying(name: name),
       excludeSemantics: true,
       child: Row(
         children: [
@@ -182,9 +218,10 @@ class _Underlying extends StatelessWidget {
 /// The FundSERV order code, set in figures, with a copy control: advisers
 /// paste it straight into an order ticket.
 class _Code extends StatelessWidget {
-  const _Code({required this.code});
+  const _Code({required this.code, required this.words});
 
   final String code;
+  final ProductLocale words;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -200,7 +237,7 @@ class _Code extends StatelessWidget {
         Expanded(
           child: Text(
             code,
-            semanticsLabel: 'FundSERV code $code',
+            semanticsLabel: words.semantics.fundserv(code: code),
             style: TextStyle(
               color: KeelColors.ink.of(context),
               fontSize: 17,
@@ -212,7 +249,7 @@ class _Code extends StatelessWidget {
         ),
         RoundIconButton(
           icon: CupertinoIcons.doc_on_doc,
-          label: 'Copy FundSERV code',
+          label: words.semantics.copyFundserv,
           foreground: KeelColors.azure.of(context),
           onPressed: () => Clipboard.setData(ClipboardData(text: code)),
         ),

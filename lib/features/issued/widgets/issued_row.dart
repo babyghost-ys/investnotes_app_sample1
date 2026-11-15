@@ -1,6 +1,9 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -11,7 +14,7 @@ import 'package:investnotes_app_sample1/data/models/issued_note.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 
 /// An issued note: its status, name and return. Opens to show its path.
-class IssuedRow extends StatelessWidget {
+class IssuedRow extends StatelessWidget implements LocalisationConsumer {
   const IssuedRow({
     super.key,
     required this.note,
@@ -28,8 +31,22 @@ class IssuedRow extends StatelessWidget {
   final VoidCallback? onOpen;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.issued, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as IssuedLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    IssuedLocale issued,
+    GeneralLocale general,
+  ) {
     final n = note;
+    final formats = Formats(general);
     final ink = KeelColors.ink.of(context);
     final muted = KeelColors.muted.of(context);
     final azure = KeelColors.azure.of(context);
@@ -72,7 +89,7 @@ class IssuedRow extends StatelessWidget {
                         NoteIcons.status(n.status),
                         size: 19,
                         color: live ? azure : muted,
-                        semanticLabel: n.status.title,
+                        semanticLabel: n.status.title(general),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -91,8 +108,8 @@ class IssuedRow extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      Formats.percent(n.change, signed: true),
-                      semanticsLabel: Spoken.change(n.change),
+                      formats.percent(n.change, signed: true),
+                      semanticsLabel: Spoken(general).change(n.change),
                       style: TextStyle(
                         color: changeColor,
                         fontSize: 18,
@@ -134,24 +151,25 @@ class IssuedRow extends StatelessWidget {
                           children: [
                             _Fact(
                               icon: CupertinoIcons.flag,
-                              text: Formats.shortDate(n.issued),
-                              semantics: 'Issued',
+                              text: formats.shortDate(n.issued),
+                              semantics: issued.semantics.issued,
                             ),
                             _Fact(
                               icon: CupertinoIcons.flag_circle,
-                              text: Formats.shortDate(n.matures),
-                              semantics: 'Matures',
+                              text: formats.shortDate(n.matures),
+                              semantics: issued.semantics.matures,
                             ),
                             _Fact(
                               icon: CupertinoIcons.tag,
                               text: '${n.type.code} · ${n.currency.code}',
-                              semantics: 'Type and currency',
-                              spoken: '${n.type.title}, ${n.currency.code}',
+                              semantics: issued.semantics.typeAndCurrency,
+                              spoken:
+                                  '${n.type.title(general)}, ${n.currency.code}',
                             ),
                             if (onOpen != null)
                               RoundIconButton(
                                 icon: CupertinoIcons.arrow_right,
-                                label: 'Open ${n.name}',
+                                label: general.semantics.openItem(name: n.name),
                                 foreground: CupertinoColors.white,
                                 background: KeelColors.tide.of(context),
                                 size: 40,

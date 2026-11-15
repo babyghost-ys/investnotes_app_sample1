@@ -1,13 +1,16 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/payoff.dart';
 
 /// A note family on Home: its payoff shape, its code and its name.
-class TypeTile extends StatelessWidget {
+class TypeTile extends StatelessWidget implements LocalisationConsumer {
   const TypeTile({super.key, required this.type, required this.onTap});
 
   final NoteType type;
@@ -30,11 +33,19 @@ class TypeTile extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) {
     final azure = KeelColors.azure.of(context);
     return Semantics(
       button: true,
-      label: type.title,
+      label: type.title(general),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -72,7 +83,7 @@ class TypeTile extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                type.title,
+                type.title(general),
                 maxLines: 2,
                 style: TextStyle(
                   color: KeelColors.muted.of(context),

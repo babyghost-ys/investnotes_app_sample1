@@ -1,0 +1,8 @@
+{
+  "labels": {
+    "title": "Enregistrés"
+  },
+  "semantics": {
+    "nothingSaved": "Rien d’enregistré"
+  }
+}

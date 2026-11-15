@@ -1,12 +1,17 @@
 import 'dart:math' as math;
 
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// Home's hero: a market path that dips and recovers, with a note's path
 /// riding above it, never falling through its floor. Draws itself once.
-class FloorHero extends StatefulWidget {
+class FloorHero extends StatefulWidget implements LocalisationConsumer {
+  @override
+  List<String> get namespaces => const [Locales.home];
+
   const FloorHero({super.key, required this.topInset, this.banner});
 
   /// Space taken by the status and navigation bars above the band.
@@ -39,7 +44,12 @@ class _FloorHeroState extends State<FloorHero>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: widget,
+    builder: (context, locale) => _build(context, locale[0] as HomeLocale),
+  );
+
+  Widget _build(BuildContext context, HomeLocale home) {
     final reduce = MediaQuery.disableAnimationsOf(context);
     if (reduce) _draw.value = 1;
     final tide = KeelColors.tide.of(context);
@@ -61,9 +71,9 @@ class _FloorHeroState extends State<FloorHero>
             widget.banner!,
             const SizedBox(height: 24),
           ],
-          const Text(
-            'Upside, with a floor.',
-            style: TextStyle(
+          Text(
+            home.labels.headline,
+            style: const TextStyle(
               color: CupertinoColors.white,
               fontSize: 32,
               height: 1.1,

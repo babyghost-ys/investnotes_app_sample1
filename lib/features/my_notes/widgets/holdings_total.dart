@@ -1,5 +1,7 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -7,7 +9,7 @@ import 'package:investnotes_app_sample1/data/models/holding.dart';
 
 /// What everything held is worth today, its return since issue, and how it
 /// splits across the notes, one segment each in the shades of their rows.
-class HoldingsTotal extends StatelessWidget {
+class HoldingsTotal extends StatelessWidget implements LocalisationConsumer {
   const HoldingsTotal({
     super.key,
     required this.holdings,
@@ -25,8 +27,22 @@ class HoldingsTotal extends StatelessWidget {
       .withValues(alpha: (1 - index * 0.22).clamp(0.25, 1.0));
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.myNotes, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as MyNotesLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    MyNotesLocale myNotes,
+    GeneralLocale general,
+  ) {
     final up = change >= 0;
+    final f = Formats(general);
     final changeColor = up
         ? KeelColors.azure.of(context)
         : KeelColors.loss.of(context);
@@ -34,8 +50,8 @@ class HoldingsTotal extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          Formats.dollars(value),
-          semanticsLabel: 'Total value ${Formats.dollars(value)}',
+          f.dollars(value),
+          semanticsLabel: myNotes.semantics.totalValue(value: f.dollars(value)),
           style: TextStyle(
             color: KeelColors.ink.of(context),
             fontSize: 44,
@@ -56,8 +72,8 @@ class HoldingsTotal extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              Formats.percent(change, signed: true),
-              semanticsLabel: Spoken.change(change),
+              f.percent(change, signed: true),
+              semanticsLabel: Spoken(general).change(change),
               style: TextStyle(
                 color: changeColor,
                 fontSize: 17,

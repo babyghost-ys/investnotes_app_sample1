@@ -1,6 +1,9 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
@@ -12,7 +15,7 @@ import 'package:investnotes_app_sample1/data/models/product.dart';
 /// A search result. Closed, it shows the note's shape, name and standing;
 /// tapped, its header turns the bar's blue and its order terms unfold,
 /// with a control to the note's page.
-class SearchResultCard extends StatelessWidget {
+class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
   const SearchResultCard({
     super.key,
     required this.product,
@@ -29,27 +32,42 @@ class SearchResultCard extends StatelessWidget {
   static const _duration = Duration(milliseconds: 280);
   static const _curve = Curves.easeOutCubic;
 
-  List<(String, String)> _terms() {
+  List<(String, String)> _terms(SearchLocale search, GeneralLocale general) {
     final p = product;
+    final f = Formats(general);
+    final words = search.labels;
     return [
-      ('FundSERV', p.fundserv),
-      ('Type', p.type.title),
-      ('Underlying', p.underlying),
-      ('Currency', p.currency.code),
+      (words.fundserv, p.fundserv),
+      (words.noteType, p.type.title(general)),
+      (words.underlying, p.underlying),
+      (words.currency, p.currency.code),
       (
-        p.isOffering ? 'Closes' : 'Issued',
-        Formats.fullDate(p.closes ?? p.issueDate),
+        p.isOffering ? words.closes : words.issued,
+        f.fullDate(p.closes ?? p.issueDate),
       ),
       if (p.calledOn != null)
-        ('Called', Formats.fullDate(p.calledOn!))
+        (words.called, f.fullDate(p.calledOn!))
       else
-        ('Matures', Formats.fullDate(p.maturity)),
-      if (p.price != null) ('Price', p.price!.toStringAsFixed(2)),
+        (words.matures, f.fullDate(p.maturity)),
+      if (p.price != null) (words.price, f.fixed(p.price!)),
     ];
   }
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.search, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as SearchLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    SearchLocale search,
+    GeneralLocale general,
+  ) {
     final p = product;
     final raised = KeelColors.raised.of(context);
     final ink = KeelColors.ink.of(context);
@@ -59,7 +77,9 @@ class SearchResultCard extends StatelessWidget {
     final tideDeep = KeelColors.tideDeep.of(context);
     final status = p.status;
     final live = status == null || status == IssuedStatus.active;
-    final standing = status == null ? Formats.until(p.closes!) : status.title;
+    final standing = status == null
+        ? Formats(general).until(p.closes!)
+        : status.title(general);
     final accent = expanded ? KeelColors.foam : (live ? azure : muted);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -154,7 +174,9 @@ class SearchResultCard extends StatelessWidget {
                                 Text(
                                   standing,
                                   semanticsLabel: status == null
-                                      ? 'Open until $standing'
+                                      ? search.semantics.openUntil(
+                                          date: standing,
+                                        )
                                       : null,
                                   style: TextStyle(
                                     color: accent,
@@ -188,7 +210,11 @@ class SearchResultCard extends StatelessWidget {
               curve: _curve,
               alignment: Alignment.topCenter,
               child: expanded
-                  ? _Terms(terms: _terms(), onOpen: onOpen, name: p.name)
+                  ? _Terms(
+                      terms: _terms(search, general),
+                      onOpen: onOpen,
+                      openLabel: general.semantics.openItem(name: p.name),
+                    )
                   : const SizedBox(width: double.infinity),
             ),
           ],
@@ -201,11 +227,15 @@ class SearchResultCard extends StatelessWidget {
 /// The order terms as a two-column table on alternate bands, then the
 /// control to the note's page at its foot.
 class _Terms extends StatelessWidget {
-  const _Terms({required this.terms, required this.onOpen, required this.name});
+  const _Terms({
+    required this.terms,
+    required this.onOpen,
+    required this.openLabel,
+  });
 
   final List<(String, String)> terms;
   final VoidCallback onOpen;
-  final String name;
+  final String openLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -250,7 +280,7 @@ class _Terms extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: RoundIconButton(
               icon: CupertinoIcons.arrow_right,
-              label: 'Open $name',
+              label: openLabel,
               foreground: CupertinoColors.white,
               background: KeelColors.tide.of(context),
               size: 48,

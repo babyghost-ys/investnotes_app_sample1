@@ -1,0 +1,12 @@
+{
+  "labels": {
+    "headline": "Upside, with a floor.",
+    "registerToday": "Register Today",
+    "welcome": "Welcome",
+    "findMyNote": "Find my note"
+  },
+  "semantics": {
+    "registerToday": "Register today",
+    "welcome": "Welcome, {name}"
+  }
+}

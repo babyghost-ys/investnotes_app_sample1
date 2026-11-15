@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -10,14 +12,28 @@ import 'package:investnotes_app_sample1/data/models/product.dart';
 
 /// The note's indicative value since issue, against par, with its high
 /// and low.
-class HistorySection extends StatelessWidget {
+class HistorySection extends StatelessWidget implements LocalisationConsumer {
   const HistorySection({super.key, required this.product});
 
   final Product product;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.product, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as ProductLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    ProductLocale words,
+    GeneralLocale general,
+  ) {
     final p = product;
+    final f = Formats(general);
     final color = p.change < 0
         ? KeelColors.loss.of(context)
         : KeelColors.azure.of(context);
@@ -29,9 +45,10 @@ class HistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          Formats.percent(p.change, signed: true),
-          semanticsLabel:
-              'Return since issue ${Formats.percent(p.change, signed: true)}',
+          f.percent(p.change, signed: true),
+          semanticsLabel: words.semantics.returnSinceIssue(
+            value: f.percent(p.change, signed: true),
+          ),
           style: TextStyle(
             color: color,
             fontSize: 44,
@@ -43,8 +60,11 @@ class HistorySection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Semantics(
-          label:
-              'Value from ${Formats.fullDate(p.issueDate)} to ${Formats.fullDate(p.calledOn ?? _lastDay(p))}, ${Spoken.change(p.change)}',
+          label: words.semantics.valueRange(
+            from: f.fullDate(p.issueDate),
+            to: f.fullDate(p.calledOn ?? _lastDay(p)),
+            change: Spoken(general).change(p.change),
+          ),
           excludeSemantics: true,
           child: Column(
             children: [
@@ -57,12 +77,9 @@ class HistorySection extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Text(Formats.fullDate(p.issueDate), style: dateStyle),
+                  Text(f.fullDate(p.issueDate), style: dateStyle),
                   const Spacer(),
-                  Text(
-                    Formats.fullDate(p.calledOn ?? _lastDay(p)),
-                    style: dateStyle,
-                  ),
+                  Text(f.fullDate(p.calledOn ?? _lastDay(p)), style: dateStyle),
                 ],
               ),
             ],
@@ -73,13 +90,13 @@ class HistorySection extends StatelessWidget {
           children: [
             _Extreme(
               icon: CupertinoIcons.arrow_up_to_line,
-              value: high,
-              semantics: 'High',
+              value: f.fixed(high),
+              semantics: words.semantics.high(value: f.fixed(high)),
             ),
             _Extreme(
               icon: CupertinoIcons.arrow_down_to_line,
-              value: low,
-              semantics: 'Low',
+              value: f.fixed(low),
+              semantics: words.semantics.low(value: f.fixed(low)),
             ),
           ],
         ),
@@ -102,20 +119,22 @@ class _Extreme extends StatelessWidget {
   });
 
   final IconData icon;
-  final double value;
+  final String value;
+
+  /// Said in place of [value].
   final String semantics;
 
   @override
   Widget build(BuildContext context) => Expanded(
     child: Semantics(
-      label: '$semantics ${value.toStringAsFixed(2)}',
+      label: semantics,
       excludeSemantics: true,
       child: Row(
         children: [
           Icon(icon, size: 18, color: KeelColors.azure.of(context)),
           const SizedBox(width: 10),
           Text(
-            value.toStringAsFixed(2),
+            value,
             style: TextStyle(
               color: KeelColors.ink.of(context),
               fontSize: 17,

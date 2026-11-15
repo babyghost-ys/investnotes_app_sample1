@@ -1,0 +1,31 @@
+{
+  "labels": {
+    "title": "Find my note",
+    "resultsTitle": "Your notes",
+    "currencyPrompt": "Which currency will you invest in?",
+    "principalPrompt": "How much of your principal must come back?",
+    "principalAll": "All of it, whatever happens",
+    "principalMost": "Most of it, with a buffer",
+    "principalIncome": "I want income and accept risk",
+    "followPrompt": "What should your return follow?",
+    "followShares": "Shares",
+    "followCommodities": "Commodities",
+    "followRates": "Interest rates",
+    "followMix": "A mix",
+    "termPrompt": "How long can you leave the money?",
+    "termShort": "Up to 3 years",
+    "termMedium": "4 to 5 years",
+    "termLong": "6 years or more",
+    "regionPrompt": "Where do you want exposure?",
+    "fit": "{count} fit",
+    "closest": "Closest",
+    "hits": "{hits}/{of}"
+  },
+  "semantics": {
+    "showNotes": "Show my notes",
+    "nextQuestion": "Next question",
+    "step": "Step {step} of {count}",
+    "hits": "{hits} of {of} answers match",
+    "done": "Done"
+  }
+}

@@ -1,14 +1,17 @@
-/// A language choice on the settings page: the system's, or a set one.
+/// A language choice on the settings page: the device's, or a set one.
 enum AppLanguage {
-  system('SYS', 'System'),
-  english('EN', 'English'),
-  french('FR', 'French');
+  system(null),
+  english('en'),
+  french('fr');
 
-  const AppLanguage(this.code, this.spoken);
+  const AppLanguage(this.language);
 
-  /// The short label on the language control.
-  final String code;
+  /// The language code the app speaks; null follows the device.
+  final String? language;
 
-  /// What VoiceOver and TalkBack say for it; never shown.
-  final String spoken;
+  /// The choice that sets [language], or [system] for none.
+  static AppLanguage of(String? language) => values.firstWhere(
+    (choice) => choice.language == language,
+    orElse: () => system,
+  );
 }

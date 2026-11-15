@@ -1,0 +1,20 @@
+{
+  "labels": {
+    "brand": "Keel",
+    "home": "Home",
+    "myNotes": "My Notes",
+    "offerings": "Offerings",
+    "issued": "Issued",
+    "learn": "Learn",
+    "saved": "Saved",
+    "findMyNote": "Find my note",
+    "settings": "Settings"
+  },
+  "semantics": {
+    "menu": "Menu",
+    "search": "Search",
+    "keelMenu": "Keel menu",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  }
+}

@@ -10,8 +10,14 @@ import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.d
 /// and on each failed attempt the person asked for. Quiet retries say
 /// nothing; a load that succeeds puts the snack bar away.
 class LoadFailureNotice extends StatefulWidget {
-  const LoadFailureNotice({super.key, required this.child});
+  const LoadFailureNotice({
+    super.key,
+    required this.message,
+    required this.child,
+  });
 
+  /// What the snack bar says, in the app's language.
+  final String message;
   final Widget child;
 
   @override
@@ -19,8 +25,6 @@ class LoadFailureNotice extends StatefulWidget {
 }
 
 class _LoadFailureNoticeState extends State<LoadFailureNotice> {
-  static const _message = 'Offerings didn’t load';
-
   /// Whether this tab was on screen at the last check.
   bool _onScreen = false;
 
@@ -35,7 +39,7 @@ class _LoadFailureNoticeState extends State<LoadFailureNotice> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !_onScreen) return;
         if (context.read<OfferingsBloc>().state.phase == LoadingPhase.failed) {
-          ErrorSnackBar.show(context, _message);
+          ErrorSnackBar.show(context, widget.message);
         }
       });
     }
@@ -49,7 +53,7 @@ class _LoadFailureNoticeState extends State<LoadFailureNotice> {
         listener: (context, state) => switch (state.phase) {
           LoadingPhase.failed when _onScreen => ErrorSnackBar.show(
             context,
-            _message,
+            widget.message,
           ),
           LoadingPhase.loaded => ErrorSnackBar.hide(),
           _ => null,

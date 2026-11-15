@@ -1,6 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
@@ -14,7 +16,7 @@ import 'package:investnotes_app_sample1/features/issued/view/issued_filter_sheet
 import 'package:investnotes_app_sample1/features/issued/widgets/issued_row.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 
-class IssuedPage extends StatelessWidget {
+class IssuedPage extends StatelessWidget implements LocalisationConsumer {
   const IssuedPage({super.key});
 
   Future<void> _filter(BuildContext context, IssuedState state) async {
@@ -28,8 +30,22 @@ class IssuedPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<IssuedBloc, IssuedState>(
+  List<String> get namespaces => const [Locales.issued, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as IssuedLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    IssuedLocale issued,
+    GeneralLocale general,
+  ) => BlocBuilder<IssuedBloc, IssuedState>(
     builder: (context, state) {
+      final formats = Formats(general);
       final insets = MediaQuery.paddingOf(context);
       final visible = state.visible;
       final live = state.all.where((n) => n.status == IssuedStatus.active);
@@ -56,14 +72,15 @@ class IssuedPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Semantics(
-                      label:
-                          'Active notes average ${Formats.percent(average, signed: true)}',
+                      label: issued.semantics.average(
+                        value: formats.percent(average, signed: true),
+                      ),
                       excludeSemantics: true,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            Formats.percent(average, signed: true),
+                            formats.percent(average, signed: true),
                             style: TextStyle(
                               color: KeelColors.azure.of(context),
                               fontSize: 44,
@@ -109,10 +126,10 @@ class IssuedPage extends StatelessWidget {
               if (visible.isEmpty)
                 EmptyState(
                   icon: CupertinoIcons.line_horizontal_3_decrease,
-                  text: 'No matches',
+                  text: general.labels.noMatches,
                   action: RoundIconButton(
                     icon: CupertinoIcons.arrow_counterclockwise,
-                    label: 'Clear filters',
+                    label: general.semantics.clearFilters,
                     foreground: KeelColors.azure.of(context),
                     background: KeelColors.mist.of(context),
                     onPressed: () => context.read<IssuedBloc>().add(

@@ -1,0 +1,20 @@
+{
+  "labels": {
+    "title": "Search",
+    "placeholder": "Name, code, index",
+    "nothingFound": "Nothing found",
+    "fundserv": "FundSERV",
+    "noteType": "Type",
+    "underlying": "Underlying",
+    "currency": "Currency",
+    "closes": "Closes",
+    "issued": "Issued",
+    "called": "Called",
+    "matures": "Matures",
+    "price": "Price",
+    "open": "open"
+  },
+  "semantics": {
+    "openUntil": "Open until {date}"
+  }
+}

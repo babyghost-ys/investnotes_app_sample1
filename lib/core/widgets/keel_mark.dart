@@ -1,8 +1,11 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
+
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 
 /// Keel's mark: a hull on the waterline with its keel below, the one
 /// shape that stays steady whatever the water does.
-class KeelMark extends StatelessWidget {
+class KeelMark extends StatelessWidget implements LocalisationConsumer {
   const KeelMark({
     super.key,
     required this.color,
@@ -17,13 +20,21 @@ class KeelMark extends StatelessWidget {
   final bool excludeFromSemantics;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) {
     final mark = SizedBox.square(
       dimension: size,
       child: CustomPaint(painter: _KeelPainter(color)),
     );
     if (excludeFromSemantics) return mark;
-    return Semantics(label: 'Keel', image: true, child: mark);
+    return Semantics(label: general.semantics.keel, image: true, child: mark);
   }
 }
 

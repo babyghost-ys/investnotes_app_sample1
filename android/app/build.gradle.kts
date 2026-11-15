@@ -47,3 +47,14 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Keel's words: the JSON in l10n/ becomes the typed classes and the
+// tar.bz2 archive before Flutter compiles (see tool/l10n.sh).
+val generateLocalisation by tasks.registering(Exec::class) {
+    workingDir = rootProject.projectDir.parentFile
+    commandLine("sh", "tool/l10n.sh")
+}
+
+tasks.matching { it.name.startsWith("compileFlutterBuild") }.configureEach {
+    dependsOn(generateLocalisation)
+}

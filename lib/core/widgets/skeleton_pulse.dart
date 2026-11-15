@@ -1,9 +1,15 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
+
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 
 /// Holds a page's skeleton: every [Bone] below it breathes in step, slowly
 /// fading and returning, until the real content takes its place. Still when
 /// the system asks for less motion.
-class SkeletonPulse extends StatefulWidget {
+class SkeletonPulse extends StatefulWidget implements LocalisationConsumer {
+  @override
+  List<String> get namespaces => const [Locales.general];
+
   const SkeletonPulse({super.key, required this.child});
 
   final Widget child;
@@ -50,9 +56,14 @@ class _SkeletonPulseState extends State<SkeletonPulse>
   }
 
   @override
-  Widget build(BuildContext context) => Semantics(
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: widget,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) => Semantics(
     container: true,
-    label: 'Loading',
+    label: general.semantics.loading,
     excludeSemantics: true,
     child: _Pulse(
       opacity: _still ? kAlwaysCompleteAnimation : _opacity,

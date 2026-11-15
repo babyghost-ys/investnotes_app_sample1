@@ -1,6 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
@@ -19,14 +21,23 @@ import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart
 
 /// A new password for a forgotten one. Pops with the username, so sign-in
 /// can fill it in.
-class ResetPasswordPage extends StatelessWidget {
+class ResetPasswordPage extends StatelessWidget
+    implements LocalisationConsumer {
   const ResetPasswordPage({super.key, this.username = ''});
 
   /// What was already typed on sign-in.
   final String username;
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  List<String> get namespaces => const [Locales.account];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as AccountLocale),
+  );
+
+  Widget _build(BuildContext context, AccountLocale account) => BlocProvider(
     create: (_) => ResetBloc(username: username),
     child: BlocBuilder<ResetBloc, ResetState>(
       builder: (context, state) {
@@ -35,12 +46,12 @@ class ResetPasswordPage extends StatelessWidget {
           child: StepSwitcher(
             step: state.step,
             child: switch (state.step) {
-              ResetStep.request => _request(state, bloc),
-              ResetStep.reset => _reset(context, state, bloc),
+              ResetStep.request => _request(state, bloc, account),
+              ResetStep.reset => _reset(context, state, bloc, account),
               ResetStep.done => FlowDone(
-                title: 'Password changed',
+                title: account.labels.passwordChanged,
                 detail: state.username.trim(),
-                actionLabel: 'Back to sign in',
+                actionLabel: account.semantics.backToSignIn,
                 onAction: () =>
                     SignInScope.of(context).pop(context, state.username.trim()),
               ),
@@ -51,13 +62,13 @@ class ResetPasswordPage extends StatelessWidget {
     ),
   );
 
-  Widget _request(ResetState state, ResetBloc bloc) {
+  Widget _request(ResetState state, ResetBloc bloc, AccountLocale account) {
     void advance() => bloc.add(const ResetAdvanced());
     return FlowBody(
       children: [
         KeelField(
           icon: CupertinoIcons.person,
-          placeholder: 'Username',
+          placeholder: account.labels.username,
           initialValue: state.username,
           autofocus: state.username.isEmpty,
           onChanged: (v) => bloc.add(ResetUsernameChanged(v)),
@@ -66,7 +77,7 @@ class ResetPasswordPage extends StatelessWidget {
         const SizedBox(height: 12),
         KeelField(
           icon: CupertinoIcons.envelope,
-          placeholder: 'Email',
+          placeholder: account.labels.email,
           initialValue: state.email,
           autofocus: state.username.isNotEmpty,
           keyboard: TextInputType.emailAddress,
@@ -77,14 +88,19 @@ class ResetPasswordPage extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         AdvanceButton(
-          label: 'Send code',
+          label: account.semantics.sendCode,
           onPressed: state.canAdvance ? advance : null,
         ),
       ],
     );
   }
 
-  Widget _reset(BuildContext context, ResetState state, ResetBloc bloc) {
+  Widget _reset(
+    BuildContext context,
+    ResetState state,
+    ResetBloc bloc,
+    AccountLocale account,
+  ) {
     void advance() => bloc.add(const ResetAdvanced());
     return FlowBody(
       children: [
@@ -102,13 +118,15 @@ class ResetPasswordPage extends StatelessWidget {
         const SizedBox(height: 28),
         KeelField(
           icon: CupertinoIcons.lock,
-          placeholder: 'New password',
+          placeholder: account.labels.newPassword,
           initialValue: state.password,
           obscure: !state.reveal,
           onChanged: (v) => bloc.add(ResetPasswordChanged(v)),
           trailing: RoundIconButton(
             icon: state.reveal ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-            label: state.reveal ? 'Hide passwords' : 'Show passwords',
+            label: state.reveal
+                ? account.semantics.hidePasswords
+                : account.semantics.showPasswords,
             foreground: KeelColors.muted.of(context),
             size: 40,
             iconSize: 18,
@@ -118,7 +136,7 @@ class ResetPasswordPage extends StatelessWidget {
         const SizedBox(height: 12),
         KeelField(
           icon: CupertinoIcons.lock_rotation,
-          placeholder: 'Confirm password',
+          placeholder: account.labels.confirmPassword,
           initialValue: state.confirm,
           obscure: !state.reveal,
           action: TextInputAction.go,
@@ -130,7 +148,7 @@ class ResetPasswordPage extends StatelessWidget {
         PasswordChecks(password: state.password, confirm: state.confirm),
         const SizedBox(height: 28),
         AdvanceButton(
-          label: 'Change password',
+          label: account.semantics.changePassword,
           icon: CupertinoIcons.checkmark_alt,
           onPressed: state.canAdvance ? advance : null,
         ),

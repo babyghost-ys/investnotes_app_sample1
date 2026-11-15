@@ -1,8 +1,11 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
+import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -19,18 +22,18 @@ Future<DateTime?> showDatePick(
 }) => NativeSheet.show<DateTime>(
   context: context,
   route: 'datePick',
-  arguments: {
+  arguments: SheetArguments.wrap(context, {
     'date': date.toIso8601String(),
     'first': first.toIso8601String(),
     'last': last.toIso8601String(),
     'end': end,
-  },
+  }),
   decodeResult: (value) => DateTime.parse(value as String),
   backgroundColor: KeelColors.page.of(context),
   builder: (_) => DatePickSheet(date: date, first: first, last: last, end: end),
 );
 
-class DatePickSheet extends StatelessWidget {
+class DatePickSheet extends StatelessWidget implements LocalisationConsumer {
   const DatePickSheet({
     super.key,
     required this.date,
@@ -47,7 +50,20 @@ class DatePickSheet extends StatelessWidget {
   final bool end;
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  List<String> get namespaces => const [Locales.issued, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as IssuedLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    IssuedLocale issued,
+    GeneralLocale general,
+  ) => BlocProvider(
     create: (_) => DraftBloc<DateTime>(date),
     child: BlocBuilder<DraftBloc<DateTime>, DraftState<DateTime>>(
       builder: (context, state) {
@@ -55,6 +71,7 @@ class DatePickSheet extends StatelessWidget {
         final azure = KeelColors.azure.of(context);
         final draft = context.read<DraftBloc<DateTime>>();
 
+        final formats = Formats(general);
         final title = Row(
           children: [
             Icon(
@@ -68,10 +85,10 @@ class DatePickSheet extends StatelessWidget {
               child: Semantics(
                 liveRegion: true,
                 label:
-                    '${end ? 'End' : 'Start'} date, ${Formats.fullDate(state.value)}',
+                    '${end ? issued.semantics.endDate : issued.semantics.startDate}, ${formats.fullDate(state.value)}',
                 excludeSemantics: true,
                 child: Text(
-                  Formats.shortDate(state.value),
+                  formats.shortDate(state.value),
                   style: TextStyle(
                     color: ink,
                     fontSize: 22,
@@ -85,13 +102,13 @@ class DatePickSheet extends StatelessWidget {
         );
         final close = RoundIconButton(
           icon: CupertinoIcons.xmark,
-          label: 'Close',
+          label: general.semantics.close,
           foreground: ink,
           onPressed: () => NativeSheet.pop(context),
         );
         final use = RoundIconButton(
           icon: CupertinoIcons.checkmark,
-          label: 'Use this date',
+          label: issued.semantics.useDate,
           foreground: CupertinoColors.white,
           background: azure,
           size: 54,
@@ -106,7 +123,9 @@ class DatePickSheet extends StatelessWidget {
             lastDate: last,
             style: NativeDatePickerStyle.inline,
             tintColor: azure,
-            semanticLabel: end ? 'End date' : 'Start date',
+            semanticLabel: end
+                ? issued.semantics.endDate
+                : issued.semantics.startDate,
             onDateChanged: (d) =>
                 draft.change(DateTime(d.year, d.month, d.day)),
           ),

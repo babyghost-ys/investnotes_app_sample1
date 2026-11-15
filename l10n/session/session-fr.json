@@ -1,0 +1,23 @@
+{
+  "labels": {
+    "signIn": "Connexion",
+    "home": "Accueil",
+    "brand": "Keel",
+    "username": "Nom d’utilisateur",
+    "password": "Mot de passe",
+    "forgotUsername": "Nom d’utilisateur oublié ?",
+    "forgotPassword": "Mot de passe oublié ?",
+    "or": "ou",
+    "newToKeel": "Nouveau sur Keel ?",
+    "register": "Ouvrir un compte"
+  },
+  "semantics": {
+    "signIn": "Se connecter",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "withPassword": "Se connecter avec nom d’utilisateur et mot de passe",
+    "biometricReason": "Se connecter à Keel avec {kind}",
+    "biometric": "Se connecter avec {kind}",
+    "biometricFailed": "Se connecter avec {kind}, non reconnu, réessayez"
+  }
+}

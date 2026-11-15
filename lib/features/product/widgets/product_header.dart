@@ -1,5 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -10,13 +13,26 @@ import 'package:investnotes_app_sample1/data/models/product.dart';
 
 /// The note's name, its payoff shape, and how it stands: open until a
 /// date, or active, called or matured.
-class ProductHeader extends StatelessWidget {
+class ProductHeader extends StatelessWidget implements LocalisationConsumer {
   const ProductHeader({super.key, required this.product});
 
   final Product product;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.product, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as ProductLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    ProductLocale words,
+    GeneralLocale general,
+  ) {
     final p = product;
     final azure = KeelColors.azure.of(context);
     final muted = KeelColors.muted.of(context);
@@ -51,9 +67,13 @@ class ProductHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    status == null ? Formats.until(p.closes!) : status.title,
+                    status == null
+                        ? Formats(general).until(p.closes!)
+                        : status.title(general),
                     semanticsLabel: status == null
-                        ? 'Open, ${Spoken.closes(p.closes!)}'
+                        ? words.semantics.open(
+                            closes: Spoken(general).closes(p.closes!),
+                          )
                         : null,
                     style: TextStyle(
                       color: live ? azure : muted,

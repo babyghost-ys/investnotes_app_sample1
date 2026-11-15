@@ -1,10 +1,12 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter/widgets.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
 import 'package:investnotes_app_sample1/app/common_overlay.dart';
 import 'package:investnotes_app_sample1/app/keel_app.dart';
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/app/common_sheet_app.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/features/splash/view/splash_page.dart';
 
 Future<void> main() async {
@@ -26,7 +28,21 @@ Future<void> main() async {
           onError: (_, _) => binding.allowFirstFrame(),
         ),
       );
-  runApp(const KeelApp());
+  // Every language's words, unpacked before the first frame, so the app
+  // opens in the language it was left in.
+  const store = LanguageStore();
+  final library = await LocaleLibrary.load(localeRegistry);
+  CommonOverlay.library = library;
+  runApp(
+    KeelApp(
+      localisation: LocalisationBloc(
+        library: library,
+        store: store,
+        choice: await store.read(),
+        system: binding.platformDispatcher.locales,
+      ),
+    ),
+  );
 }
 
 /// Each native sheet runs in an engine of its own, started here.
@@ -38,6 +54,8 @@ void commonSheetMain() {
 /// The strip below the status bar runs in an engine of its own on iOS,
 /// started here (see [NativeOverlayContainer]).
 @pragma('vm:entry-point')
-void commonOverlayMain() {
-  NativeOverlayContainer.run(CommonOverlay.build);
+Future<void> commonOverlayMain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  CommonOverlay.library = await LocaleLibrary.load(localeRegistry);
+  await NativeOverlayContainer.run(CommonOverlay.build);
 }

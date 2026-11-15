@@ -1,15 +1,17 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
 
 /// An offering in a list: its payoff shape, its name, and the number people
 /// compare it by. A closing date shows only when it is close.
-class OfferingRow extends StatelessWidget {
+class OfferingRow extends StatelessWidget implements LocalisationConsumer {
   const OfferingRow({
     super.key,
     required this.offering,
@@ -33,22 +35,32 @@ class OfferingRow extends StatelessWidget {
   final bool selected;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) {
+    final formats = Formats(general);
+    final say = Spoken(general);
     final o = offering;
     final ink = KeelColors.ink.of(context);
     final muted = KeelColors.muted.of(context);
     final azure = KeelColors.azure.of(context);
     final soon = o.closes.difference(DateTime.now()).inDays < 7;
-    final tag = badge ?? (soon ? Formats.until(o.closes) : null);
+    final tag = badge ?? (soon ? formats.until(o.closes) : null);
     final mist = KeelColors.mist.of(context);
     final spoken = [
       o.name,
       o.underlying,
-      Spoken.headline(o),
+      say.headline(o),
       if (badge != null)
         spokenBadge ?? badge!
       else if (soon)
-        Spoken.closes(o.closes),
+        say.closes(o.closes),
     ].join(', ');
     return Semantics(
       container: true,
@@ -81,7 +93,7 @@ class OfferingRow extends StatelessWidget {
                 ),
               ),
             ),
-            _row(context, o, ink, muted, azure, tag),
+            _row(context, o, ink, muted, azure, tag, formats),
           ],
         ),
       ),
@@ -98,6 +110,7 @@ class OfferingRow extends StatelessWidget {
     Color muted,
     Color azure,
     String? tag,
+    Formats formats,
   ) => Container(
     padding: const EdgeInsets.symmetric(vertical: 14),
     decoration: BoxDecoration(
@@ -155,8 +168,8 @@ class OfferingRow extends StatelessWidget {
           children: [
             Text(
               o.headlineIsRate
-                  ? Formats.percent(o.headline)
-                  : Formats.times(o.headline),
+                  ? formats.percent(o.headline)
+                  : formats.times(o.headline),
               style: TextStyle(
                 color: ink,
                 fontSize: 22,

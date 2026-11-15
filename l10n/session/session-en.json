@@ -1,0 +1,23 @@
+{
+  "labels": {
+    "signIn": "Sign in",
+    "home": "Home",
+    "brand": "Keel",
+    "username": "Username",
+    "password": "Password",
+    "forgotUsername": "Forgot username?",
+    "forgotPassword": "Forgot password?",
+    "or": "or",
+    "newToKeel": "New to Keel?",
+    "register": "Register"
+  },
+  "semantics": {
+    "signIn": "Sign in",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "withPassword": "Sign in with username and password",
+    "biometricReason": "Sign in to Keel with {kind}",
+    "biometric": "Sign in with {kind}",
+    "biometricFailed": "Sign in with {kind}, not recognised, try again"
+  }
+}

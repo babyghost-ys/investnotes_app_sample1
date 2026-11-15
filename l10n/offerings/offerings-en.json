@@ -1,0 +1,26 @@
+{
+  "labels": {
+    "atLeast": "≥ {value}",
+    "sortClosing": "Closing",
+    "sortHeadline": "Headline",
+    "sortTerm": "Term",
+    "ascending": "Ascending",
+    "descending": "Descending"
+  },
+  "semantics": {
+    "didntLoad": "Offerings didn’t load",
+    "lowestHeadline": "Lowest cap or coupon",
+    "atLeast": "At least {value}",
+    "closesBy": "Closes by",
+    "anyClosingDate": "Any closing date",
+    "shareClass": "Share class",
+    "goal": "Goal",
+    "payout": "Payout",
+    "term": "Term",
+    "sortClosing": "Sort by closing date",
+    "sortHeadline": "Sort by cap or coupon",
+    "sortTerm": "Sort by term",
+    "ascending": "Ascending",
+    "descending": "Descending"
+  }
+}

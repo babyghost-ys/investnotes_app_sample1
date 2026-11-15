@@ -1,0 +1,18 @@
+{
+  "labels": {
+    "title": "Settings",
+    "languageTitle": "Language",
+    "languageDetail": "Choose the app’s language",
+    "haptics": "Haptics",
+    "hapticsDetail": "Enable or disable haptic feedback",
+    "system": "SYS",
+    "english": "EN",
+    "french": "FR"
+  },
+  "semantics": {
+    "system": "System",
+    "english": "English",
+    "french": "Français",
+    "haptics": "Haptics"
+  }
+}

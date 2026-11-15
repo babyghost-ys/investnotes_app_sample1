@@ -1,0 +1,10 @@
+{
+  "labels": {
+    "title": "Mes billets"
+  },
+  "semantics": {
+    "noNotes": "Aucun billet détenu",
+    "totalValue": "Valeur totale {value}",
+    "worth": "{name}, valeur {value}, {change}"
+  }
+}

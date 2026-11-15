@@ -11,15 +11,21 @@ final class BiometricStarted extends BiometricEvent {
   const BiometricStarted();
 }
 
-/// Biometric sign-in switched [on] for the account [name].
+/// Biometric sign-in switched [on] for the account [name]. [reason] is
+/// what the system's prompt says, in the app's language.
 final class BiometricToggled extends BiometricEvent {
-  const BiometricToggled({required this.on, required this.name});
+  const BiometricToggled({
+    required this.on,
+    required this.name,
+    required this.reason,
+  });
 
   final bool on;
   final String name;
+  final String reason;
 
   @override
-  List<Object?> get props => [on, name];
+  List<Object?> get props => [on, name, reason];
 }
 
 final class BiometricAccountSignedIn extends BiometricEvent {

@@ -41,9 +41,7 @@ class BiometricBloc extends Bloc<BiometricEvent, BiometricState> {
     emit(BiometricState(kind: kind, checking: true));
     // The prompt rises once the switch has settled and the touch is over.
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    final matched = await _repository.authenticate(
-      'Sign in to Keel with ${kind.title}',
-    );
+    final matched = await _repository.authenticate(event.reason);
     if (matched) await _repository.enrol(event.name);
     emit(BiometricState(kind: kind, name: matched ? event.name : null));
   }

@@ -1,11 +1,13 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/data/models/credentials.dart';
 
 /// Where the code went, with a control to send another.
-class CodeSentHeader extends StatelessWidget {
+class CodeSentHeader extends StatelessWidget implements LocalisationConsumer {
   const CodeSentHeader({
     super.key,
     required this.email,
@@ -20,7 +22,15 @@ class CodeSentHeader extends StatelessWidget {
   final VoidCallback onResend;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.account];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as AccountLocale),
+  );
+
+  Widget _build(BuildContext context, AccountLocale account) {
     final azure = KeelColors.azure.of(context);
     return Row(
       children: [
@@ -39,7 +49,7 @@ class CodeSentHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Code sent to',
+                account.labels.codeSentTo,
                 style: TextStyle(
                   color: KeelColors.muted.of(context),
                   fontSize: 14,
@@ -48,7 +58,7 @@ class CodeSentHeader extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 Credentials.masked(email),
-                semanticsLabel: Credentials.spokenMasked(email),
+                semanticsLabel: Credentials.spokenMasked(email, account),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -67,7 +77,9 @@ class CodeSentHeader extends StatelessWidget {
             icon: resent
                 ? CupertinoIcons.checkmark
                 : CupertinoIcons.arrow_clockwise,
-            label: resent ? 'New code sent' : 'Send a new code',
+            label: resent
+                ? account.semantics.newCodeSent
+                : account.semantics.sendNewCode,
             foreground: azure,
             background: KeelColors.mist.of(context),
             onPressed: resent ? null : onResend,

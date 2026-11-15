@@ -1,0 +1,18 @@
+{
+  "labels": {
+    "title": "Réglages",
+    "languageTitle": "Langue",
+    "languageDetail": "Choisissez la langue de l’app",
+    "haptics": "Retour haptique",
+    "hapticsDetail": "Activer ou désactiver le retour haptique",
+    "system": "SYS",
+    "english": "EN",
+    "french": "FR"
+  },
+  "semantics": {
+    "system": "Système",
+    "english": "English",
+    "french": "Français",
+    "haptics": "Retour haptique"
+  }
+}

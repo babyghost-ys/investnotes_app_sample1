@@ -1,0 +1,31 @@
+{
+  "labels": {
+    "title": "Trouver mon billet",
+    "resultsTitle": "Vos billets",
+    "currencyPrompt": "Dans quelle devise investirez-vous ?",
+    "principalPrompt": "Quelle part de votre capital doit vous revenir ?",
+    "principalAll": "Tout, quoi qu’il arrive",
+    "principalMost": "La plus grande partie, avec une protection",
+    "principalIncome": "Je veux un revenu et j’accepte le risque",
+    "followPrompt": "Sur quoi votre rendement doit-il reposer ?",
+    "followShares": "Actions",
+    "followCommodities": "Matières premières",
+    "followRates": "Taux d’intérêt",
+    "followMix": "Un mélange",
+    "termPrompt": "Combien de temps pouvez-vous placer cet argent ?",
+    "termShort": "3 ans ou moins",
+    "termMedium": "4 à 5 ans",
+    "termLong": "6 ans ou plus",
+    "regionPrompt": "Où voulez-vous être exposé ?",
+    "fit": "{count} correspondent",
+    "closest": "Les plus proches",
+    "hits": "{hits}/{of}"
+  },
+  "semantics": {
+    "showNotes": "Afficher mes billets",
+    "nextQuestion": "Question suivante",
+    "step": "Étape {step} sur {count}",
+    "hits": "{hits} réponses sur {of} correspondent",
+    "done": "Terminé"
+  }
+}

@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/product.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
@@ -12,7 +14,9 @@ part 'search_state.dart';
 /// type, region, asset class, currency and status. Every word must match
 /// somewhere. Results open one at a time in place.
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  SearchBloc(NotesRepository repository)
+  /// Words such as a type's name match in [general]'s language, the one
+  /// the page shows.
+  SearchBloc(NotesRepository repository, this._general)
     : _all = [
         ...repository.offerings.map(repository.productOf),
         ...repository.issued.map(repository.productOfIssued),
@@ -49,16 +53,17 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   final List<Product> _all;
+  final GeneralLocale _general;
 
-  static String _haystack(Product p) => [
+  String _haystack(Product p) => [
     p.name,
     p.fundserv,
     p.underlying,
     p.type.code,
-    p.type.title,
-    p.region.title,
-    p.assetClass.title,
+    p.type.title(_general),
+    p.region.title(_general),
+    p.assetClass.title(_general),
     p.currency.code,
-    p.status?.title ?? 'open',
+    p.status?.title(_general) ?? '',
   ].join(' ').toLowerCase();
 }

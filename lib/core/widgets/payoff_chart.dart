@@ -16,6 +16,7 @@ class PayoffChart extends StatelessWidget {
     required this.marketColor,
     required this.gridColor,
     required this.labelColor,
+    required this.tickLabel,
     this.height = 240,
   });
 
@@ -27,6 +28,9 @@ class PayoffChart extends StatelessWidget {
   final Color marketColor;
   final Color gridColor;
   final Color labelColor;
+
+  /// A tick's market move as the language writes it, such as "+20%".
+  final String Function(double move) tickLabel;
   final double height;
 
   @override
@@ -41,6 +45,7 @@ class PayoffChart extends StatelessWidget {
         market: marketColor,
         grid: gridColor,
         label: labelColor,
+        tickLabel: tickLabel,
         textScaler: MediaQuery.textScalerOf(context),
       ),
     ),
@@ -55,12 +60,14 @@ class _ChartPainter extends CustomPainter {
     required this.market,
     required this.grid,
     required this.label,
+    required this.tickLabel,
     required this.textScaler,
   });
 
   final Payoff payoff;
   final double move;
   final Color line, market, grid, label;
+  final String Function(double move) tickLabel;
   final TextScaler textScaler;
 
   static const _minY = -0.5, _maxY = 0.65;
@@ -153,9 +160,7 @@ class _ChartPainter extends CustomPainter {
 
     // Move ticks under the chart.
     for (final tick in const [-0.4, -0.2, 0.0, 0.2, 0.4]) {
-      final text = tick == 0
-          ? '0'
-          : '${tick > 0 ? '+' : ''}${(tick * 100).round()}%';
+      final text = tickLabel(tick);
       final painter = TextPainter(
         text: TextSpan(
           text: text,
@@ -180,5 +185,6 @@ class _ChartPainter extends CustomPainter {
       old.line != line ||
       old.market != market ||
       old.grid != grid ||
-      old.label != label;
+      old.label != label ||
+      old.tickLabel(0.2) != tickLabel(0.2);
 }

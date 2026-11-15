@@ -1,12 +1,14 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// One end of a custom date range. Its date is its content; tapping opens
 /// a calendar on top.
-class RangeButton extends StatelessWidget {
+class RangeButton extends StatelessWidget implements LocalisationConsumer {
   const RangeButton({
     super.key,
     required this.icon,
@@ -23,9 +25,18 @@ class RangeButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Semantics(
+  List<String> get namespaces => const [Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) => Semantics(
     button: true,
-    label: '$semantics ${date == null ? 'any' : Formats.fullDate(date!)}',
+    label:
+        '$semantics ${date == null ? general.semantics.any : Formats(general).fullDate(date!)}',
     excludeSemantics: true,
     child: GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -46,7 +57,9 @@ class RangeButton extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                date == null ? 'Any' : Formats.fullDate(date!),
+                date == null
+                    ? general.labels.any
+                    : Formats(general).fullDate(date!),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

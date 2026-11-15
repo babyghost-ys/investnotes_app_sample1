@@ -1,0 +1,10 @@
+{
+  "labels": {
+    "title": "My Notes"
+  },
+  "semantics": {
+    "noNotes": "No notes held",
+    "totalValue": "Total value {value}",
+    "worth": "{name}, worth {value}, {change}"
+  }
+}

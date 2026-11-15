@@ -1,0 +1,26 @@
+{
+  "labels": {
+    "atLeast": "≥ {value}",
+    "sortClosing": "Clôture",
+    "sortHeadline": "Rendement",
+    "sortTerm": "Durée",
+    "ascending": "Croissant",
+    "descending": "Décroissant"
+  },
+  "semantics": {
+    "didntLoad": "Les offres n’ont pas pu être chargées",
+    "lowestHeadline": "Plafond ou coupon minimal",
+    "atLeast": "Au moins {value}",
+    "closesBy": "Se termine avant le",
+    "anyClosingDate": "Toute date de fin",
+    "shareClass": "Catégorie de parts",
+    "goal": "Objectif",
+    "payout": "Versement",
+    "term": "Durée",
+    "sortClosing": "Trier par date de fin",
+    "sortHeadline": "Trier par plafond ou coupon",
+    "sortTerm": "Trier par durée",
+    "ascending": "Croissant",
+    "descending": "Décroissant"
+  }
+}

@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/bar_strip.dart';
@@ -20,7 +22,11 @@ enum _Check { idle, checking, failed }
 /// Welcome back for an account that signs in with Face ID or Touch ID: who
 /// it is, one large control that checks and signs in, and a way to sign in
 /// with username and password instead.
-class BiometricSignInPage extends StatefulWidget {
+class BiometricSignInPage extends StatefulWidget
+    implements LocalisationConsumer {
+  @override
+  List<String> get namespaces => const [Locales.session];
+
   const BiometricSignInPage({super.key});
 
   @override
@@ -44,7 +50,12 @@ class _BiometricSignInPageState extends State<BiometricSignInPage>
   }
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: widget,
+    builder: (context, locale) => _build(context, locale[0] as SessionLocale),
+  );
+
+  Widget _build(BuildContext context, SessionLocale session) => BlocProvider(
     create: (_) => DraftBloc<_Check>(_Check.idle),
     child: BlocBuilder<DraftBloc<_Check>, DraftState<_Check>>(
       builder: (context, state) {
@@ -59,7 +70,7 @@ class _BiometricSignInPageState extends State<BiometricSignInPage>
         Future<void> signIn() async {
           check.change(_Check.checking);
           final matched = await _repository.authenticate(
-            'Sign in to Keel with ${account.kind.title}',
+            session.semantics.biometricReason(kind: account.kind.title),
           );
           if (!mounted) return;
           if (matched) {
@@ -90,7 +101,7 @@ class _BiometricSignInPageState extends State<BiometricSignInPage>
                       ),
                       child: Column(
                         children: [
-                          _Band(insets: insets),
+                          _Band(insets: insets, brand: session.labels.brand),
                           const SizedBox(height: 40),
                           // Whose account this signs in.
                           Padding(
@@ -139,6 +150,7 @@ class _BiometricSignInPageState extends State<BiometricSignInPage>
                             ),
                             child: _BiometricButton(
                               account: account,
+                              session: session,
                               failed: failed,
                               color: azure,
                               onPressed: state.value == _Check.checking
@@ -149,7 +161,7 @@ class _BiometricSignInPageState extends State<BiometricSignInPage>
                           const SizedBox(height: 36),
                           RoundIconButton(
                             icon: CupertinoIcons.keyboard,
-                            label: 'Sign in with username and password',
+                            label: session.semantics.withPassword,
                             foreground: azure,
                             background: KeelColors.mist.of(context),
                             size: 56,
@@ -174,9 +186,10 @@ class _BiometricSignInPageState extends State<BiometricSignInPage>
 /// The tide blue carried down from the bar, holding the brand, as on
 /// sign-in.
 class _Band extends StatelessWidget {
-  const _Band({required this.insets});
+  const _Band({required this.insets, required this.brand});
 
   final EdgeInsets insets;
+  final String brand;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -191,17 +204,17 @@ class _Band extends StatelessWidget {
     child: Align(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: FlowPage.measure - 48),
-        child: const Row(
+        child: Row(
           children: [
-            KeelMark(
+            const KeelMark(
               color: CupertinoColors.white,
               size: 56,
               excludeFromSemantics: true,
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
             Text(
-              'Keel',
-              style: TextStyle(
+              brand,
+              style: const TextStyle(
                 color: CupertinoColors.white,
                 fontSize: 36,
                 height: 1,
@@ -221,12 +234,14 @@ class _Band extends StatelessWidget {
 class _BiometricButton extends StatelessWidget {
   const _BiometricButton({
     required this.account,
+    required this.session,
     required this.failed,
     required this.color,
     required this.onPressed,
   });
 
   final BiometricAccount account;
+  final SessionLocale session;
   final bool failed;
   final Color color;
   final VoidCallback? onPressed;
@@ -242,8 +257,8 @@ class _BiometricButton extends StatelessWidget {
       button: true,
       enabled: onPressed != null,
       label: failed
-          ? 'Sign in with ${account.kind.title}, not recognised, try again'
-          : 'Sign in with ${account.kind.title}',
+          ? session.semantics.biometricFailed(kind: account.kind.title)
+          : session.semantics.biometric(kind: account.kind.title),
       liveRegion: failed,
       excludeSemantics: true,
       child: CupertinoButton(

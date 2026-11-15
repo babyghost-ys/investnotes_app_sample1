@@ -1,6 +1,9 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/product_section.dart';
 
@@ -88,7 +91,7 @@ class _SectionStripState extends State<SectionStrip> {
   );
 }
 
-class _Item extends StatelessWidget {
+class _Item extends StatelessWidget implements LocalisationConsumer {
   const _Item({
     super.key,
     required this.section,
@@ -108,12 +111,20 @@ class _Item extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.product];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as ProductLocale),
+  );
+
+  Widget _build(BuildContext context, ProductLocale product) {
     final tide = _chosen.of(context);
     return Semantics(
       button: true,
       selected: selected,
-      label: section.title,
+      label: section.title(product),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -158,7 +169,7 @@ class _Item extends StatelessWidget {
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 ),
-                child: Text(section.title, maxLines: 1),
+                child: Text(section.title(product), maxLines: 1),
               ),
             ],
           ),

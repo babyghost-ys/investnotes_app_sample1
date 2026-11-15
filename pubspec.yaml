@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   flutter_native_widgets:
     path: packages/flutter_native_widgets
+  keel_localisation:
+    path: packages/keel_localisation
   bloc: ^9.2.1
   flutter_bloc: ^9.1.1
   equatable: ^3.0.0
@@ -38,4 +40,7 @@ flutter:
           weight: 600
   assets:
     - assets/images/splash_background.jpg
+    # Every language's words, packed by `dart run keel_localisation:generate`
+    # from the JSON in l10n/.
+    - assets/l10n/l10n.tar.bz2
     - assets/images/splash_background_wide.jpg

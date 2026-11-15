@@ -1,11 +1,16 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// Six boxes for an emailed code. One hidden field takes the typing, the
 /// paste and the code the keyboard offers from Mail; the boxes show it.
-class CodeField extends StatefulWidget {
+class CodeField extends StatefulWidget implements LocalisationConsumer {
+  @override
+  List<String> get namespaces => const [Locales.account];
+
   const CodeField({
     super.key,
     required this.value,
@@ -53,7 +58,12 @@ class _CodeFieldState extends State<CodeField> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: widget,
+    builder: (context, locale) => _build(context, locale[0] as AccountLocale),
+  );
+
+  Widget _build(BuildContext context, AccountLocale account) {
     final value = widget.value;
     final active = _focus.hasFocus
         ? value.length.clamp(0, CodeField.length - 1)
@@ -61,7 +71,7 @@ class _CodeFieldState extends State<CodeField> {
     final azure = KeelColors.azure.of(context);
     // The boxes draw the digits; the field underneath says them once.
     return Semantics(
-      label: 'Code',
+      label: account.semantics.code,
       child: SizedBox(
         height: 60,
         child: Stack(

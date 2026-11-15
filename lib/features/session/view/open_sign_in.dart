@@ -3,6 +3,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
@@ -25,12 +26,15 @@ Future<void> openSignIn(BuildContext context) async {
   final name = await NativeSheet.show<String>(
     context: context,
     route: 'signIn',
-    arguments: biometric.enabled
-        ? {
-            'biometricName': biometric.name,
-            'biometricKind': biometric.kind!.name,
-          }
-        : null,
+    arguments: SheetArguments.wrap(
+      context,
+      biometric.enabled
+          ? {
+              'biometricName': biometric.name,
+              'biometricKind': biometric.kind!.name,
+            }
+          : null,
+    ),
     fullScreen: true,
     backgroundColor: KeelColors.raised.of(context),
     // UIKit's own bar: across the top, or in the Duo's vertical bar.

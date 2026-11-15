@@ -1,6 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -9,7 +11,7 @@ import 'package:investnotes_app_sample1/data/models/holding.dart';
 
 /// A note held: its shade in the split, its path, its name and worth, and
 /// its return. Opens the note's page.
-class HoldingRow extends StatelessWidget {
+class HoldingRow extends StatelessWidget implements LocalisationConsumer {
   const HoldingRow({
     super.key,
     required this.holding,
@@ -22,8 +24,22 @@ class HoldingRow extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.myNotes, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as MyNotesLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    MyNotesLocale myNotes,
+    GeneralLocale general,
+  ) {
     final n = holding.note;
+    final f = Formats(general);
     final muted = KeelColors.muted.of(context);
     final changeColor = n.change < 0
         ? KeelColors.loss.of(context)
@@ -31,8 +47,11 @@ class HoldingRow extends StatelessWidget {
     return Semantics(
       container: true,
       button: true,
-      label:
-          '${n.name}, worth ${Formats.dollars(holding.value)}, ${Spoken.change(n.change)}',
+      label: myNotes.semantics.worth(
+        name: n.name,
+        value: f.dollars(holding.value),
+        change: Spoken(general).change(n.change),
+      ),
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -82,7 +101,7 @@ class HoldingRow extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      Formats.dollars(holding.value),
+                      f.dollars(holding.value),
                       style: TextStyle(
                         color: muted,
                         fontSize: 14,
@@ -94,7 +113,7 @@ class HoldingRow extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                Formats.percent(n.change, signed: true),
+                f.percent(n.change, signed: true),
                 style: TextStyle(
                   color: changeColor,
                   fontSize: 18,

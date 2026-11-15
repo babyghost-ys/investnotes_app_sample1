@@ -2,7 +2,9 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/biometric_glyph.dart';
@@ -17,13 +19,21 @@ import 'package:investnotes_app_sample1/features/shell/widgets/drawer_row.dart';
 
 /// The menu that slides in from the left: the account, every tab, and the
 /// places that are not tabs.
-class KeelDrawer extends StatelessWidget {
+class KeelDrawer extends StatelessWidget implements LocalisationConsumer {
   const KeelDrawer({super.key});
 
   static const _white = CupertinoColors.white;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.shell];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as ShellLocale),
+  );
+
+  Widget _build(BuildContext context, ShellLocale words) {
     final shell = context.watch<ShellBloc>().state;
     final session = context.watch<SessionBloc>().state;
     final biometric = context.watch<BiometricBloc>().state.kind;
@@ -67,9 +77,9 @@ class KeelDrawer extends StatelessWidget {
                 excludeFromSemantics: true,
               ),
               const SizedBox(width: 10),
-              const Text(
-                'Keel',
-                semanticsLabel: 'Keel menu',
+              Text(
+                words.labels.brand,
+                semanticsLabel: words.semantics.keelMenu,
                 style: TextStyle(
                   color: _white,
                   fontSize: 28,
@@ -81,7 +91,7 @@ class KeelDrawer extends StatelessWidget {
               if (session.signedIn)
                 RoundIconButton(
                   icon: CupertinoIcons.square_arrow_right,
-                  label: 'Sign out',
+                  label: words.semantics.signOut,
                   foreground: KeelColors.foam,
                   onPressed: () =>
                       context.read<SessionBloc>().add(const SessionSignedOut()),
@@ -89,7 +99,7 @@ class KeelDrawer extends StatelessWidget {
               else
                 RoundIconButton(
                   icon: CupertinoIcons.person_crop_circle_badge_plus,
-                  label: 'Sign in',
+                  label: words.semantics.signIn,
                   foreground: KeelColors.tide.of(context),
                   background: _white,
                   iconSize: 22,
@@ -128,12 +138,16 @@ class KeelDrawer extends StatelessWidget {
           ),
         const SizedBox(height: 28),
         for (final (tab, icon, title) in [
-          (ShellTab.home, CupertinoIcons.house_fill, 'Home'),
+          (ShellTab.home, CupertinoIcons.house_fill, words.labels.home),
           if (session.signedIn)
-            (ShellTab.myNotes, CupertinoIcons.briefcase_fill, 'My Notes'),
-          (ShellTab.offerings, CupertinoIcons.tag_fill, 'Offerings'),
-          (ShellTab.issued, CupertinoIcons.clock_fill, 'Issued'),
-          (ShellTab.learn, CupertinoIcons.book_fill, 'Learn'),
+            (
+              ShellTab.myNotes,
+              CupertinoIcons.briefcase_fill,
+              words.labels.myNotes,
+            ),
+          (ShellTab.offerings, CupertinoIcons.tag_fill, words.labels.offerings),
+          (ShellTab.issued, CupertinoIcons.clock_fill, words.labels.issued),
+          (ShellTab.learn, CupertinoIcons.book_fill, words.labels.learn),
         ])
           DrawerRow(
             icon: icon,
@@ -150,12 +164,12 @@ class KeelDrawer extends StatelessWidget {
         ),
         DrawerRow(
           icon: CupertinoIcons.bookmark_fill,
-          title: 'Saved',
+          title: words.labels.saved,
           onTap: () => open(KeelRoutes.saved),
         ),
         DrawerRow(
           icon: CupertinoIcons.wand_stars,
-          title: 'Find my note',
+          title: words.labels.findMyNote,
           onTap: () async {
             await close();
             if (host.mounted) await startFinder(host);
@@ -175,7 +189,7 @@ class KeelDrawer extends StatelessWidget {
           ),
         DrawerRow(
           icon: CupertinoIcons.gear_alt_fill,
-          title: 'Settings',
+          title: words.labels.settings,
           onTap: () => open(KeelRoutes.settings),
         ),
       ],

@@ -7,15 +7,6 @@ sealed class SettingsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class SettingsLanguageChanged extends SettingsEvent {
-  const SettingsLanguageChanged(this.language);
-
-  final AppLanguage language;
-
-  @override
-  List<Object?> get props => [language];
-}
-
 final class SettingsHapticsToggled extends SettingsEvent {
   const SettingsHapticsToggled({required this.on});
 

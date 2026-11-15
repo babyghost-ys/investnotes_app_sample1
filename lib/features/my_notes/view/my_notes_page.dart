@@ -1,7 +1,9 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
@@ -11,11 +13,19 @@ import 'package:investnotes_app_sample1/features/my_notes/widgets/holdings_total
 
 /// The signed-in investor's own notes: their worth today, how it splits,
 /// and each note, opening to its page.
-class MyNotesPage extends StatelessWidget {
+class MyNotesPage extends StatelessWidget implements LocalisationConsumer {
   const MyNotesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.myNotes];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as MyNotesLocale),
+  );
+
+  Widget _build(BuildContext context, MyNotesLocale myNotes) {
     final state = context.watch<MyNotesBloc>().state;
     final insets = MediaQuery.paddingOf(context);
     final holdings = state.holdings;
@@ -34,9 +44,9 @@ class MyNotesPage extends StatelessWidget {
           ),
           children: [
             if (holdings.isEmpty)
-              const EmptyState(
+              EmptyState(
                 icon: CupertinoIcons.briefcase,
-                semanticLabel: 'No notes held',
+                semanticLabel: myNotes.semantics.noNotes,
               )
             else ...[
               HoldingsTotal(

@@ -2,7 +2,10 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
@@ -26,13 +29,26 @@ Future<void> openProduct(BuildContext context, Product product) =>
 
 /// A note's own page: its bar, with the bookmark for an offering, over its
 /// content.
-class ProductPage extends StatelessWidget {
+class ProductPage extends StatelessWidget implements LocalisationConsumer {
   const ProductPage({super.key, required this.product});
 
   final Product product;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.product, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as ProductLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    ProductLocale words,
+    GeneralLocale general,
+  ) {
     final p = product;
     final saved =
         p.isOffering &&
@@ -44,9 +60,10 @@ class ProductPage extends StatelessWidget {
       backgroundColor: KeelColors.page.of(context),
       appBar: NativeAppBar(
         title: p.type.code,
-        semanticTitle: p.type.title,
+        semanticTitle: p.type.title(general),
         actions: [
-          if (p.isOffering) bookmarkAction(context, p.id, saved: saved),
+          if (p.isOffering)
+            bookmarkAction(context, p.id, saved: saved, product: words),
         ],
       ),
       body: PageLoader(
@@ -62,11 +79,12 @@ NativeAppBarAction bookmarkAction(
   BuildContext context,
   String id, {
   required bool saved,
+  required ProductLocale product,
 }) => NativeAppBarAction(
   icon: NativeIcon(
     sfSymbol: saved ? 'bookmark.fill' : 'bookmark',
     icon: saved ? Icons.bookmark : Icons.bookmark_border,
   ),
-  label: saved ? 'Remove from saved' : 'Save',
+  label: saved ? product.semantics.unsave : product.semantics.save,
   onPressed: () => context.read<OfferingsBloc>().add(OfferingSaveToggled(id)),
 );

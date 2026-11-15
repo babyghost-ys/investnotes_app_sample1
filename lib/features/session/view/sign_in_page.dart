@@ -1,7 +1,9 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/bar_strip.dart';
@@ -16,7 +18,10 @@ typedef SignInForm = ({String name, String password, bool reveal});
 
 /// Sign-in: the brand band under the bar, two fields and one go control,
 /// then the ways in for a forgotten username or password and a new account.
-class SignInPage extends StatefulWidget {
+class SignInPage extends StatefulWidget implements LocalisationConsumer {
+  @override
+  List<String> get namespaces => const [Locales.session];
+
   const SignInPage({super.key});
 
   @override
@@ -35,7 +40,12 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: widget,
+    builder: (context, locale) => _build(context, locale[0] as SessionLocale),
+  );
+
+  Widget _build(BuildContext context, SessionLocale session) => BlocProvider(
     create: (_) =>
         DraftBloc<SignInForm>((name: '', password: '', reveal: false)),
     child: BlocBuilder<DraftBloc<SignInForm>, DraftState<SignInForm>>(
@@ -102,17 +112,17 @@ class _SignInPageState extends State<SignInPage> {
                           constraints: const BoxConstraints(
                             maxWidth: FlowPage.measure - 48,
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
-                              KeelMark(
+                              const KeelMark(
                                 color: CupertinoColors.white,
                                 size: 56,
                                 excludeFromSemantics: true,
                               ),
-                              SizedBox(width: 14),
+                              const SizedBox(width: 14),
                               Text(
-                                'Keel',
-                                style: TextStyle(
+                                session.labels.brand,
+                                style: const TextStyle(
                                   color: CupertinoColors.white,
                                   fontSize: 36,
                                   height: 1,
@@ -143,7 +153,7 @@ class _SignInPageState extends State<SignInPage> {
                               KeelField(
                                 controller: _name,
                                 icon: CupertinoIcons.person,
-                                placeholder: 'Username',
+                                placeholder: session.labels.username,
                                 autofill: AutofillHints.username,
                                 onChanged: (v) => draft.change((
                                   name: v,
@@ -155,7 +165,7 @@ class _SignInPageState extends State<SignInPage> {
                               KeelField(
                                 focusNode: _passwordFocus,
                                 icon: CupertinoIcons.lock,
-                                placeholder: 'Password',
+                                placeholder: session.labels.password,
                                 obscure: !form.reveal,
                                 action: TextInputAction.go,
                                 autofill: AutofillHints.password,
@@ -170,8 +180,8 @@ class _SignInPageState extends State<SignInPage> {
                                       ? CupertinoIcons.eye_slash
                                       : CupertinoIcons.eye,
                                   label: form.reveal
-                                      ? 'Hide password'
-                                      : 'Show password',
+                                      ? session.semantics.hidePassword
+                                      : session.semantics.showPassword,
                                   foreground: muted,
                                   size: 40,
                                   iconSize: 18,
@@ -185,7 +195,7 @@ class _SignInPageState extends State<SignInPage> {
                               const SizedBox(height: 28),
                               RoundIconButton(
                                 icon: CupertinoIcons.arrow_right,
-                                label: 'Sign in',
+                                label: session.semantics.signIn,
                                 foreground: CupertinoColors.white,
                                 background: KeelColors.azure.of(context),
                                 size: 56,
@@ -198,7 +208,7 @@ class _SignInPageState extends State<SignInPage> {
                                 spacing: 12,
                                 children: [
                                   TextLink(
-                                    label: 'Forgot username?',
+                                    label: session.labels.forgotUsername,
                                     color: ink,
                                     onPressed: () => scope.push<void>(
                                       context,
@@ -206,7 +216,7 @@ class _SignInPageState extends State<SignInPage> {
                                     ),
                                   ),
                                   TextLink(
-                                    label: 'Forgot password?',
+                                    label: session.labels.forgotPassword,
                                     color: ink,
                                     onPressed: resetPassword,
                                   ),
@@ -221,7 +231,7 @@ class _SignInPageState extends State<SignInPage> {
                                       horizontal: 14,
                                     ),
                                     child: Text(
-                                      'or',
+                                      session.labels.or,
                                       style: TextStyle(
                                         color: muted,
                                         fontSize: 14,
@@ -236,14 +246,14 @@ class _SignInPageState extends State<SignInPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'New to Keel?',
+                                    session.labels.newToKeel,
                                     style: TextStyle(
                                       color: muted,
                                       fontSize: 15,
                                     ),
                                   ),
                                   TextLink(
-                                    label: 'Register',
+                                    label: session.labels.register,
                                     color: KeelColors.azure.of(context),
                                     weight: FontWeight.w600,
                                     onPressed: () => scope.push<void>(

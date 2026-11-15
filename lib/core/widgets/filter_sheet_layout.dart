@@ -1,7 +1,9 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart' show Material, MaterialType;
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 
@@ -12,7 +14,8 @@ import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 /// A [scrolls] layout fills a full-height sheet: the top row and the apply
 /// control stay put while the groups scroll between them. Otherwise the
 /// layout takes its natural height, for a sheet that fits its content.
-class FilterSheetLayout extends StatelessWidget {
+class FilterSheetLayout extends StatelessWidget
+    implements LocalisationConsumer {
   const FilterSheetLayout({
     super.key,
     required this.groups,
@@ -31,7 +34,15 @@ class FilterSheetLayout extends StatelessWidget {
   final bool scrolls;
 
   @override
-  Widget build(BuildContext context) {
+  List<String> get namespaces => const [Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(context, locale[0] as GeneralLocale),
+  );
+
+  Widget _build(BuildContext context, GeneralLocale general) {
     final ink = KeelColors.ink.of(context);
     final hairline = KeelColors.hairline.of(context);
 
@@ -41,13 +52,13 @@ class FilterSheetLayout extends StatelessWidget {
         children: [
           RoundIconButton(
             icon: CupertinoIcons.arrow_counterclockwise,
-            label: 'Reset',
+            label: general.semantics.reset,
             foreground: ink,
             onPressed: onReset,
           ),
           Expanded(
             child: Text(
-              'Filters',
+              general.labels.filters,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: ink,
@@ -58,7 +69,7 @@ class FilterSheetLayout extends StatelessWidget {
           ),
           RoundIconButton(
             icon: CupertinoIcons.xmark,
-            label: 'Close',
+            label: general.semantics.close,
             foreground: ink,
             onPressed: () => NativeSheet.pop(context),
           ),
@@ -80,7 +91,7 @@ class FilterSheetLayout extends StatelessWidget {
     final apply = Center(
       child: RoundIconButton(
         icon: CupertinoIcons.checkmark,
-        label: 'Show $resultCount results',
+        label: general.semantics.showResults(count: resultCount),
         foreground: CupertinoColors.white,
         background: KeelColors.azure.of(context),
         size: 54,

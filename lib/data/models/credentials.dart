@@ -1,3 +1,5 @@
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
+
 /// The rules Keel holds a username, email, password and emailed code to.
 abstract final class Credentials {
   static final _username = RegExp(r'^[A-Za-z0-9._]{4,}$');
@@ -30,10 +32,13 @@ abstract final class Credentials {
   }
 
   /// [masked] as it should be spoken: "m, then hidden, at keel.com".
-  static String spokenMasked(String email) {
+  static String spokenMasked(String email, AccountLocale account) {
     final address = email.trim();
     final at = address.indexOf('@');
     if (at < 1) return address;
-    return '${address[0]}, then hidden, at ${address.substring(at + 1)}';
+    return account.semantics.maskedEmail(
+      first: address[0],
+      domain: address.substring(at + 1),
+    );
   }
 }

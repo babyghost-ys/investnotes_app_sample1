@@ -1,7 +1,11 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/core/l10n/terms.dart';
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
+import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/filter_sheet_layout.dart';
@@ -21,13 +25,14 @@ Future<IssuedFilter?> showIssuedFilter(
 }) => NativeSheet.show<IssuedFilter>(
   context: context,
   route: 'issuedFilter',
-  arguments: current.encode(),
+  arguments: SheetArguments.wrap(context, current.encode()),
   decodeResult: IssuedFilter.decode,
   backgroundColor: KeelColors.page.of(context),
   builder: (_) => IssuedFilterSheet(initial: current, notes: notes),
 );
 
-class IssuedFilterSheet extends StatelessWidget {
+class IssuedFilterSheet extends StatelessWidget
+    implements LocalisationConsumer {
   const IssuedFilterSheet({
     super.key,
     required this.initial,
@@ -49,6 +54,7 @@ class IssuedFilterSheet extends StatelessWidget {
     BuildContext context,
     DraftBloc<IssuedFilter> draft,
     IssuedFilter f,
+    IssuedLocale issued,
   ) {
     final range = IssuedFilter.defaultRange();
     final from = f.from ?? range.from;
@@ -59,7 +65,7 @@ class IssuedFilterSheet extends StatelessWidget {
           child: RangeButton(
             icon: CupertinoIcons.flag,
             date: from,
-            semantics: 'From',
+            semantics: issued.semantics.from,
             onTap: () async {
               final picked = await showDatePick(
                 context,
@@ -86,7 +92,7 @@ class IssuedFilterSheet extends StatelessWidget {
           child: RangeButton(
             icon: CupertinoIcons.flag_fill,
             date: to,
-            semantics: 'To',
+            semantics: issued.semantics.to,
             onTap: () async {
               final picked = await showDatePick(
                 context,
@@ -106,7 +112,20 @@ class IssuedFilterSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
+  List<String> get namespaces => const [Locales.issued, Locales.general];
+
+  @override
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) =>
+        _build(context, locale[0] as IssuedLocale, locale[1] as GeneralLocale),
+  );
+
+  Widget _build(
+    BuildContext context,
+    IssuedLocale issued,
+    GeneralLocale general,
+  ) => BlocProvider(
     create: (_) =>
         DraftBloc<IssuedFilter>(initial, reset: const IssuedFilter()),
     child: BlocBuilder<DraftBloc<IssuedFilter>, DraftState<IssuedFilter>>(
@@ -126,8 +145,8 @@ class IssuedFilterSheet extends StatelessWidget {
               children: [
                 for (final s in IssuedStatus.values)
                   OptionChip(
-                    text: s.title,
-                    group: 'Status',
+                    text: s.title(general),
+                    group: issued.semantics.status,
                     icon: NoteIcons.status(s),
                     selected: f.statuses.contains(s),
                     onTap: () => draft.change(
@@ -143,8 +162,8 @@ class IssuedFilterSheet extends StatelessWidget {
                 for (final t in NoteType.values)
                   OptionChip(
                     text: t.code,
-                    group: 'Note type',
-                    semanticLabel: t.title,
+                    group: general.semantics.noteType,
+                    semanticLabel: t.title(general),
                     selected: f.types.contains(t),
                     onTap: () =>
                         draft.change(f.copyWith(types: _flip(f.types, t))),
@@ -152,7 +171,7 @@ class IssuedFilterSheet extends StatelessWidget {
                 for (final c in Currency.values)
                   OptionChip(
                     text: c.code,
-                    group: 'Currency',
+                    group: general.semantics.currency,
                     selected: f.currencies.contains(c),
                     onTap: () => draft.change(
                       f.copyWith(currencies: _flip(f.currencies, c)),
@@ -164,9 +183,11 @@ class IssuedFilterSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 NativeSegmentedControl(
-                  labels: [for (final p in IssuedPeriod.values) p.label],
+                  labels: [
+                    for (final p in IssuedPeriod.values) p.label(issued),
+                  ],
                   semanticLabels: [
-                    for (final p in IssuedPeriod.values) p.spoken,
+                    for (final p in IssuedPeriod.values) p.spoken(issued),
                   ],
                   selectedIndex: f.period.index,
                   onValueChanged: (i) {
@@ -190,7 +211,7 @@ class IssuedFilterSheet extends StatelessWidget {
                   child: f.period == IssuedPeriod.custom
                       ? Padding(
                           padding: const EdgeInsets.only(top: 12),
-                          child: _range(context, draft, f),
+                          child: _range(context, draft, f, issued),
                         )
                       : const SizedBox(width: double.infinity),
                 ),

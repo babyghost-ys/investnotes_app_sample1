@@ -1,8 +1,10 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keel_localisation/keel_localisation.dart';
 import 'package:material_ui/material_ui.dart' show MaterialPage;
 
+import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/features/account/view/find_username_page.dart';
 import 'package:investnotes_app_sample1/features/account/view/register_page.dart';
 import 'package:investnotes_app_sample1/features/account/view/reset_password_page.dart';
@@ -11,6 +13,15 @@ import 'package:investnotes_app_sample1/features/session/view/biometric_sign_in_
 import 'package:investnotes_app_sample1/features/session/view/sign_in_page.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_scope.dart';
 import 'package:investnotes_app_sample1/features/session/widgets/sheet_bar_binder.dart';
+
+/// Namespaces the flow's bars read their words from.
+const _barNamespaces = [Locales.session, Locales.account];
+
+/// A bar's words, from the session's and the account's namespaces.
+typedef FlowWords = String Function(
+  SessionLocale session,
+  AccountLocale account,
+);
 
 /// A page of the sign-in flow.
 ///
@@ -21,27 +32,45 @@ import 'package:investnotes_app_sample1/features/session/widgets/sheet_bar_binde
 ///
 /// The [first] page carries the close control, an xmark or [closeTitle] in
 /// words; pages pushed over it have back.
+///
+/// [title] and [closeTitle] are read in the language in use, so an open
+/// flow turns with the rest of the app.
 Page<void> _page(
   GoRouterState state, {
   required bool sheet,
-  required String? title,
+  required FlowWords? title,
   required Widget child,
   bool first = false,
-  String? closeTitle,
+  FlowWords? closeTitle,
 }) {
+  Widget worded(Widget Function(String? title, String? closeTitle) build) =>
+      LocalisedBuilder.namespaces(
+        namespaces: _barNamespaces,
+        builder: (context, locale) {
+          final session = locale[0] as SessionLocale;
+          final account = locale[1] as AccountLocale;
+          return build(
+            title?.call(session, account),
+            closeTitle?.call(session, account),
+          );
+        },
+      );
+
   if (sheet) {
     // UIKit moves the whole page; Flutter switches without a transition.
     return NoTransitionPage<void>(
       key: state.pageKey,
       child: FlowBarHost(
-        builder: (context, action) => NativeScaffold(
-          body: SheetBarBinder(
-            first: first,
-            title: title,
-            onClose: first ? SignInScope.of(context).onClose : null,
-            closeTitle: closeTitle,
-            action: action,
-            child: child,
+        builder: (context, action) => worded(
+          (title, closeTitle) => NativeScaffold(
+            body: SheetBarBinder(
+              first: first,
+              title: title,
+              onClose: first ? SignInScope.of(context).onClose : null,
+              closeTitle: closeTitle,
+              action: action,
+              child: child,
+            ),
           ),
         ),
       ),
@@ -51,35 +80,37 @@ Page<void> _page(
     return MaterialPage<void>(
       key: state.pageKey,
       fullscreenDialog: true,
-      child: Builder(
-        builder: (context) => NativeScaffold(
-          extendBody: true,
-          appBar: NativeAppBar(
-            title: title,
-            // A worded close replaces the dialog's own xmark.
-            leading: closeTitle == null ? null : const SizedBox.shrink(),
-            actions: closeTitle == null
-                ? null
-                : [
-                    NativeAppBarAction(
-                      title: closeTitle,
-                      onPressed: SignInScope.of(context).onClose,
-                    ),
-                  ],
+      child: worded(
+        (title, closeTitle) => Builder(
+          builder: (context) => NativeScaffold(
+            extendBody: true,
+            appBar: NativeAppBar(
+              title: title,
+              // A worded close replaces the dialog's own xmark.
+              leading: closeTitle == null ? null : const SizedBox.shrink(),
+              actions: closeTitle == null
+                  ? null
+                  : [
+                      NativeAppBarAction(
+                        title: closeTitle,
+                        onPressed: SignInScope.of(context).onClose,
+                      ),
+                    ],
+            ),
+            body: child,
           ),
-          body: child,
         ),
       ),
     );
   }
-  return flowPage(state, title: title ?? '', child: child);
+  return flowPage(state, title: title, child: child);
 }
 
 /// A flow page pushed in the app's own navigation, the bar carrying the
 /// page's own control when it sets one.
 NativePage<void> flowPage(
   GoRouterState state, {
-  required String title,
+  required FlowWords? title,
   required Widget child,
 }) => NativePage<void>(
   key: state.pageKey,
@@ -87,23 +118,31 @@ NativePage<void> flowPage(
   child: FlowBarHost(
     builder: (context, action) => ValueListenableBuilder(
       valueListenable: action,
-      builder: (context, bar, body) => NativeScaffold(
-        extendBody: true,
-        appBar: NativeAppBar(
-          title: title,
-          actions: [
-            if (bar != null)
-              NativeAppBarAction(
-                icon: NativeIcon(
-                  sfSymbol: bar.sfSymbol,
-                  icon: CupertinoIcons.backward,
+      builder: (context, bar, body) => LocalisedBuilder.namespaces(
+        namespaces: _barNamespaces,
+        builder: (context, locale) => NativeScaffold(
+          extendBody: true,
+          appBar: NativeAppBar(
+            title:
+                title?.call(
+                  locale[0] as SessionLocale,
+                  locale[1] as AccountLocale,
+                ) ??
+                '',
+            actions: [
+              if (bar != null)
+                NativeAppBarAction(
+                  icon: NativeIcon(
+                    sfSymbol: bar.sfSymbol,
+                    icon: CupertinoIcons.backward,
+                  ),
+                  label: bar.label,
+                  onPressed: bar.onPressed,
                 ),
-                label: bar.label,
-                onPressed: bar.onPressed,
-              ),
-          ],
+            ],
+          ),
+          body: body!,
         ),
-        body: body!,
       ),
       child: child,
     ),
@@ -121,7 +160,7 @@ GoRoute signInRoute({required String path, required bool sheet}) => GoRoute(
   pageBuilder: (context, state) => _page(
     state,
     sheet: sheet,
-    title: 'Sign in',
+    title: (session, _) => session.labels.signIn,
     first: state.extra != SignInScope.fromBiometric,
     child: const SignInPage(),
   ),
@@ -131,7 +170,7 @@ GoRoute signInRoute({required String path, required bool sheet}) => GoRoute(
       pageBuilder: (context, state) => _page(
         state,
         sheet: sheet,
-        title: 'Register',
+        title: (_, account) => account.labels.register,
         child: const RegisterPage(),
       ),
     ),
@@ -140,7 +179,7 @@ GoRoute signInRoute({required String path, required bool sheet}) => GoRoute(
       pageBuilder: (context, state) => _page(
         state,
         sheet: sheet,
-        title: 'Reset password',
+        title: (_, account) => account.labels.resetPassword,
         child: ResetPasswordPage(
           username: state.uri.queryParameters['username'] ?? '',
         ),
@@ -151,7 +190,7 @@ GoRoute signInRoute({required String path, required bool sheet}) => GoRoute(
       pageBuilder: (context, state) => _page(
         state,
         sheet: sheet,
-        title: 'Find username',
+        title: (_, account) => account.labels.findUsername,
         child: const FindUsernamePage(),
       ),
     ),
@@ -168,7 +207,7 @@ GoRoute biometricSignInRoute({required String path, required bool sheet}) =>
         sheet: sheet,
         title: null,
         first: true,
-        closeTitle: 'Home',
+        closeTitle: (session, _) => session.labels.home,
         child: const BiometricSignInPage(),
       ),
     );
@@ -180,7 +219,7 @@ GoRoute registerRoute({required String path}) => GoRoute(
   path: path,
   pageBuilder: (context, state) => flowPage(
     state,
-    title: 'Register',
+    title: (_, account) => account.labels.register,
     child: Builder(
       builder: (context) => SignInScope(
         base: path,

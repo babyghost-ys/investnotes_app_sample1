@@ -157,6 +157,11 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
         "\(item["title"] as? String ?? "")|\(item["symbol"] as? String ?? "")"
     }
 
+    /// A tab's symbol alone, for a tab whose title changed.
+    private static func symbolKey(_ item: [String: Any]) -> String {
+        item["symbol"] as? String ?? ""
+    }
+
     private func configure(_ args: [String: Any]) {
         guard configuredForWindow else { initialConfiguration = args; return }
         let items = args["items"] as? [[String: Any]] ?? []
@@ -174,20 +179,27 @@ final class SearchTabView: NSObject, FlutterPlatformView, UITabBarControllerDele
             // is never thrown away, and no controller is handed to a second
             // tab, when tabs are added or removed (a tab that appears after
             // signing in, in the middle of the bar). Tabs are matched by
-            // title and symbol, not position.
-            let previousKeys = previousItems.map(Self.tabKey)
+            // title and symbol, not position; a tab left unmatched is then
+            // matched by its symbol alone, so one that only changed its
+            // title (the app's language changed) keeps its page too.
             var claimed = Set<Int>()
-            let origin: [Int?] = items.enumerated().map { index, item in
-                guard index != searchIndex else { return nil }
-                let key = Self.tabKey(item)
-                guard let match = previousKeys.indices.first(where: { previous in
+            func match(_ item: [String: Any], by key: ([String: Any]) -> String) -> Int? {
+                let wanted = key(item)
+                guard let found = previousItems.indices.first(where: { previous in
                     !claimed.contains(previous) && previous != previousSearchIndex
-                        && previousKeys[previous] == key
+                        && key(previousItems[previous]) == wanted
                         && previousPages.indices.contains(previous)
                         && previousNavigations.indices.contains(previous)
                 }) else { return nil }
-                claimed.insert(match)
-                return match
+                claimed.insert(found)
+                return found
+            }
+            var origin: [Int?] = items.enumerated().map { index, item in
+                index == searchIndex ? nil : match(item, by: Self.tabKey)
+            }
+            for (index, item) in items.enumerated()
+            where index != searchIndex && origin[index] == nil {
+                origin[index] = match(item, by: Self.symbolKey)
             }
             pages = items.indices.map { index in
                 if index == searchIndex { return searchPage }
