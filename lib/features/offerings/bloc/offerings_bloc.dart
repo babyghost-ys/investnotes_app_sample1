@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -15,23 +13,17 @@ part 'offerings_event.dart';
 part 'offerings_state.dart';
 
 /// Open offerings: loading them, the selected note type, the filter, and
-/// saved notes. A failed load tries again on its own every few seconds.
+/// saved notes. A failed load stays failed until someone asks again.
 class OfferingsBloc extends Bloc<OfferingsEvent, OfferingsState> {
   OfferingsBloc(this._repository) : super(const OfferingsState()) {
     // One fetch at a time: asking again while one runs changes nothing.
     on<OfferingsRequested>(transformer: droppable(), (event, emit) async {
-      _retry?.cancel();
-      // A quiet retry leaves the failure on screen until it succeeds.
-      if (!event.quiet) emit(state.copyWith(phase: LoadingPhase.loading));
+      emit(state.copyWith(phase: LoadingPhase.loading));
       try {
         final all = await _repository.fetchOfferings();
         emit(state.copyWith(all: all, phase: LoadingPhase.loaded));
       } on NotesUnavailable {
         emit(state.copyWith(phase: LoadingPhase.failed));
-        _retry = Timer(
-          _retryAfter,
-          () => add(const OfferingsRequested(quiet: true)),
-        );
       }
     });
     on<OfferingsTypeSelected>(
@@ -50,16 +42,7 @@ class OfferingsBloc extends Bloc<OfferingsEvent, OfferingsState> {
     });
   }
 
-  static const _retryAfter = Duration(seconds: 4);
-
   final NotesRepository _repository;
-  Timer? _retry;
-
-  @override
-  Future<void> close() {
-    _retry?.cancel();
-    return super.close();
-  }
 }
 
 /// Asks [bloc] for the offerings, for a page that shows them.

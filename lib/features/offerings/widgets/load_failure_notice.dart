@@ -7,8 +7,8 @@ import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.d
 
 /// Says so with an [ErrorSnackBar] when the offerings fail to load, while
 /// this tab is on screen: when it comes into view while they are failing,
-/// and on each failed attempt the person asked for. Quiet retries say
-/// nothing; a load that succeeds puts the snack bar away.
+/// and on each failed attempt the person asked for. A load that succeeds
+/// puts the snack bar away.
 class LoadFailureNotice extends StatefulWidget {
   const LoadFailureNotice({
     super.key,

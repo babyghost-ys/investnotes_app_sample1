@@ -7,15 +7,9 @@ sealed class OfferingsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Loads the offerings. [quiet] is a retry after a failure, which leaves
-/// the failure showing until it succeeds.
+/// Loads the offerings: at launch, and each time someone tries again.
 final class OfferingsRequested extends OfferingsEvent {
-  const OfferingsRequested({this.quiet = false});
-
-  final bool quiet;
-
-  @override
-  List<Object?> get props => [quiet];
+  const OfferingsRequested();
 }
 
 final class OfferingsTypeSelected extends OfferingsEvent {
