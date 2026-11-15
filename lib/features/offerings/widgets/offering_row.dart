@@ -14,6 +14,7 @@ class OfferingRow extends StatelessWidget {
     required this.offering,
     required this.onTap,
     this.badge,
+    this.selected = false,
   });
 
   final Offering offering;
@@ -21,6 +22,9 @@ class OfferingRow extends StatelessWidget {
 
   /// Overrides the closing badge, e.g. for a partial finder match.
   final String? badge;
+
+  /// Marks the offering open beside the list in a split window.
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -30,102 +34,142 @@ class OfferingRow extends StatelessWidget {
     final azure = KeelColors.azure.of(context);
     final soon = o.closes.difference(DateTime.now()).inDays < 7;
     final tag = badge ?? (soon ? Formats.until(o.closes) : null);
+    final mist = KeelColors.mist.of(context);
     return Semantics(
       button: true,
+      selected: selected,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: KeelColors.hairline.of(context)),
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: KeelColors.mist.of(context),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: PayoffGlyph(payoff: o.payoff, color: azure, size: 40),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      o.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 16,
-                        height: 1.25,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      o.underlying,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: muted, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    o.headlineIsRate
-                        ? Formats.percent(o.headline)
-                        : Formats.times(o.headline),
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // The highlight reaches past the row's edges, its corners
+            // concentric with the glyph tile's.
+            Positioned.fill(
+              left: -_reach,
+              right: -_reach,
+              child: AnimatedOpacity(
+                opacity: selected ? 1 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: mist,
+                    borderRadius: BorderRadius.circular(_tileRadius + _reach),
                   ),
-                  if (tag != null) ...[
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: KeelColors.mist.of(context),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          color: azure,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ],
-          ),
+            ),
+            _row(context, o, ink, muted, azure, tag),
+          ],
         ),
       ),
     );
   }
+
+  static const _reach = 12.0;
+  static const _tileRadius = 14.0;
+
+  Widget _row(
+    BuildContext context,
+    Offering o,
+    Color ink,
+    Color muted,
+    Color azure,
+    String? tag,
+  ) => Container(
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    decoration: BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+          color: selected
+              ? const Color(0x00000000)
+              : KeelColors.hairline.of(context),
+        ),
+      ),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: selected
+                ? KeelColors.raised.of(context)
+                : KeelColors.mist.of(context),
+            borderRadius: BorderRadius.circular(_tileRadius),
+          ),
+          alignment: Alignment.center,
+          child: PayoffGlyph(payoff: o.payoff, color: azure, size: 40),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                o.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 16,
+                  height: 1.25,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                o.underlying,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: muted, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              o.headlineIsRate
+                  ? Formats.percent(o.headline)
+                  : Formats.times(o.headline),
+              style: TextStyle(
+                color: ink,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            if (tag != null) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? KeelColors.raised.of(context)
+                      : KeelColors.mist.of(context),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  tag,
+                  style: TextStyle(
+                    color: azure,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    ),
+  );
 }

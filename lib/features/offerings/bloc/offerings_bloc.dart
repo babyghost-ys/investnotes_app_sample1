@@ -37,6 +37,9 @@ class OfferingsBloc extends Bloc<OfferingsEvent, OfferingsState> {
     on<OfferingsFilterChanged>(
       (event, emit) => emit(state.copyWith(filter: event.filter)),
     );
+    on<OfferingSelected>(
+      (event, emit) => emit(state.copyWith(selectedId: () => event.id)),
+    );
     on<OfferingSaveToggled>((event, emit) {
       final saved = {...state.saved};
       if (!saved.remove(event.id)) saved.add(event.id);

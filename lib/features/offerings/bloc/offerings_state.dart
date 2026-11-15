@@ -7,6 +7,7 @@ final class OfferingsState extends Equatable {
     this.type = NoteType.mld,
     this.filter = const OfferingFilter(),
     this.saved = const {},
+    this.selectedId,
   });
 
   final List<Offering> all;
@@ -15,12 +16,25 @@ final class OfferingsState extends Equatable {
   final OfferingFilter filter;
   final Set<String> saved;
 
+  /// The offering last opened from the list, while it is open.
+  final String? selectedId;
+
   /// The selected type's offerings, filtered and sorted.
   List<Offering> get visible => filter.apply(all.where((o) => o.type == type));
 
   List<Offering> get savedOfferings =>
       all.where((o) => saved.contains(o.id)).toList()
         ..sort((a, b) => a.closes.compareTo(b.closes));
+
+  /// The offering beside the list in a split window: the one opened, while
+  /// it is still in the list, or else the first.
+  Offering? get detail {
+    final list = visible;
+    for (final o in list) {
+      if (o.id == selectedId) return o;
+    }
+    return list.isEmpty ? null : list.first;
+  }
 
   int countOf(NoteType type) => all.where((o) => o.type == type).length;
 
@@ -32,14 +46,16 @@ final class OfferingsState extends Equatable {
     NoteType? type,
     OfferingFilter? filter,
     Set<String>? saved,
+    String? Function()? selectedId,
   }) => OfferingsState(
     all: all ?? this.all,
     status: status ?? this.status,
     type: type ?? this.type,
     filter: filter ?? this.filter,
     saved: saved ?? this.saved,
+    selectedId: selectedId != null ? selectedId() : this.selectedId,
   );
 
   @override
-  List<Object?> get props => [all, status, type, filter, saved];
+  List<Object?> get props => [all, status, type, filter, saved, selectedId];
 }

@@ -44,3 +44,13 @@ final class OfferingSaveToggled extends OfferingsEvent {
   @override
   List<Object?> get props => [id];
 }
+
+/// An offering opened from the list, or null once it is closed.
+final class OfferingSelected extends OfferingsEvent {
+  const OfferingSelected(this.id);
+
+  final String? id;
+
+  @override
+  List<Object?> get props => [id];
+}

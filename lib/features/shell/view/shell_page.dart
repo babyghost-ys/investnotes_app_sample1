@@ -5,11 +5,14 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
+import 'package:investnotes_app_sample1/core/widgets/responsive_master_detail.dart';
 import 'package:investnotes_app_sample1/features/home/view/home_page.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_page.dart';
 import 'package:investnotes_app_sample1/features/learn/view/learn_page.dart';
 import 'package:investnotes_app_sample1/features/my_notes/view/my_notes_page.dart';
+import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_page.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/bloc/shell_bloc.dart';
 import 'package:investnotes_app_sample1/features/shell/widgets/keel_drawer.dart';
@@ -48,6 +51,14 @@ class _ShellPageState extends State<ShellPage> {
         ? ShellTab.home
         : state.tab;
     final shown = ShellTab.shown(signedIn: signedIn);
+    // The offering beside the Offerings list in a split window: its
+    // bookmark joins the bar, as it would on the offering's own page.
+    final split = ResponsiveMasterDetail.isSplit(context);
+    final beside = context.select<OfferingsBloc, (String, bool)?>((b) {
+      final detail = b.state.detail;
+      if (tab != ShellTab.offerings || !split || detail == null) return null;
+      return (detail.id, b.state.saved.contains(detail.id));
+    });
     return NativeScaffold(
       key: _scaffold,
       extendBody: true,
@@ -73,6 +84,8 @@ class _ShellPageState extends State<ShellPage> {
             label: 'Search',
             onPressed: () => context.push<void>(KeelRoutes.search),
           ),
+          if (beside != null)
+            bookmarkAction(context, beside.$1, saved: beside.$2),
         ],
       ),
       drawer: NativeDrawer.custom(

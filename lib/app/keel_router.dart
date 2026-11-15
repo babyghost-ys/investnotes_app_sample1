@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/app/keel_page.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
+import 'package:investnotes_app_sample1/core/widgets/responsive_detail_page.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
@@ -28,6 +29,11 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
         GoRoute(
           path: 'offering/:id',
           pageBuilder: (context, state) => _productPage(state, repository),
+        ),
+        GoRoute(
+          path: 'offerings/:id',
+          pageBuilder: (context, state) =>
+              _productPage(state, repository, responsive: true),
         ),
         GoRoute(
           path: 'note/:id',
@@ -98,14 +104,19 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
 );
 
 /// A note's page, open or issued. The page carries its own scaffold for
-/// its bookmark.
+/// its bookmark. A [responsive] page is the detail of a list that splits in
+/// a wide window, and steps back to that split when the window widens.
 NativePage<void> _productPage(
   GoRouterState state,
-  NotesRepository repository,
-) => NativePage<void>(
-  key: state.pageKey,
-  name: state.matchedLocation,
-  child: ProductPage(
+  NotesRepository repository, {
+  bool responsive = false,
+}) {
+  final page = ProductPage(
     product: repository.productById(state.pathParameters['id']!)!,
-  ),
-);
+  );
+  return NativePage<void>(
+    key: state.pageKey,
+    name: state.matchedLocation,
+    child: responsive ? ResponsiveDetailPage(child: page) : page,
+  );
+}

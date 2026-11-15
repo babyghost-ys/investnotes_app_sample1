@@ -17,6 +17,11 @@ abstract final class KeelRoutes {
   static const biometricSignIn = '/sign-in-biometric';
 
   static String offering(String id) => '/offering/$id';
+
+  /// An offering opened from the Offerings list on a single pane. In a
+  /// split window it shows beside the list instead, and this page steps
+  /// back to the split when the window widens.
+  static String offeringsItem(String id) => '/offerings/$id';
   static String note(String id) => '/note/$id';
   static String article(String id) => '/article/$id';
   static String finderStep(int step) => '/finder/step/$step';
