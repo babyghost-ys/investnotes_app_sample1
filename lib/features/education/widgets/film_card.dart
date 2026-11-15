@@ -1,5 +1,3 @@
-import 'dart:ui' show FlutterView;
-
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
@@ -13,7 +11,7 @@ import 'package:investnotes_app_sample1/features/education/widgets/film_view.dar
 import 'package:investnotes_app_sample1/features/education/widgets/play_glyph.dart';
 
 /// A film in the Videos list. Its poster until tapped, then it plays right
-/// there, and goes full screen on its side on demand.
+/// there, and fills the screen on demand.
 class FilmCard extends StatefulWidget {
   const FilmCard({super.key, required this.film});
 
@@ -61,14 +59,8 @@ class _FilmCardState extends State<FilmCard> {
     final c = _controller!;
     final playing = c.value.isPlaying;
     final native = NativeStyle.of(context) == NativeStyle.native;
-    final view = View.of(context);
-    final wasUpright = view.physicalSize.width < view.physicalSize.height;
-    await SystemChrome.setPreferredOrientations(const [
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    // Full screen the way the phone is held: turning it is the user's call.
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    await _settleOnItsSide(view);
     // On iOS full screen is a sheet over the native bars, with an engine of
     // its own: it picks the film up where this one leaves it.
     if (native) await c.pause();
@@ -87,37 +79,9 @@ class _FilmCardState extends State<FilmCard> {
       builder: (_) => FilmFullscreen(controller: c, asset: widget.film.asset),
     );
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // Back the way it was: lifting the lock alone leaves the screen on its
-    // side, so an upright screen is turned upright first, then let go.
-    if (wasUpright) {
-      await SystemChrome.setPreferredOrientations(const [
-        DeviceOrientation.portraitUp,
-      ]);
-      await _settle(view, upright: true);
-    }
-    await SystemChrome.setPreferredOrientations(const []);
     if (place == null || !mounted) return;
     await c.seekTo(place.position);
     place.playing ? await c.play() : await c.pause();
-  }
-
-  /// Waits for the screen to finish turning onto its side. A sheet keeps
-  /// the shape it was presented in through a turn that starts while it is
-  /// still sliding up, so it is presented only once the turn is done.
-  static Future<void> _settleOnItsSide(FlutterView view) =>
-      _settle(view, upright: false);
-
-  /// Waits for the screen to stand [upright] or lie on its side.
-  static Future<void> _settle(FlutterView view, {required bool upright}) async {
-    bool there() =>
-        (view.physicalSize.width < view.physicalSize.height) == upright;
-    if (there()) return;
-    final deadline = DateTime.now().add(const Duration(milliseconds: 1500));
-    while (!there() && DateTime.now().isBefore(deadline)) {
-      await Future<void>.delayed(const Duration(milliseconds: 40));
-    }
-    // The new size arrives as the turn starts; its animation runs on.
-    await Future<void>.delayed(const Duration(milliseconds: 450));
   }
 
   @override

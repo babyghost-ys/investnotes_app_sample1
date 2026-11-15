@@ -7,7 +7,7 @@ import 'package:investnotes_app_sample1/features/education/widgets/film_view.dar
 /// Where full screen leaves off: the film's place and whether it played.
 typedef FilmPlace = ({Duration position, bool playing});
 
-/// A film full screen, on its side. Given the inline [controller] (one
+/// A film full screen. Given the inline [controller] (one
 /// engine) it carries on with it; in a sheet's own engine it opens the
 /// film itself at [start] and hands its place back when closed.
 class FilmFullscreen extends StatefulWidget {
