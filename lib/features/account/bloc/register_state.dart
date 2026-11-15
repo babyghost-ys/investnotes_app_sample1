@@ -5,8 +5,8 @@ enum RegisterStep { start, account, verify, done }
 final class RegisterState extends Equatable {
   const RegisterState({
     this.step = RegisterStep.start,
-    this.adviser = false,
-    this.advised = true,
+    this.adviser,
+    this.advised,
     this.username = '',
     this.email = '',
     this.password = '',
@@ -18,11 +18,19 @@ final class RegisterState extends Equatable {
 
   final RegisterStep step;
 
-  /// Registering as a financial adviser.
-  final bool adviser;
+  /// Registering as a financial adviser; null until answered.
+  final bool? adviser;
 
-  /// Investing through an adviser; only asked of investors.
-  final bool advised;
+  /// Investing through an adviser; only asked of investors, null until
+  /// answered.
+  final bool? advised;
+
+  /// Every opening question that is asked has an answer.
+  bool get rolesAnswered => switch (adviser) {
+    null => false,
+    true => true,
+    false => advised != null,
+  };
 
   final String username;
   final String email;
@@ -43,7 +51,7 @@ final class RegisterState extends Equatable {
       matches;
 
   bool get canAdvance => switch (step) {
-    RegisterStep.start => true,
+    RegisterStep.start => rolesAnswered,
     RegisterStep.account => accountReady,
     RegisterStep.verify => Credentials.code(code),
     RegisterStep.done => false,

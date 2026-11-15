@@ -5,7 +5,8 @@ import 'package:keel_localisation/keel_localisation.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
-/// A yes-or-no question with its answer beside it.
+/// A yes-or-no question with its answer beside it; neither side is chosen
+/// until it is answered.
 class QuestionRow extends StatelessWidget implements LocalisationConsumer {
   const QuestionRow({
     super.key,
@@ -15,7 +16,7 @@ class QuestionRow extends StatelessWidget implements LocalisationConsumer {
   });
 
   final String question;
-  final bool value;
+  final bool? value;
   final ValueChanged<bool> onChanged;
 
   @override
@@ -52,7 +53,11 @@ class QuestionRow extends StatelessWidget implements LocalisationConsumer {
               NativeIcon(sfSymbol: 'checkmark', icon: CupertinoIcons.checkmark),
               NativeIcon(sfSymbol: 'xmark', icon: CupertinoIcons.xmark),
             ],
-            selectedIndex: value ? 0 : 1,
+            selectedIndex: switch (value) {
+              true => 0,
+              false => 1,
+              null => -1,
+            },
             onValueChanged: (i) => onChanged(i == 0),
           ),
         ),

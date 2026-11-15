@@ -29,7 +29,7 @@ class NativeSegmentedControl extends StatelessWidget {
   /// Segment labels to display, in order
   final List<String> labels;
 
-  /// The index of the selected segment
+  /// The index of the selected segment, or -1 for none
   final int selectedIndex;
 
   /// Called when the user selects a segment
@@ -149,7 +149,8 @@ class NativeSegmentedControl extends StatelessWidget {
 
     Widget control = SegmentedButton<int>(
       segments: segments,
-      selected: {selectedIndex},
+      selected: {if (selectedIndex >= 0) selectedIndex},
+      emptySelectionAllowed: true,
       // The fill already marks the selection; a checkmark beside the label
       // pushes longer labels onto several lines in narrow segments.
       showSelectedIcon: false,

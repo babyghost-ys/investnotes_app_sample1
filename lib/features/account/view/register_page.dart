@@ -109,7 +109,7 @@ class RegisterPage extends StatelessWidget implements LocalisationConsumer {
           duration: const Duration(milliseconds: 240),
           curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
-          child: state.adviser
+          child: state.adviser ?? true
               ? const SizedBox(width: double.infinity)
               : Column(
                   children: [
@@ -126,7 +126,9 @@ class RegisterPage extends StatelessWidget implements LocalisationConsumer {
         const SizedBox(height: 28),
         AdvanceButton(
           label: account.semantics.next,
-          onPressed: () => bloc.add(const RegisterAdvanced()),
+          onPressed: state.rolesAnswered
+              ? () => bloc.add(const RegisterAdvanced())
+              : null,
         ),
       ],
     );
