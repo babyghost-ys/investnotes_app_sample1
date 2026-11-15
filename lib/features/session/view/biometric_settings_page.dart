@@ -74,18 +74,15 @@ class BiometricSettingsPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 28),
-                Semantics(
-                  label: 'Sign in with ${kind.title}',
-                  toggled: on,
-                  child: NativeSwitch(
-                    value: on,
-                    activeColor: azure,
-                    onChanged: state.checking
-                        ? null
-                        : (value) => context.read<BiometricBloc>().add(
-                            BiometricToggled(on: value, name: name),
-                          ),
-                  ),
+                NativeSwitch(
+                  value: on,
+                  activeColor: azure,
+                  semanticLabel: 'Sign in with ${kind.title}',
+                  onChanged: state.checking
+                      ? null
+                      : (value) => context.read<BiometricBloc>().add(
+                          BiometricToggled(on: value, name: name),
+                        ),
                 ),
               ],
             ),

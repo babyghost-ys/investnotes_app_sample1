@@ -60,14 +60,11 @@ class _SettingsView extends StatelessWidget {
             SettingCard(
               title: 'Haptics',
               subtitle: 'Enable or disable haptic feedback',
-              control: Semantics(
-                label: 'Haptics',
-                toggled: state.haptics,
-                child: NativeSwitch(
-                  value: state.haptics,
-                  activeColor: tide,
-                  onChanged: (on) => bloc.add(SettingsHapticsToggled(on: on)),
-                ),
+              control: NativeSwitch(
+                value: state.haptics,
+                activeColor: tide,
+                semanticLabel: 'Haptics',
+                onChanged: (on) => bloc.add(SettingsHapticsToggled(on: on)),
               ),
             ),
           ],

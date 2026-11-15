@@ -59,42 +59,46 @@ class _CodeFieldState extends State<CodeField> {
         ? value.length.clamp(0, CodeField.length - 1)
         : -1;
     final azure = KeelColors.azure.of(context);
+    // The boxes draw the digits; the field underneath says them once.
     return Semantics(
       label: 'Code',
-      value: value,
       child: SizedBox(
         height: 60,
         child: Stack(
           children: [
-            Row(
-              children: [
-                for (var i = 0; i < CodeField.length; i++) ...[
-                  if (i > 0) SizedBox(width: i == 3 ? 16 : 8),
-                  Expanded(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: KeelColors.mist.of(context),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          width: 2,
-                          color: i == active ? azure : const Color(0x00000000),
+            ExcludeSemantics(
+              child: Row(
+                children: [
+                  for (var i = 0; i < CodeField.length; i++) ...[
+                    if (i > 0) SizedBox(width: i == 3 ? 16 : 8),
+                    Expanded(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: KeelColors.mist.of(context),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            width: 2,
+                            color: i == active
+                                ? azure
+                                : const Color(0x00000000),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        i < value.length ? value[i] : '',
-                        style: TextStyle(
-                          color: KeelColors.ink.of(context),
-                          fontSize: 26,
-                          fontWeight: FontWeight.w600,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                        child: Text(
+                          i < value.length ? value[i] : '',
+                          style: TextStyle(
+                            color: KeelColors.ink.of(context),
+                            fontSize: 26,
+                            fontWeight: FontWeight.w600,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
             Positioned.fill(
               child: CupertinoTextField(

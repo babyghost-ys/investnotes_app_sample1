@@ -14,6 +14,7 @@ const double kHostedToolbarHeight = 44.0;
 class TopToolbarContent {
   const TopToolbarContent({
     this.title,
+    this.semanticTitle,
     this.scrollController,
     this.largeTitle = false,
     this.titleOverlay,
@@ -40,6 +41,7 @@ class TopToolbarContent {
     }
     return TopToolbarContent(
       title: appBar.title,
+      semanticTitle: appBar.semanticTitle,
       scrollController: entry.titleOverlay == null
           ? entry.scrollController
           : null,
@@ -59,6 +61,9 @@ class TopToolbarContent {
   }
 
   final String? title;
+
+  /// What VoiceOver says for [title]; null reads the title itself.
+  final String? semanticTitle;
   final bool largeTitle;
   final NativeNavigationScrollController? scrollController;
 
@@ -253,6 +258,7 @@ class _HostedTopToolbarState extends State<HostedTopToolbar> {
               leadingText: content.impliesBack ? '' : null,
               onLeadingTap: () => content.navigator?.maybePop(),
               title: content.title,
+              semanticTitle: content.semanticTitle,
               titleWidget: content.titleOverlay,
               leading: content.customLeading,
               actions: content.actions,

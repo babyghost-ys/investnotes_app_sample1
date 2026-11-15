@@ -5,15 +5,18 @@ import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 
 /// How far back issued notes reach, by issue date.
 enum IssuedPeriod {
-  all('All', null),
-  year('1Y', 365),
-  threeYears('3Y', 365 * 3),
-  fiveYears('5Y', 365 * 5),
-  custom('Custom', null);
+  all('All', 'All time', null),
+  year('1Y', '1 year', 365),
+  threeYears('3Y', '3 years', 365 * 3),
+  fiveYears('5Y', '5 years', 365 * 5),
+  custom('Custom', 'Custom dates', null);
 
-  const IssuedPeriod(this.label, this.days);
+  const IssuedPeriod(this.label, this.spoken, this.days);
 
   final String label;
+
+  /// What VoiceOver and TalkBack say for it; never shown.
+  final String spoken;
   final int? days;
 }
 

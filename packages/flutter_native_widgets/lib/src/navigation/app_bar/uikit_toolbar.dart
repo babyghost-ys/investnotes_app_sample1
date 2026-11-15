@@ -18,6 +18,7 @@ class UiKitToolbar extends StatefulWidget {
   const UiKitToolbar({
     super.key,
     this.title,
+    this.semanticTitle,
     this.scrollController,
     this.largeTitle = false,
     this.leading,
@@ -39,6 +40,9 @@ class UiKitToolbar extends StatefulWidget {
   });
 
   final String? title;
+
+  /// What VoiceOver says for [title]; null reads the title itself.
+  final String? semanticTitle;
   final bool largeTitle;
   final NativeNavigationScrollController? scrollController;
   final Widget? leading;
@@ -236,6 +240,12 @@ class _UiKitToolbarState extends State<UiKitToolbar>
       });
     }
     _syncPropsToNativeIfNeeded();
+
+    if (widget.semanticTitle != oldWidget.semanticTitle) {
+      _channel?.invokeMethod('setSemanticTitle', {
+        'semanticTitle': widget.semanticTitle,
+      });
+    }
 
     if (widget.title != oldWidget.title) {
       final ch = _channel;
@@ -523,10 +533,7 @@ class _UiKitToolbarState extends State<UiKitToolbar>
     }
   }
 
-  bool _actionsEqual(
-    List<NativeAppBarAction>? a,
-    List<NativeAppBarAction>? b,
-  ) {
+  bool _actionsEqual(List<NativeAppBarAction>? a, List<NativeAppBarAction>? b) {
     if (identical(a, b)) return true;
     a ??= const <NativeAppBarAction>[];
     b ??= const <NativeAppBarAction>[];
@@ -552,6 +559,7 @@ class _UiKitToolbarState extends State<UiKitToolbar>
       // Hide native title when a titleWidget overlay is provided
       if (widget.title != null && widget.titleWidget == null)
         'title': widget.title!,
+      if (widget.semanticTitle != null) 'semanticTitle': widget.semanticTitle,
       if (widget.leading == null && widget.leadingText != null)
         'leading': widget.leadingText!,
       if (widget.actions != null && widget.actions!.isNotEmpty)

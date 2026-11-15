@@ -52,6 +52,7 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             return keelPage(
               state,
               title: article.type.code,
+              semanticTitle: article.type.title,
               child: PageLoader(
                 skeleton: const ArticleSkeleton(),
                 child: ArticlePage(article: article),

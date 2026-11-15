@@ -2,6 +2,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
@@ -19,7 +20,10 @@ class ClosingCard extends StatelessWidget {
     final ink = KeelColors.ink.of(context);
     final azure = KeelColors.azure.of(context);
     return Semantics(
+      container: true,
       button: true,
+      label: '${o.name}, ${Spoken.headline(o)}, ${Spoken.closes(o.closes)}',
+      excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {

@@ -104,7 +104,11 @@ class _SignInPageState extends State<SignInPage> {
                           ),
                           child: const Row(
                             children: [
-                              KeelMark(color: CupertinoColors.white, size: 56),
+                              KeelMark(
+                                color: CupertinoColors.white,
+                                size: 56,
+                                excludeFromSemantics: true,
+                              ),
                               SizedBox(width: 14),
                               Text(
                                 'Keel',

@@ -48,6 +48,12 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
     private var configuredTint: UIColor?
     private var hidesButtonBackground = false
     private var usesLargeTitle = false
+    /// What VoiceOver says for the title in place of its text; nil reads
+    /// the title as shown.
+    private var semanticTitle: String?
+    /// The title as drawn. Held apart from the item's title, which carries
+    /// the spoken title while a semantic one is set.
+    private var shownTitle: String?
     private var verticalNavigation = false
     private var scrollOffset: CGFloat = 0
     private var scrollGeneration = 0
@@ -79,12 +85,14 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
         active = params["active"] as? Bool ?? true
         covered = params["covered"] as? Bool ?? false
         usesLargeTitle = params["largeTitle"] as? Bool ?? false
+        semanticTitle = params["semanticTitle"] as? String
         verticalNavigation = params["verticalNavigation"] as? Bool ?? false
         scrollOffset = CGFloat(params["scrollOffset"] as? Double ?? 0)
         if let value = params["tint"] as? NSNumber { configuredTint = Self.colorFromARGB(value.intValue) }
         hidesButtonBackground = params["hidesNavigationButtonBackground"] as? Bool ?? false
         configureNavigationAppearance(params)
         configureItems(params)
+        applySpokenTitle()
         containerView.onWindowChange = { [weak self] in
             guard let self, self.active, self.containerView.window != nil else { return }
             NativeNavigationHost.connect(self, from: self.containerView)
@@ -125,7 +133,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
     private func layoutScrollController() {
         guard active else { return }
         NativeNavigationHost.connect(self, from: containerView)
-        NativeNavigationHost.update(self)
+        publish()
         NativeNavigationHost.setCovered(self, covered)
     }
 
@@ -164,9 +172,49 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
         }
     }
 
+    /// Hands the item to the navigation host, its spoken title up to date.
+    private func publish() {
+        applySpokenTitle()
+        NativeNavigationHost.update(self)
+    }
+
+    /// The bar speaks the item's title and ignores a title view's own label.
+    /// With a semantic title, the title text is drawn by a title view styled
+    /// with the bar's title attributes, so it looks the same, and the item's
+    /// title, which UIKit no longer draws, carries the semantic title for
+    /// VoiceOver. Without one, the title is drawn and read as given.
+    private func applySpokenTitle() {
+        let shown = shownTitle ?? navigationItem.title
+        if let image = navigationItem.titleView as? UIImageView {
+            image.isAccessibilityElement = true
+            image.accessibilityLabel = semanticTitle ?? shown
+            image.accessibilityTraits = .header
+            navigationItem.title = shown
+            return
+        }
+        guard let spoken = semanticTitle, !usesLargeTitle,
+              let title = shown, !title.isEmpty else {
+            if navigationItem.titleView is SpokenTitleLabel { navigationItem.titleView = nil }
+            navigationItem.title = shown
+            return
+        }
+        var attributes = navigationItem.standardAppearance?.titleTextAttributes ?? [:]
+        if attributes[.font] == nil {
+            attributes[.font] = UIFont.preferredFont(forTextStyle: .headline)
+        }
+        if attributes[.foregroundColor] == nil { attributes[.foregroundColor] = UIColor.label }
+        let label = (navigationItem.titleView as? SpokenTitleLabel) ?? SpokenTitleLabel()
+        label.attributedText = NSAttributedString(string: title, attributes: attributes)
+        label.spokenTitle = spoken
+        label.sizeToFit()
+        navigationItem.titleView = label
+        navigationItem.title = spoken
+    }
+
     private func configureItems(_ params: [String: Any]) {
         // Title
         if let title = params["title"] as? String {
+            shownTitle = title
             navigationItem.title = title
         }
 
@@ -304,7 +352,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
             }
         }
         configureButtonBackgrounds()
-        NativeNavigationHost.update(self)
+        publish()
     }
 
     /// Builds the menu of a bar button; dividers split it into inline groups
@@ -384,7 +432,9 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
                 scrollOffset = CGFloat(offset)
                 metricsGeneration = -1
                 UIView.performWithoutAnimation {
-                    navigationItem.title = args["title"] as? String ?? ""
+                    shownTitle = args["title"] as? String ?? ""
+                    navigationItem.title = shownTitle
+                    applySpokenTitle()
                     layoutScrollController()
                 }
             }
@@ -406,13 +456,18 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
             } else {
                 navigationItem.titleView = nil
             }
-            NativeNavigationHost.update(self)
+            publish()
             NativeNavigationHost.setTitleView(self, navigationItem.titleView)
+            result(nil)
+        case "setSemanticTitle":
+            semanticTitle = (call.arguments as? [String: Any])?["semanticTitle"] as? String
+            publish()
             result(nil)
         case "updateTitle":
             if let args = call.arguments as? [String: Any], let title = args["title"] as? String {
+                shownTitle = title
                 navigationItem.title = title
-                NativeNavigationHost.update(self)
+                publish()
                 result(nil)
             } else {
                 result(FlutterMethodNotImplemented)
@@ -423,7 +478,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
                 isDark = dark
                 if #available(iOS 13.0, *) {
                     containerView.overrideUserInterfaceStyle = dark ? .dark : .light
-                    NativeNavigationHost.update(self)
+                    publish()
                 }
             }
             result(nil)
@@ -467,13 +522,13 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
                     navigationItem.leftBarButtonItems = items
                 }
                 configureButtonBackgrounds()
-                NativeNavigationHost.update(self)
+                publish()
             }
             result(nil)
         case "setNavigationBarColor":
             if let args = call.arguments as? [String: Any] {
                 configureNavigationAppearance(args)
-                NativeNavigationHost.update(self)
+                publish()
             }
             result(nil)
         case "setStyle":
@@ -500,7 +555,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
                 }
             }
             configureButtonBackgrounds()
-            NativeNavigationHost.update(self)
+            publish()
             result(nil)
         default:
             result(FlutterMethodNotImplemented)
@@ -517,4 +572,24 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView, NativeNavigationP
         let b = CGFloat(argb & 0xFF) / 255.0
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
+}
+
+/// The bar's title shown as a title view so it can carry a spoken label.
+final class SpokenTitleLabel: UILabel {
+    /// Said in place of the drawn text. A stored label is not enough: the
+    /// bar reads the text of its title view unless the getter answers.
+    var spokenTitle: String?
+
+    override var accessibilityLabel: String? {
+        get { spokenTitle ?? super.accessibilityLabel }
+        set { super.accessibilityLabel = newValue }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isAccessibilityElement = true
+        accessibilityTraits = .header
+        adjustsFontForContentSizeCategory = false
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }

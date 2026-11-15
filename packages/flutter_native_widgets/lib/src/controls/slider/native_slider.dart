@@ -34,6 +34,8 @@ class NativeSlider extends StatelessWidget {
     this.label,
     this.activeColor,
     this.thumbColor,
+    this.semanticLabel,
+    this.semanticValue,
   });
 
   /// The currently selected value for this slider
@@ -80,6 +82,14 @@ class NativeSlider extends StatelessWidget {
   /// The color of the thumb
   final Color? thumbColor;
 
+  /// What assistive technologies say the slider sets, such as "Market
+  /// move". Never drawn.
+  final String? semanticLabel;
+
+  /// The value as it should be spoken, such as "+10%" or "Any", in place
+  /// of the thumb's position as a percent of the track. Never drawn.
+  final String? semanticValue;
+
   @override
   Widget build(BuildContext context) {
     switch (NativeStyle.of(context)) {
@@ -94,10 +104,12 @@ class NativeSlider extends StatelessWidget {
           max: max,
           activeColor: activeColor,
           thumbColor: thumbColor,
+          semanticLabel: semanticLabel,
+          semanticValue: semanticValue,
         );
       case NativeStyle.material:
         // Android - Use Material Design Slider
-        return Slider(
+        final material = Slider(
           value: value,
           onChanged: onChanged,
           onChangeStart: onChangeStart,
@@ -108,7 +120,13 @@ class NativeSlider extends StatelessWidget {
           label: label,
           activeColor: activeColor,
           thumbColor: thumbColor,
+          semanticFormatterCallback: semanticValue == null
+              ? null
+              : (_) => semanticValue!,
         );
+        return semanticLabel == null
+            ? material
+            : Semantics(label: semanticLabel, child: material);
     }
   }
 }

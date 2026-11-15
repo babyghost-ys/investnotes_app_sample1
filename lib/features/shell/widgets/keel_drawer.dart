@@ -61,10 +61,15 @@ class KeelDrawer extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              const KeelMark(color: _white, size: 40),
+              const KeelMark(
+                color: _white,
+                size: 40,
+                excludeFromSemantics: true,
+              ),
               const SizedBox(width: 10),
               const Text(
                 'Keel',
+                semanticsLabel: 'Keel menu',
                 style: TextStyle(
                   color: _white,
                   fontSize: 28,

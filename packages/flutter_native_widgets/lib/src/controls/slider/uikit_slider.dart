@@ -27,6 +27,8 @@ class UiKitSlider extends StatefulWidget {
     this.max = 1.0,
     this.activeColor,
     this.thumbColor,
+    this.semanticLabel,
+    this.semanticValue,
   });
 
   /// The currently selected value for this slider
@@ -52,6 +54,12 @@ class UiKitSlider extends StatefulWidget {
 
   /// The color of the thumb
   final Color? thumbColor;
+
+  /// What VoiceOver says the slider sets.
+  final String? semanticLabel;
+
+  /// The value as VoiceOver should say it.
+  final String? semanticValue;
 
   @override
   State<UiKitSlider> createState() => _UiKitSliderState();
@@ -145,6 +153,14 @@ class _UiKitSliderState extends State<UiKitSlider> {
       });
     }
 
+    if (oldWidget.semanticLabel != widget.semanticLabel ||
+        oldWidget.semanticValue != widget.semanticValue) {
+      _channel.invokeMethod('setSemantics', {
+        'label': widget.semanticLabel,
+        'value': widget.semanticValue,
+      });
+    }
+
     // Update enabled state
     if ((oldWidget.onChanged == null) != (widget.onChanged == null)) {
       _channel.invokeMethod('setEnabled', {
@@ -165,6 +181,8 @@ class _UiKitSliderState extends State<UiKitSlider> {
       if (widget.thumbColor != null)
         'thumbColor': _colorToARGB(widget.thumbColor!),
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
+      if (widget.semanticLabel != null) 'semanticLabel': widget.semanticLabel,
+      if (widget.semanticValue != null) 'semanticValue': widget.semanticValue,
     };
   }
 
@@ -200,7 +218,7 @@ class _UiKitSliderState extends State<UiKitSlider> {
     }
 
     // Fallback to CupertinoSlider on other platforms
-    return CupertinoSlider(
+    final fallback = CupertinoSlider(
       value: widget.value,
       onChanged: widget.onChanged,
       onChangeStart: widget.onChangeStart,
@@ -210,5 +228,12 @@ class _UiKitSliderState extends State<UiKitSlider> {
       activeColor: widget.activeColor,
       thumbColor: widget.thumbColor ?? CupertinoColors.white,
     );
+    return widget.semanticLabel == null && widget.semanticValue == null
+        ? fallback
+        : Semantics(
+            label: widget.semanticLabel,
+            value: widget.semanticValue,
+            child: ExcludeSemantics(child: fallback),
+          );
   }
 }

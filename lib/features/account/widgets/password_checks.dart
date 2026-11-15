@@ -27,32 +27,36 @@ class PasswordChecks extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final (text, met) in checks)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) =>
-                      ScaleTransition(scale: animation, child: child),
-                  child: Icon(
-                    met
-                        ? CupertinoIcons.checkmark_circle_fill
-                        : CupertinoIcons.circle,
-                    key: ValueKey(met),
-                    size: 18,
-                    color: met ? azure : muted.withValues(alpha: 0.6),
+          Semantics(
+            label: '$text, ${met ? 'done' : 'not yet'}',
+            excludeSemantics: true,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    transitionBuilder: (child, animation) =>
+                        ScaleTransition(scale: animation, child: child),
+                    child: Icon(
+                      met
+                          ? CupertinoIcons.checkmark_circle_fill
+                          : CupertinoIcons.circle,
+                      key: ValueKey(met),
+                      size: 18,
+                      color: met ? azure : muted.withValues(alpha: 0.6),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: met ? KeelColors.ink.of(context) : muted,
+                  const SizedBox(width: 10),
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: met ? KeelColors.ink.of(context) : muted,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
       ],

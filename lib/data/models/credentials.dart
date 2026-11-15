@@ -28,4 +28,12 @@ abstract final class Credentials {
     final address = email.trim();
     return '${address[0]}•••${address.substring(at)}';
   }
+
+  /// [masked] as it should be spoken: "m, then hidden, at keel.com".
+  static String spokenMasked(String email) {
+    final address = email.trim();
+    final at = address.indexOf('@');
+    if (at < 1) return address;
+    return '${address[0]}, then hidden, at ${address.substring(at + 1)}';
+  }
 }

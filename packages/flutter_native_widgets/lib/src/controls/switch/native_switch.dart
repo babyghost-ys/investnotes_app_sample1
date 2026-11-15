@@ -28,6 +28,7 @@ class NativeSwitch extends StatelessWidget {
     required this.onChanged,
     this.activeColor,
     this.thumbColor,
+    this.semanticLabel,
   });
 
   /// Whether this switch is on or off
@@ -54,6 +55,11 @@ class NativeSwitch extends StatelessWidget {
   /// On Android: The color of the circular knob
   final Color? thumbColor;
 
+  /// What assistive technologies say the switch is for, such as
+  /// "Haptics". Never drawn; the platform adds the switch's own state,
+  /// on or off, in the user's language.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     switch (NativeStyle.of(context)) {
@@ -64,10 +70,11 @@ class NativeSwitch extends StatelessWidget {
           onChanged: onChanged,
           activeColor: activeColor,
           thumbColor: thumbColor,
+          semanticLabel: semanticLabel,
         );
       case NativeStyle.material:
         // Android - Use Material Design Switch
-        return Switch(
+        final material = Switch(
           value: value,
           onChanged: onChanged,
           thumbColor: thumbColor != null
@@ -82,6 +89,9 @@ class NativeSwitch extends StatelessWidget {
                 })
               : null,
         );
+        return semanticLabel == null
+            ? material
+            : Semantics(label: semanticLabel, child: material);
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
@@ -14,6 +15,7 @@ class OfferingRow extends StatelessWidget {
     required this.offering,
     required this.onTap,
     this.badge,
+    this.spokenBadge,
     this.selected = false,
   });
 
@@ -22,6 +24,10 @@ class OfferingRow extends StatelessWidget {
 
   /// Overrides the closing badge, e.g. for a partial finder match.
   final String? badge;
+
+  /// What assistive technologies say for [badge], such as "3 of 4 answers
+  /// match" for "3/4".
+  final String? spokenBadge;
 
   /// Marks the offering open beside the list in a split window.
   final bool selected;
@@ -35,9 +41,21 @@ class OfferingRow extends StatelessWidget {
     final soon = o.closes.difference(DateTime.now()).inDays < 7;
     final tag = badge ?? (soon ? Formats.until(o.closes) : null);
     final mist = KeelColors.mist.of(context);
+    final spoken = [
+      o.name,
+      o.underlying,
+      Spoken.headline(o),
+      if (badge != null)
+        spokenBadge ?? badge!
+      else if (soon)
+        Spoken.closes(o.closes),
+    ].join(', ');
     return Semantics(
+      container: true,
       button: true,
       selected: selected,
+      label: spoken,
+      excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {

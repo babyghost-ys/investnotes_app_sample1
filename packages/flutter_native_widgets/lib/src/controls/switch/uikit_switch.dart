@@ -23,6 +23,7 @@ class UiKitSwitch extends StatefulWidget {
     required this.onChanged,
     this.activeColor,
     this.thumbColor,
+    this.semanticLabel,
   });
 
   /// Whether this switch is on or off
@@ -36,6 +37,9 @@ class UiKitSwitch extends StatefulWidget {
 
   /// The color of the thumb (handle)
   final Color? thumbColor;
+
+  /// What VoiceOver says the switch is for; it adds the state itself.
+  final String? semanticLabel;
 
   @override
   State<UiKitSwitch> createState() => _UiKitSwitchState();
@@ -114,6 +118,12 @@ class _UiKitSwitchState extends State<UiKitSwitch> {
       });
     }
 
+    if (oldWidget.semanticLabel != widget.semanticLabel) {
+      _channel.invokeMethod('setSemanticLabel', {
+        'label': widget.semanticLabel,
+      });
+    }
+
     // Update enabled state
     if ((oldWidget.onChanged == null) != (widget.onChanged == null)) {
       _channel.invokeMethod('setEnabled', {
@@ -132,6 +142,7 @@ class _UiKitSwitchState extends State<UiKitSwitch> {
       if (widget.thumbColor != null)
         'thumbColor': _colorToARGB(widget.thumbColor!),
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
+      if (widget.semanticLabel != null) 'semanticLabel': widget.semanticLabel,
     };
   }
 
@@ -181,11 +192,14 @@ class _UiKitSwitchState extends State<UiKitSwitch> {
     }
 
     // Fallback to CupertinoSwitch on other platforms
-    return CupertinoSwitch(
+    final fallback = CupertinoSwitch(
       value: widget.value,
       onChanged: widget.onChanged,
       activeTrackColor: widget.activeColor,
       thumbColor: widget.thumbColor ?? CupertinoColors.white,
     );
+    return widget.semanticLabel == null
+        ? fallback
+        : Semantics(label: widget.semanticLabel, child: fallback);
   }
 }

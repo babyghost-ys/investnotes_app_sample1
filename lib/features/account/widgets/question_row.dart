@@ -37,6 +37,7 @@ class QuestionRow extends StatelessWidget {
           width: 112,
           child: NativeSegmentedControl(
             labels: const ['Yes', 'No'],
+            semanticLabels: const ['Yes', 'No'],
             icons: const [
               NativeIcon(sfSymbol: 'checkmark', icon: CupertinoIcons.checkmark),
               NativeIcon(sfSymbol: 'xmark', icon: CupertinoIcons.xmark),

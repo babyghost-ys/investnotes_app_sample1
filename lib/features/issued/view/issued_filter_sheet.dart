@@ -127,6 +127,7 @@ class IssuedFilterSheet extends StatelessWidget {
                 for (final s in IssuedStatus.values)
                   OptionChip(
                     text: s.title,
+                    group: 'Status',
                     icon: NoteIcons.status(s),
                     selected: f.statuses.contains(s),
                     onTap: () => draft.change(
@@ -142,6 +143,8 @@ class IssuedFilterSheet extends StatelessWidget {
                 for (final t in NoteType.values)
                   OptionChip(
                     text: t.code,
+                    group: 'Note type',
+                    semanticLabel: t.title,
                     selected: f.types.contains(t),
                     onTap: () =>
                         draft.change(f.copyWith(types: _flip(f.types, t))),
@@ -149,6 +152,7 @@ class IssuedFilterSheet extends StatelessWidget {
                 for (final c in Currency.values)
                   OptionChip(
                     text: c.code,
+                    group: 'Currency',
                     selected: f.currencies.contains(c),
                     onTap: () => draft.change(
                       f.copyWith(currencies: _flip(f.currencies, c)),
@@ -161,6 +165,9 @@ class IssuedFilterSheet extends StatelessWidget {
               children: [
                 NativeSegmentedControl(
                   labels: [for (final p in IssuedPeriod.values) p.label],
+                  semanticLabels: [
+                    for (final p in IssuedPeriod.values) p.spoken,
+                  ],
                   selectedIndex: f.period.index,
                   onValueChanged: (i) {
                     final period = IssuedPeriod.values[i];

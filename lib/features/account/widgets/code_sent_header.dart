@@ -48,6 +48,7 @@ class CodeSentHeader extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 Credentials.masked(email),
+                semanticsLabel: Credentials.spokenMasked(email),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(

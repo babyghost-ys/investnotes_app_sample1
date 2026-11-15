@@ -1,6 +1,7 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/holding.dart';
 
@@ -34,6 +35,7 @@ class HoldingsTotal extends StatelessWidget {
       children: [
         Text(
           Formats.dollars(value),
+          semanticsLabel: 'Total value ${Formats.dollars(value)}',
           style: TextStyle(
             color: KeelColors.ink.of(context),
             fontSize: 44,
@@ -55,6 +57,7 @@ class HoldingsTotal extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               Formats.percent(change, signed: true),
+              semanticsLabel: Spoken.change(change),
               style: TextStyle(
                 color: changeColor,
                 fontSize: 17,
@@ -65,24 +68,27 @@ class HoldingsTotal extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 22),
-        SizedBox(
-          height: 10,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var i = 0; i < holdings.length; i++) ...[
-                if (i > 0) const SizedBox(width: 3),
-                Expanded(
-                  flex: (holdings[i].value / value * 1000).round(),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: shade(context, i),
-                      borderRadius: BorderRadius.circular(5),
+        // How the total splits, by colour; each row says its own worth.
+        ExcludeSemantics(
+          child: SizedBox(
+            height: 10,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < holdings.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 3),
+                  Expanded(
+                    flex: (holdings[i].value / value * 1000).round(),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: shade(context, i),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],

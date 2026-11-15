@@ -29,6 +29,7 @@ class NativeInlineDatePicker extends StatefulWidget {
     required this.onDateChanged,
     this.style = NativeDatePickerStyle.wheels,
     this.tintColor,
+    this.semanticLabel,
   });
 
   final DateTime initialDate;
@@ -44,9 +45,12 @@ class NativeInlineDatePicker extends StatefulWidget {
   /// Selection colour.
   final Color? tintColor;
 
+  /// What assistive technologies say the picker chooses, such as "End
+  /// date". Never drawn; the days and the chosen date speak for themselves.
+  final String? semanticLabel;
+
   @override
-  State<NativeInlineDatePicker> createState() =>
-      _NativeInlineDatePickerState();
+  State<NativeInlineDatePicker> createState() => _NativeInlineDatePickerState();
 }
 
 class _NativeInlineDatePickerState extends State<NativeInlineDatePicker> {
@@ -83,7 +87,8 @@ class _NativeInlineDatePickerState extends State<NativeInlineDatePicker> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.firstDate != widget.firstDate ||
         oldWidget.lastDate != widget.lastDate ||
-        oldWidget.tintColor != widget.tintColor) {
+        oldWidget.tintColor != widget.tintColor ||
+        oldWidget.semanticLabel != widget.semanticLabel) {
       _channel.invokeMethod<void>('update', _params());
     }
   }
@@ -107,6 +112,7 @@ class _NativeInlineDatePickerState extends State<NativeInlineDatePicker> {
     'style': widget.style.name,
     'isDark': _isDark,
     if (widget.tintColor != null) 'tint': widget.tintColor!.toARGB32(),
+    'semanticLabel': widget.semanticLabel,
   };
 
   @override
@@ -127,12 +133,19 @@ class _NativeInlineDatePickerState extends State<NativeInlineDatePicker> {
           ),
         );
       case NativeStyle.material:
-        return CalendarDatePicker(
+        final calendar = CalendarDatePicker(
           initialDate: widget.initialDate,
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           onDateChanged: widget.onDateChanged,
         );
+        return widget.semanticLabel == null
+            ? calendar
+            : Semantics(
+                container: true,
+                label: widget.semanticLabel,
+                child: calendar,
+              );
     }
   }
 }

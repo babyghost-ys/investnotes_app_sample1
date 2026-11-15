@@ -31,6 +31,8 @@ class RoundIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
     return Semantics(
+      // Its own node: never folded into the heading or row beside it.
+      container: true,
       button: true,
       enabled: enabled,
       label: label,

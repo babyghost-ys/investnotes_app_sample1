@@ -38,6 +38,7 @@ class SettingCard extends StatelessWidget {
             children: [
               Text(
                 title.toUpperCase(),
+                semanticsLabel: title,
                 style: TextStyle(
                   color: KeelColors.tideInk.of(context),
                   fontSize: 20,

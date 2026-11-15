@@ -34,7 +34,10 @@ class MyNotesPage extends StatelessWidget {
           ),
           children: [
             if (holdings.isEmpty)
-              const EmptyState(icon: CupertinoIcons.briefcase)
+              const EmptyState(
+                icon: CupertinoIcons.briefcase,
+                semanticLabel: 'No notes held',
+              )
             else ...[
               HoldingsTotal(
                 holdings: holdings,

@@ -12,6 +12,8 @@ class OptionChip extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.icon,
+    this.group,
+    this.semanticLabel,
   });
 
   final String text;
@@ -19,13 +21,24 @@ class OptionChip extends StatelessWidget {
   final VoidCallback onTap;
   final IconData? icon;
 
+  /// What the chip's set of options is, said after the chip ("USD,
+  /// Currency"), since the sheet shows no headings. Never drawn.
+  final String? group;
+
+  /// Said in place of [text] when it is an abbreviation. Never drawn.
+  final String? semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     final accent = KeelColors.azure.of(context);
     final fg = selected ? CupertinoColors.white : KeelColors.ink.of(context);
     return Semantics(
+      container: true,
       button: true,
       selected: selected,
+      label: semanticLabel ?? text,
+      hint: group,
+      excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {

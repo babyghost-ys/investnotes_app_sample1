@@ -154,6 +154,7 @@ class _DrawerCoverReporterState extends State<DrawerCoverReporter> {
         x: x,
         width: width,
         end: widget.end,
+        closeLabel: MaterialLocalizations.of(context).closeButtonLabel,
         color:
             widget.pulse.panelColor ??
             NativeDrawer.defaultBackground(Theme.of(context)),

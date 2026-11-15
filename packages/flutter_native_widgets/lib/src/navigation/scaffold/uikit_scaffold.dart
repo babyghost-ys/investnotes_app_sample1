@@ -29,6 +29,7 @@ class UiKitScaffold extends StatefulWidget {
     super.key,
     this.bottomNavigationBar,
     this.title,
+    this.semanticTitle,
     this.largeTitle = false,
     this.scrollController,
     this.actions,
@@ -51,6 +52,9 @@ class UiKitScaffold extends StatefulWidget {
 
   final NativeBottomNavigationBar? bottomNavigationBar;
   final String? title;
+
+  /// What VoiceOver says for [title]; null reads the title itself.
+  final String? semanticTitle;
   final bool largeTitle;
   final NativeNavigationScrollController? scrollController;
   final List<NativeAppBarAction>? actions;
@@ -388,6 +392,7 @@ class _UiKitScaffoldState extends State<UiKitScaffold> {
             height: duoVerticalPose ? mq.size.height : null,
             child: UiKitToolbar(
               title: widget.title,
+              semanticTitle: widget.semanticTitle,
               largeTitle: widget.largeTitle,
               scrollController: widget.scrollController,
               verticalNavigation: duoVerticalPose,

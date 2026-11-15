@@ -80,7 +80,11 @@ class _SplashPageState extends State<SplashPage>
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    KeelMark(color: CupertinoColors.white, size: 40),
+                    KeelMark(
+                      color: CupertinoColors.white,
+                      size: 40,
+                      excludeFromSemantics: true,
+                    ),
                     SizedBox(width: 10),
                     Text(
                       'Keel',

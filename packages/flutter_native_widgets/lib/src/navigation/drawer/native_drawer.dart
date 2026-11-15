@@ -138,6 +138,7 @@ class NativeDrawer extends StatelessWidget {
     required double width,
     required Color color,
     bool end = false,
+    String? closeLabel,
   }) {
     if (!_listening) {
       _listening = true;
@@ -150,6 +151,7 @@ class NativeDrawer extends StatelessWidget {
       'width': width,
       'background': color.toARGB32(),
       'end': end,
+      'closeLabel': ?closeLabel,
     });
   }
 

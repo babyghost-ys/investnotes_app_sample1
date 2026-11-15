@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 NativePage<void> keelPage(
   GoRouterState state, {
   required String title,
+  String? semanticTitle,
   required Widget child,
   List<NativeAppBarAction>? actions,
 }) => NativePage<void>(
@@ -14,7 +15,11 @@ NativePage<void> keelPage(
   name: state.matchedLocation,
   child: NativeScaffold(
     extendBody: true,
-    appBar: NativeAppBar(title: title, actions: actions),
+    appBar: NativeAppBar(
+      title: title,
+      semanticTitle: semanticTitle,
+      actions: actions,
+    ),
     body: child,
   ),
 );

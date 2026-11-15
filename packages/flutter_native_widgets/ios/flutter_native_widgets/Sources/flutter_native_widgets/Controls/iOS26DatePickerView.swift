@@ -82,6 +82,7 @@ class iOS26DatePickerView: NSObject, FlutterPlatformView {
             if picker.date != date { picker.setDate(date, animated: false) }
         }
         if let argb = config["tint"] as? Int { picker.tintColor = UIColor(argb: argb) }
+        picker.accessibilityLabel = config["semanticLabel"] as? String
     }
 
     @objc private func changed() {

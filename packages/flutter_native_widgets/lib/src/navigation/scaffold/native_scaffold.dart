@@ -268,9 +268,7 @@ class NativeScaffoldState extends State<NativeScaffold> {
   /// Material drawer.
   NativeDrawer? get _nativeDrawer {
     final drawer = widget.drawer;
-    return _native && drawer is NativeDrawer && drawer.isNative
-        ? drawer
-        : null;
+    return _native && drawer is NativeDrawer && drawer.isNative ? drawer : null;
   }
 
   bool _nativeDrawerOpen = false;
@@ -529,13 +527,19 @@ class NativeScaffoldState extends State<NativeScaffold> {
     if (title == null) return null;
     final subtitle = _appBar?.subtitle;
     if (subtitle == null || subtitle.isEmpty) {
-      return nativeTitleFallback ? null : Text(title, style: titleStyle);
+      return nativeTitleFallback
+          ? null
+          : Text(
+              title,
+              style: titleStyle,
+              semanticsLabel: _appBar?.semanticTitle,
+            );
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: crossAxisAlignment,
       children: [
-        Text(title, style: titleStyle),
+        Text(title, style: titleStyle, semanticsLabel: _appBar?.semanticTitle),
         Text(
           subtitle,
           style: TextStyle(

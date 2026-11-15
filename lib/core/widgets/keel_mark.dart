@@ -3,20 +3,28 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 /// Keel's mark: a hull on the waterline with its keel below, the one
 /// shape that stays steady whatever the water does.
 class KeelMark extends StatelessWidget {
-  const KeelMark({super.key, required this.color, this.size = 32});
+  const KeelMark({
+    super.key,
+    required this.color,
+    this.size = 32,
+    this.excludeFromSemantics = false,
+  });
 
   final Color color;
   final double size;
 
+  /// Silent, for a mark set beside the word "Keel", which says it already.
+  final bool excludeFromSemantics;
+
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: 'Keel',
-    image: true,
-    child: SizedBox.square(
+  Widget build(BuildContext context) {
+    final mark = SizedBox.square(
       dimension: size,
       child: CustomPaint(painter: _KeelPainter(color)),
-    ),
-  );
+    );
+    if (excludeFromSemantics) return mark;
+    return Semantics(label: 'Keel', image: true, child: mark);
+  }
 }
 
 class _KeelPainter extends CustomPainter {

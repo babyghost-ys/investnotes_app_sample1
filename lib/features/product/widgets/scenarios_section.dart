@@ -36,23 +36,26 @@ class ScenariosSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Container(width: 18, height: 2, color: muted),
-            const SizedBox(width: 6),
-            Text('Market', style: TextStyle(color: muted, fontSize: 13)),
-            const SizedBox(width: 18),
-            Container(
-              width: 18,
-              height: 8,
-              decoration: BoxDecoration(
-                color: KeelColors.azure.of(context),
-                borderRadius: BorderRadius.circular(2),
+        // A key to the bars; each row below says its own figures.
+        ExcludeSemantics(
+          child: Row(
+            children: [
+              Container(width: 18, height: 2, color: muted),
+              const SizedBox(width: 6),
+              Text('Market', style: TextStyle(color: muted, fontSize: 13)),
+              const SizedBox(width: 18),
+              Container(
+                width: 18,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: KeelColors.azure.of(context),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Text('Note', style: TextStyle(color: muted, fontSize: 13)),
-          ],
+              const SizedBox(width: 6),
+              Text('Note', style: TextStyle(color: muted, fontSize: 13)),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         for (final m in moves)

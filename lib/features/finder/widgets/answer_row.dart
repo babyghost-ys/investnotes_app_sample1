@@ -25,8 +25,9 @@ class AnswerRow extends StatelessWidget {
     final azure = KeelColors.azure.of(context);
     final ink = KeelColors.ink.of(context);
     return Semantics(
-      button: true,
-      selected: selected,
+      container: true,
+      checked: selected,
+      inMutuallyExclusiveGroup: !multiple,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {

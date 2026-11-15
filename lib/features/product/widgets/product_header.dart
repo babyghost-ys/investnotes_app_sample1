@@ -1,6 +1,7 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
@@ -52,7 +53,7 @@ class ProductHeader extends StatelessWidget {
                   Text(
                     status == null ? Formats.until(p.closes!) : status.title,
                     semanticsLabel: status == null
-                        ? 'Open until ${Formats.until(p.closes!)}'
+                        ? 'Open, ${Spoken.closes(p.closes!)}'
                         : null,
                     style: TextStyle(
                       color: live ? azure : muted,

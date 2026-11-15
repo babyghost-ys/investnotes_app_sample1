@@ -12,6 +12,7 @@ class FlowDone extends StatelessWidget {
     required this.actionLabel,
     required this.onAction,
     this.icon = CupertinoIcons.checkmark_alt,
+    this.spokenDetail,
   });
 
   final String title;
@@ -19,6 +20,9 @@ class FlowDone extends StatelessWidget {
   final String actionLabel;
   final VoidCallback onAction;
   final IconData icon;
+
+  /// Said in place of [detail], such as a masked address. Never drawn.
+  final String? spokenDetail;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -48,19 +52,25 @@ class FlowDone extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 28),
-        Text(
-          title,
-          style: TextStyle(
-            color: KeelColors.ink.of(context),
-            fontSize: 30,
-            height: 1.1,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.6,
+        // Said as the flow lands here, so the outcome is heard.
+        Semantics(
+          liveRegion: true,
+          header: true,
+          child: Text(
+            title,
+            style: TextStyle(
+              color: KeelColors.ink.of(context),
+              fontSize: 30,
+              height: 1.1,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.6,
+            ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
           detail,
+          semanticsLabel: spokenDetail,
           style: TextStyle(color: KeelColors.muted.of(context), fontSize: 17),
         ),
         const Spacer(),

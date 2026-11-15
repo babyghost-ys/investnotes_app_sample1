@@ -43,6 +43,7 @@ class PageLoader extends StatelessWidget {
               child: Center(
                 child: EmptyState(
                   icon: CupertinoIcons.exclamationmark_circle,
+                  semanticLabel: 'Didn’t load',
                   action: RoundIconButton(
                     icon: CupertinoIcons.arrow_clockwise,
                     label: 'Try again',

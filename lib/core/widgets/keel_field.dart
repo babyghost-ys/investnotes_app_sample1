@@ -59,33 +59,44 @@ class _KeelFieldState extends State<KeelField> {
   Widget build(BuildContext context) {
     final muted = KeelColors.muted.of(context);
     final trailing = widget.trailing;
-    return CupertinoTextField(
-      controller: _controller,
-      focusNode: widget.focusNode,
-      keyboardType: widget.keyboard,
-      placeholder: widget.placeholder,
-      obscureText: widget.obscure,
-      autofocus: widget.autofocus,
-      autocorrect: false,
-      enableSuggestions: false,
-      textInputAction: widget.action,
-      autofillHints: widget.autofill == null ? null : [widget.autofill!],
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
-      cursorColor: KeelColors.azure.of(context),
-      style: TextStyle(color: KeelColors.ink.of(context), fontSize: 17),
-      placeholderStyle: TextStyle(color: muted, fontSize: 17),
-      padding: const EdgeInsets.symmetric(vertical: 17),
-      prefix: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 12),
-        child: Icon(widget.icon, size: 20, color: muted),
-      ),
-      suffix: trailing == null
-          ? null
-          : Padding(padding: const EdgeInsets.only(right: 4), child: trailing),
-      decoration: BoxDecoration(
-        color: KeelColors.mist.of(context),
-        borderRadius: BorderRadius.circular(16),
+    // The placeholder names the field; it stays its name once typed in.
+    return MergeSemantics(
+      child: Semantics(
+        label: widget.placeholder,
+        child: CupertinoTextField(
+          controller: _controller,
+          focusNode: widget.focusNode,
+          keyboardType: widget.keyboard,
+          placeholder: widget.placeholder,
+          obscureText: widget.obscure,
+          autofocus: widget.autofocus,
+          autocorrect: false,
+          enableSuggestions: false,
+          textInputAction: widget.action,
+          autofillHints: widget.autofill == null ? null : [widget.autofill!],
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          cursorColor: KeelColors.azure.of(context),
+          style: TextStyle(color: KeelColors.ink.of(context), fontSize: 17),
+          placeholderStyle: TextStyle(color: muted, fontSize: 17),
+          padding: const EdgeInsets.symmetric(vertical: 17),
+          prefix: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 12),
+            child: ExcludeSemantics(
+              child: Icon(widget.icon, size: 20, color: muted),
+            ),
+          ),
+          suffix: trailing == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: trailing,
+                ),
+          decoration: BoxDecoration(
+            color: KeelColors.mist.of(context),
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
       ),
     );
   }

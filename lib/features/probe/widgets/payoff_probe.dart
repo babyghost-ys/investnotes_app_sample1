@@ -67,13 +67,17 @@ class PayoffProbe extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            PayoffChart(
-              payoff: payoff,
-              move: state.move,
-              lineColor: azure,
-              marketColor: muted,
-              gridColor: KeelColors.hairline.of(context),
-              labelColor: muted,
+            // The figures above say what the chart shows at the slider's
+            // move; the curve itself is for the eye.
+            ExcludeSemantics(
+              child: PayoffChart(
+                payoff: payoff,
+                move: state.move,
+                lineColor: azure,
+                marketColor: muted,
+                gridColor: KeelColors.hairline.of(context),
+                labelColor: muted,
+              ),
             ),
             const SizedBox(height: 10),
             NativeSlider(
@@ -81,6 +85,8 @@ class PayoffProbe extends StatelessWidget {
               min: PayoffChart.minMove,
               max: PayoffChart.maxMove,
               activeColor: azure,
+              semanticLabel: 'Market move',
+              semanticValue: Formats.percent(state.move, signed: true),
               onChanged: (v) => context.read<ProbeBloc>().add(
                 ProbeMoved((v * 100).roundToDouble() / 100),
               ),

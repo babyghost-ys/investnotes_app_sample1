@@ -63,77 +63,86 @@ class _Step extends StatelessWidget {
     final date = soon
         ? '${Formats.until(event.date)} · ${Formats.fullDate(event.date)}'
         : Formats.fullDate(event.date);
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 44,
-            child: Column(
-              children: [
-                Container(
-                  width: 2,
-                  height: 14,
-                  color: first ? null : (past ? azure : hairline),
-                ),
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: past ? azure : KeelColors.raised.of(context),
-                    shape: BoxShape.circle,
-                    border: past
-                        ? null
-                        : Border.all(color: next ? azure : hairline, width: 2),
-                  ),
-                  child: Icon(
-                    EventsSection.iconOf(event.kind),
-                    size: 19,
-                    color: past
-                        ? CupertinoColors.white
-                        : next
-                        ? azure
-                        : muted,
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: last ? null : (past ? azure : hairline),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 18, bottom: 20),
+    final state = past ? 'Done' : (next ? 'Next' : 'Upcoming');
+    return Semantics(
+      container: true,
+      label: '$state, ${event.kind.title}, ${Formats.fullDate(event.date)}',
+      excludeSemantics: true,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: 44,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    event.kind.title,
-                    style: TextStyle(
-                      color: KeelColors.ink.of(context),
-                      fontSize: 17,
-                      fontWeight: next ? FontWeight.w700 : FontWeight.w600,
+                  Container(
+                    width: 2,
+                    height: 14,
+                    color: first ? null : (past ? azure : hairline),
+                  ),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: past ? azure : KeelColors.raised.of(context),
+                      shape: BoxShape.circle,
+                      border: past
+                          ? null
+                          : Border.all(
+                              color: next ? azure : hairline,
+                              width: 2,
+                            ),
+                    ),
+                    child: Icon(
+                      EventsSection.iconOf(event.kind),
+                      size: 19,
+                      color: past
+                          ? CupertinoColors.white
+                          : next
+                          ? azure
+                          : muted,
                     ),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    date,
-                    style: TextStyle(
-                      color: next ? azure : muted,
-                      fontSize: 14,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      color: last ? null : (past ? azure : hairline),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 18, bottom: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.kind.title,
+                      style: TextStyle(
+                        color: KeelColors.ink.of(context),
+                        fontSize: 17,
+                        fontWeight: next ? FontWeight.w700 : FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      date,
+                      style: TextStyle(
+                        color: next ? azure : muted,
+                        fontSize: 14,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

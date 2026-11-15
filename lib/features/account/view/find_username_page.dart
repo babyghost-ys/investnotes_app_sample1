@@ -38,6 +38,7 @@ class FindUsernamePage extends StatelessWidget {
                     icon: CupertinoIcons.envelope_fill,
                     title: 'Username sent',
                     detail: Credentials.masked(request.email),
+                    spokenDetail: Credentials.spokenMasked(request.email),
                     actionLabel: 'Back to sign in',
                     onAction: () => SignInScope.of(context).pop<void>(context),
                   )

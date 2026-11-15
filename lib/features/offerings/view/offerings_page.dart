@@ -95,6 +95,7 @@ class OfferingsPage extends StatelessWidget {
           children: [
             NativeSegmentedControl(
               labels: [for (final t in NoteType.values) t.code],
+              semanticLabels: [for (final t in NoteType.values) t.title],
               selectedIndex: state.type.index,
               onValueChanged: (i) => context.read<OfferingsBloc>().add(
                 OfferingsTypeSelected(NoteType.values[i]),
@@ -145,6 +146,7 @@ class OfferingsPage extends StatelessWidget {
               LoadingPhase.failed when state.all.isEmpty => [
                 EmptyState(
                   icon: CupertinoIcons.exclamationmark_circle,
+                  semanticLabel: 'Offerings didn’t load',
                   action: RoundIconButton(
                     icon: CupertinoIcons.arrow_clockwise,
                     label: 'Try again',

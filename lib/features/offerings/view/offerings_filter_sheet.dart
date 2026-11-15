@@ -60,29 +60,32 @@ class OfferingsFilterSheet extends StatelessWidget {
   ) {
     final azure = KeelColors.azure.of(context);
     final any = f.minHeadline <= 0;
-    return Semantics(
-      label: any
-          ? 'Any cap or coupon'
-          : 'Cap or coupon at least ${Formats.percent(f.minHeadline)}',
-      child: Row(
-        children: [
-          Icon(CupertinoIcons.arrow_up_to_line, size: 20, color: azure),
-          const SizedBox(width: 8),
-          Expanded(
-            child: NativeSlider(
-              value: f.minHeadline,
-              min: 0,
-              max: OfferingFilter.headlineCeiling,
-              activeColor: azure,
-              onChanged: (v) => draft.change(
-                draft.state.value.copyWith(
-                  minHeadline: (v * 20).roundToDouble() / 20,
-                ),
+    // The slider says what it sets and its value; the figure beside it
+    // shows the same value, so it stays silent.
+    return Row(
+      children: [
+        Icon(CupertinoIcons.arrow_up_to_line, size: 20, color: azure),
+        const SizedBox(width: 8),
+        Expanded(
+          child: NativeSlider(
+            value: f.minHeadline,
+            min: 0,
+            max: OfferingFilter.headlineCeiling,
+            activeColor: azure,
+            semanticLabel: 'Lowest cap or coupon',
+            semanticValue: any
+                ? 'Any'
+                : 'At least ${Formats.percent(f.minHeadline)}',
+            onChanged: (v) => draft.change(
+              draft.state.value.copyWith(
+                minHeadline: (v * 20).roundToDouble() / 20,
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          Text(
+        ),
+        const SizedBox(width: 8),
+        ExcludeSemantics(
+          child: Text(
             any ? 'Any' : '≥ ${Formats.percent(f.minHeadline)}',
             style: TextStyle(
               color: KeelColors.ink.of(context),
@@ -91,8 +94,8 @@ class OfferingsFilterSheet extends StatelessWidget {
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -165,6 +168,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final c in ShareClass.values)
                   OptionChip(
                     text: c.title,
+                    group: 'Share class',
                     selected: f.classes.contains(c),
                     onTap: () =>
                         draft.change(f.copyWith(classes: _flip(f.classes, c))),
@@ -178,6 +182,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final g in NoteGoal.values)
                   OptionChip(
                     text: g.title,
+                    group: 'Goal',
                     icon: switch (g) {
                       NoteGoal.income => CupertinoIcons.arrow_2_circlepath,
                       NoteGoal.growth => CupertinoIcons.arrow_up_right,
@@ -196,6 +201,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final p in Payout.values)
                   OptionChip(
                     text: p.title,
+                    group: 'Payout',
                     icon: switch (p) {
                       Payout.maturity => CupertinoIcons.flag_fill,
                       Payout.annual => CupertinoIcons.calendar,
@@ -214,6 +220,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final c in Currency.values)
                   OptionChip(
                     text: c.code,
+                    group: 'Currency',
                     selected: f.currencies.contains(c),
                     onTap: () => draft.change(
                       f.copyWith(currencies: _flip(f.currencies, c)),
@@ -228,6 +235,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final r in Region.values)
                   OptionChip(
                     text: r.title,
+                    group: 'Region',
                     selected: f.regions.contains(r),
                     onTap: () =>
                         draft.change(f.copyWith(regions: _flip(f.regions, r))),
@@ -241,6 +249,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final a in AssetClass.values)
                   OptionChip(
                     text: a.title,
+                    group: 'Asset class',
                     icon: NoteIcons.assetClass(a),
                     selected: f.assetClasses.contains(a),
                     onTap: () => draft.change(
@@ -256,6 +265,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                 for (final t in TermBand.values)
                   OptionChip(
                     text: t.title,
+                    group: 'Term',
                     icon: CupertinoIcons.hourglass,
                     selected: f.terms.contains(t),
                     onTap: () =>
@@ -271,6 +281,11 @@ class OfferingsFilterSheet extends StatelessWidget {
                   flex: 3,
                   child: NativeSegmentedControl(
                     labels: const ['Closing', 'Headline', 'Term'],
+                    semanticLabels: const [
+                      'Sort by closing date',
+                      'Sort by cap or coupon',
+                      'Sort by term',
+                    ],
                     icons: const [
                       NativeIcon(
                         sfSymbol: 'calendar.badge.clock',
@@ -295,6 +310,7 @@ class OfferingsFilterSheet extends StatelessWidget {
                   flex: 2,
                   child: NativeSegmentedControl(
                     labels: const ['Ascending', 'Descending'],
+                    semanticLabels: const ['Ascending', 'Descending'],
                     icons: const [
                       NativeIcon(
                         sfSymbol: 'arrow.up',

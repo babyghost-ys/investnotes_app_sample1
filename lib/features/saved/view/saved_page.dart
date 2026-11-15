@@ -31,7 +31,11 @@ class SavedPage extends StatelessWidget {
           children: [
             for (final o in saved)
               OfferingRow(offering: o, onTap: () => openOffering(context, o)),
-            if (saved.isEmpty) const EmptyState(icon: CupertinoIcons.bookmark),
+            if (saved.isEmpty)
+              const EmptyState(
+                icon: CupertinoIcons.bookmark,
+                semanticLabel: 'Nothing saved',
+              ),
           ],
         ),
       ),

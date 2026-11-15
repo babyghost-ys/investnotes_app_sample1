@@ -58,6 +58,9 @@ class FinderResultsPage extends StatelessWidget {
               OfferingRow(
                 offering: m.offering,
                 badge: m.exact ? null : '${m.hits}/${m.of}',
+                spokenBadge: m.exact
+                    ? null
+                    : '${m.hits} of ${m.of} answers match',
                 onTap: () => openOffering(context, m.offering),
               ),
           ],

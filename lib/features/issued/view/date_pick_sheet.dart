@@ -64,13 +64,20 @@ class DatePickSheet extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                Formats.shortDate(state.value),
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              // Spoken again as the chosen day changes.
+              child: Semantics(
+                liveRegion: true,
+                label:
+                    '${end ? 'End' : 'Start'} date, ${Formats.fullDate(state.value)}',
+                excludeSemantics: true,
+                child: Text(
+                  Formats.shortDate(state.value),
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ),
             ),
@@ -99,6 +106,7 @@ class DatePickSheet extends StatelessWidget {
             lastDate: last,
             style: NativeDatePickerStyle.inline,
             tintColor: azure,
+            semanticLabel: end ? 'End date' : 'Start date',
             onDateChanged: (d) =>
                 draft.change(DateTime(d.year, d.month, d.day)),
           ),

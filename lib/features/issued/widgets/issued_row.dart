@@ -2,6 +2,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
@@ -91,6 +92,7 @@ class IssuedRow extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       Formats.percent(n.change, signed: true),
+                      semanticsLabel: Spoken.change(n.change),
                       style: TextStyle(
                         color: changeColor,
                         fontSize: 18,
@@ -144,6 +146,7 @@ class IssuedRow extends StatelessWidget {
                               icon: CupertinoIcons.tag,
                               text: '${n.type.code} · ${n.currency.code}',
                               semantics: 'Type and currency',
+                              spoken: '${n.type.title}, ${n.currency.code}',
                             ),
                             if (onOpen != null)
                               RoundIconButton(
@@ -173,16 +176,20 @@ class _Fact extends StatelessWidget {
     required this.icon,
     required this.text,
     required this.semantics,
+    this.spoken,
   });
 
   final IconData icon;
   final String text;
   final String semantics;
 
+  /// Said in place of [text] when it is an abbreviation.
+  final String? spoken;
+
   @override
   Widget build(BuildContext context) => Expanded(
     child: Semantics(
-      label: '$semantics $text',
+      label: '$semantics ${spoken ?? text}',
       excludeSemantics: true,
       child: Row(
         children: [

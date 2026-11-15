@@ -34,21 +34,24 @@ class FilterIconButton extends StatelessWidget {
           Positioned(
             right: -2,
             top: -2,
+            // The button's label already says how many are on.
             child: IgnorePointer(
-              child: Container(
-                width: 18,
-                height: 18,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: KeelColors.page.of(context),
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$activeCount',
-                  style: TextStyle(
-                    color: azure,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+              child: ExcludeSemantics(
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: KeelColors.page.of(context),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '$activeCount',
+                    style: TextStyle(
+                      color: azure,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),

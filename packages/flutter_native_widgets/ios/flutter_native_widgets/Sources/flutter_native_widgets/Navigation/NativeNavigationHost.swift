@@ -128,7 +128,9 @@ final class NativeNavigationHost {
                     cover = existing
                 } else {
                     let background = UIColor(argb: args["background"] as? Int ?? 0xFFFFFFFF)
-                    cover = NativeDrawerCover(background: background)
+                    cover = NativeDrawerCover(
+                        background: background,
+                        closeLabel: args["closeLabel"] as? String ?? "Close")
                     cover.frame = window.bounds
                     cover.tapped = { drawerChannel?.invokeMethod("tapped", arguments: nil) }
                     window.addSubview(cover)

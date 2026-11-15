@@ -25,6 +25,8 @@ class StepTabs extends StatelessWidget {
     final hairline = KeelColors.hairline.of(context);
     return Semantics(
       label: 'Step ${current + 1} of ${titles.length}, ${titles[current]}',
+      onTap: current > 0 ? onBack : null,
+      onTapHint: current > 0 ? 'Back a step' : null,
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 18, 24, 0),

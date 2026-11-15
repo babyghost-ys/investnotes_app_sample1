@@ -193,7 +193,11 @@ class _Band extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: FlowPage.measure - 48),
         child: const Row(
           children: [
-            KeelMark(color: CupertinoColors.white, size: 56),
+            KeelMark(
+              color: CupertinoColors.white,
+              size: 56,
+              excludeFromSemantics: true,
+            ),
             SizedBox(width: 14),
             Text(
               'Keel',
@@ -236,7 +240,11 @@ class _BiometricButton extends StatelessWidget {
         : color;
     return Semantics(
       button: true,
-      label: 'Sign in with ${account.kind.title}',
+      enabled: onPressed != null,
+      label: failed
+          ? 'Sign in with ${account.kind.title}, not recognised, try again'
+          : 'Sign in with ${account.kind.title}',
+      liveRegion: failed,
       excludeSemantics: true,
       child: CupertinoButton(
         padding: EdgeInsets.zero,

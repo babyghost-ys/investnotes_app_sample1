@@ -44,6 +44,7 @@ class ProductPage extends StatelessWidget {
       backgroundColor: KeelColors.page.of(context),
       appBar: NativeAppBar(
         title: p.type.code,
+        semanticTitle: p.type.title,
         actions: [
           if (p.isOffering) bookmarkAction(context, p.id, saved: saved),
         ],

@@ -13,6 +13,7 @@ class NativeAppBar {
   /// Creates a native app bar configuration
   const NativeAppBar({
     this.title,
+    this.semanticTitle,
     this.largeTitle = false,
     this.subtitle,
     this.actions,
@@ -29,6 +30,11 @@ class NativeAppBar {
 
   /// Title for the app bar
   final String? title;
+
+  /// What assistive technologies say for [title], such as "Market-linked
+  /// deposits" for a bar that shows "MLD". Never drawn. Without it the
+  /// visible title is read as it is.
+  final String? semanticTitle;
 
   /// Font family, size and weight of [title]. On the native iOS path it is
   /// applied to the navigation bar's title attributes, so UIKit still draws
@@ -108,6 +114,7 @@ class NativeAppBar {
   /// Creates a copy of this app bar with the given fields replaced
   NativeAppBar copyWith({
     String? title,
+    String? semanticTitle,
     bool? largeTitle,
     String? subtitle,
     List<NativeAppBarAction>? actions,
@@ -123,6 +130,7 @@ class NativeAppBar {
   }) {
     return NativeAppBar(
       title: title ?? this.title,
+      semanticTitle: semanticTitle ?? this.semanticTitle,
       largeTitle: largeTitle ?? this.largeTitle,
       subtitle: subtitle ?? this.subtitle,
       actions: actions ?? this.actions,

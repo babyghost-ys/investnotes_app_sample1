@@ -2,6 +2,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/sparkline.dart';
 import 'package:investnotes_app_sample1/data/models/holding.dart';
@@ -28,7 +29,11 @@ class HoldingRow extends StatelessWidget {
         ? KeelColors.loss.of(context)
         : KeelColors.azure.of(context);
     return Semantics(
+      container: true,
       button: true,
+      label:
+          '${n.name}, worth ${Formats.dollars(holding.value)}, ${Spoken.change(n.change)}',
+      excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/sparkline.dart';
 import 'package:investnotes_app_sample1/data/models/product.dart';
@@ -41,19 +42,31 @@ class HistorySection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        Sparkline(
-          values: p.history,
-          color: color,
-          parColor: KeelColors.hairline.of(context),
-          height: 200,
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Text(Formats.fullDate(p.issueDate), style: dateStyle),
-            const Spacer(),
-            Text(Formats.fullDate(p.calledOn ?? _lastDay(p)), style: dateStyle),
-          ],
+        Semantics(
+          label:
+              'Value from ${Formats.fullDate(p.issueDate)} to ${Formats.fullDate(p.calledOn ?? _lastDay(p))}, ${Spoken.change(p.change)}',
+          excludeSemantics: true,
+          child: Column(
+            children: [
+              Sparkline(
+                values: p.history,
+                color: color,
+                parColor: KeelColors.hairline.of(context),
+                height: 200,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(Formats.fullDate(p.issueDate), style: dateStyle),
+                  const Spacer(),
+                  Text(
+                    Formats.fullDate(p.calledOn ?? _lastDay(p)),
+                    style: dateStyle,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 18),
         Row(

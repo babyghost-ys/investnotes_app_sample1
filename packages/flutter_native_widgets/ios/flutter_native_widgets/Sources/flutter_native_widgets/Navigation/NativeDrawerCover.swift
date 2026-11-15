@@ -18,7 +18,7 @@ final class NativeDrawerCover: UIView {
     /// The status bar style that stays legible over the panel colour.
     let statusBarStyle: UIStatusBarStyle
 
-    init(background: UIColor) {
+    init(background: UIColor, closeLabel: String) {
         var white: CGFloat = 0
         background.getWhite(&white, alpha: nil)
         statusBarStyle = white > 0.5 ? .darkContent : .lightContent
@@ -27,6 +27,7 @@ final class NativeDrawerCover: UIView {
         scrim.backgroundColor = UIColor.black.withAlphaComponent(0.45)
         scrim.addTarget(self, action: #selector(tap), for: .touchUpInside)
         scrim.accessibilityTraits = .button
+        scrim.accessibilityLabel = closeLabel
         addSubview(scrim)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }

@@ -31,7 +31,7 @@ class iOS26SliderViewFactory: NSObject, FlutterPlatformViewFactory {
 /// Native iOS 26 slider implementation with native UISlider
 class iOS26SliderView: NSObject, FlutterPlatformView {
     private var _view: UIView
-    private var sliderControl: UISlider!
+    private var sliderControl: SpokenSlider!
     private var channel: FlutterMethodChannel
     private var sliderId: Int
 
@@ -93,7 +93,7 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
 
     private func createNativeSlider(with args: Any?) {
         // Create iOS UISlider
-        sliderControl = UISlider()
+        sliderControl = SpokenSlider()
         sliderControl.translatesAutoresizingMaskIntoConstraints = false
 
         // Enable user interaction
@@ -117,6 +117,9 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
             }
 
             // Set thumb color
+            sliderControl.accessibilityLabel = config["semanticLabel"] as? String
+            sliderControl.spokenValue = config["semanticValue"] as? String
+
             if let argb = config["thumbColor"] as? Int {
                 sliderControl.thumbTintColor = UIColor(argb: argb)
             }
@@ -157,6 +160,13 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+        case "setSemantics":
+            let args = call.arguments as? [String: Any]
+            sliderControl.accessibilityLabel = args?["label"] as? String
+            // Nil hands the value back to UIKit's own percent.
+            sliderControl.spokenValue = args?["value"] as? String
+            result(nil)
+
         case "setValue":
             if let args = call.arguments as? [String: Any],
                let value = args["value"] as? Double {
@@ -212,5 +222,18 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+}
+
+/// A slider that says the value the app gives it ("+10%", "Any") in place
+/// of UIKit's percent of the track, which its own accessibility computes
+/// and a stored value cannot replace.
+final class SpokenSlider: UISlider {
+    /// Nil leaves UIKit's own percent.
+    var spokenValue: String?
+
+    override var accessibilityValue: String? {
+        get { spokenValue ?? super.accessibilityValue }
+        set { super.accessibilityValue = newValue }
     }
 }

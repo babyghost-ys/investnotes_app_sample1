@@ -20,6 +20,7 @@ class ValidMark extends StatelessWidget {
               CupertinoIcons.checkmark_circle_fill,
               size: 20,
               color: KeelColors.azure.of(context),
+              semanticLabel: 'Looks right',
             ),
           )
         : const SizedBox.shrink(),

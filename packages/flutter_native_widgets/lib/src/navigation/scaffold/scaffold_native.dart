@@ -77,6 +77,7 @@ extension _UiKitScaffold on NativeScaffoldState {
         scrollController: navigation,
         bottomNavigationBar: bottomBar,
         title: appBar?.title,
+        semanticTitle: appBar?.semanticTitle,
         actions: appBar?.actions,
         leading: appBar?.leading,
         tintColor: appBar?.tintColor,

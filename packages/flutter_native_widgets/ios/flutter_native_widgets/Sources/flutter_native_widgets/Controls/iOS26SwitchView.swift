@@ -104,6 +104,9 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
             }
 
             // Set thumb color
+            // What it switches; UIKit adds the state and the switch trait.
+            switchControl.accessibilityLabel = config["semanticLabel"] as? String
+
             if let argb = config["thumbColor"] as? Int {
                 switchControl.thumbTintColor = UIColor(argb: argb)
             }
@@ -139,6 +142,11 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
                let value = args["value"] as? Bool {
                 switchControl.setOn(value, animated: true)
             }
+            result(nil)
+
+        case "setSemanticLabel":
+            let args = call.arguments as? [String: Any]
+            switchControl.accessibilityLabel = args?["label"] as? String
             result(nil)
 
         case "setEnabled":

@@ -1,6 +1,7 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
+import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/models/product.dart';
 
@@ -46,9 +47,12 @@ class ValueSection extends StatelessWidget {
             const SizedBox(width: 8),
             Padding(
               padding: const EdgeInsets.only(bottom: 7),
-              child: Text(
-                '/ 100',
-                style: TextStyle(color: muted, fontSize: 17),
+              // The price already says "per 100".
+              child: ExcludeSemantics(
+                child: Text(
+                  '/ 100',
+                  style: TextStyle(color: muted, fontSize: 17),
+                ),
               ),
             ),
             const Spacer(),
@@ -56,6 +60,7 @@ class ValueSection extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 6),
               child: Text(
                 Formats.percent(p.change, signed: true),
+                semanticsLabel: Spoken.change(p.change),
                 style: TextStyle(
                   color: changeColor,
                   fontSize: 22,
