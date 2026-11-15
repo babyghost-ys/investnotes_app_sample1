@@ -3,7 +3,7 @@ part of 'offerings_bloc.dart';
 final class OfferingsState extends Equatable {
   const OfferingsState({
     this.all = const [],
-    this.status = LoadStatus.loading,
+    this.phase = LoadingPhase.loading,
     this.type = NoteType.mld,
     this.filter = const OfferingFilter(),
     this.saved = const {},
@@ -11,7 +11,7 @@ final class OfferingsState extends Equatable {
   });
 
   final List<Offering> all;
-  final LoadStatus status;
+  final LoadingPhase phase;
   final NoteType type;
   final OfferingFilter filter;
   final Set<String> saved;
@@ -42,14 +42,14 @@ final class OfferingsState extends Equatable {
 
   OfferingsState copyWith({
     List<Offering>? all,
-    LoadStatus? status,
+    LoadingPhase? phase,
     NoteType? type,
     OfferingFilter? filter,
     Set<String>? saved,
     String? Function()? selectedId,
   }) => OfferingsState(
     all: all ?? this.all,
-    status: status ?? this.status,
+    phase: phase ?? this.phase,
     type: type ?? this.type,
     filter: filter ?? this.filter,
     saved: saved ?? this.saved,
@@ -57,5 +57,5 @@ final class OfferingsState extends Equatable {
   );
 
   @override
-  List<Object?> get props => [all, status, type, filter, saved, selectedId];
+  List<Object?> get props => [all, phase, type, filter, saved, selectedId];
 }

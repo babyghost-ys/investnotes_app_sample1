@@ -5,9 +5,11 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
+import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
 import 'package:investnotes_app_sample1/data/models/product.dart';
 import 'package:investnotes_app_sample1/features/product/widgets/product_body.dart';
+import 'package:investnotes_app_sample1/features/product/widgets/product_skeleton.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 
 /// Pushes an offering's page.
@@ -46,7 +48,10 @@ class ProductPage extends StatelessWidget {
           if (p.isOffering) bookmarkAction(context, p.id, saved: saved),
         ],
       ),
-      body: ProductBody(product: p),
+      body: PageLoader(
+        skeleton: const ProductSkeleton(),
+        child: ProductBody(product: p),
+      ),
     );
   }
 }

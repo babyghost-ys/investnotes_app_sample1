@@ -5,8 +5,13 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
+import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_master_detail.dart';
 import 'package:investnotes_app_sample1/features/home/view/home_page.dart';
+import 'package:investnotes_app_sample1/features/home/widgets/home_skeleton.dart';
+import 'package:investnotes_app_sample1/features/issued/widgets/issued_skeleton.dart';
+import 'package:investnotes_app_sample1/features/learn/widgets/learn_skeleton.dart';
+import 'package:investnotes_app_sample1/features/my_notes/widgets/my_notes_skeleton.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_page.dart';
 import 'package:investnotes_app_sample1/features/learn/view/learn_page.dart';
 import 'package:investnotes_app_sample1/features/my_notes/view/my_notes_page.dart';
@@ -143,12 +148,13 @@ class _ShellPageState extends State<ShellPage> {
         index: tab.index,
         // In ShellTab order, so each page keeps its place as My Notes comes
         // and goes from the bar.
+        // Offerings switches on its own phase, from its real fetch.
         children: const [
-          HomePage(),
-          MyNotesPage(),
+          PageLoader(skeleton: HomeSkeleton(), child: HomePage()),
+          PageLoader(skeleton: MyNotesSkeleton(), child: MyNotesPage()),
           OfferingsPage(),
-          IssuedPage(),
-          LearnPage(),
+          PageLoader(skeleton: IssuedSkeleton(), child: IssuedPage()),
+          PageLoader(skeleton: LearnSkeleton(), child: LearnPage()),
         ],
       ),
     );

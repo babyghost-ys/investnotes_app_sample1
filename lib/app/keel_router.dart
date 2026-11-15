@@ -5,14 +5,19 @@ import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/app/keel_page.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
+import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_detail_page.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
+import 'package:investnotes_app_sample1/features/finder/widgets/finder_results_skeleton.dart';
 import 'package:investnotes_app_sample1/features/learn/view/article_page.dart';
+import 'package:investnotes_app_sample1/features/learn/widgets/article_skeleton.dart';
 import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
+import 'package:investnotes_app_sample1/features/saved/widgets/saved_skeleton.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
+import 'package:investnotes_app_sample1/features/search/widgets/search_skeleton.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/view/biometric_settings_page.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_route.dart';
@@ -47,19 +52,34 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             return keelPage(
               state,
               title: article.type.code,
-              child: ArticlePage(article: article),
+              child: PageLoader(
+                skeleton: const ArticleSkeleton(),
+                child: ArticlePage(article: article),
+              ),
             );
           },
         ),
         GoRoute(
           path: 'search',
-          pageBuilder: (context, state) =>
-              keelPage(state, title: 'Search', child: const SearchPage()),
+          pageBuilder: (context, state) => keelPage(
+            state,
+            title: 'Search',
+            child: const PageLoader(
+              skeleton: SearchSkeleton(),
+              child: SearchPage(),
+            ),
+          ),
         ),
         GoRoute(
           path: 'saved',
-          pageBuilder: (context, state) =>
-              keelPage(state, title: 'Saved', child: const SavedPage()),
+          pageBuilder: (context, state) => keelPage(
+            state,
+            title: 'Saved',
+            child: const PageLoader(
+              skeleton: SavedSkeleton(),
+              child: SavedPage(),
+            ),
+          ),
         ),
         GoRoute(
           path: 'finder/step/:step',
@@ -84,7 +104,10 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
                 onPressed: () => context.go(KeelRoutes.home),
               ),
             ],
-            child: const FinderResultsPage(),
+            child: const PageLoader(
+              skeleton: FinderResultsSkeleton(),
+              child: FinderResultsPage(),
+            ),
           ),
         ),
         GoRoute(

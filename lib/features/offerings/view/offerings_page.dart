@@ -1,6 +1,5 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:material_ui/material_ui.dart' show CircularProgressIndicator;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,7 +9,8 @@ import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
 import 'package:investnotes_app_sample1/core/widgets/filter_icon_button.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_master_detail.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
-import 'package:investnotes_app_sample1/data/models/load_status.dart';
+import 'package:investnotes_app_sample1/core/widgets/skeleton_pulse.dart';
+import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
 import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
@@ -19,6 +19,7 @@ import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.d
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/load_failure_notice.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.dart';
+import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row_skeleton.dart';
 import 'package:investnotes_app_sample1/features/product/widgets/product_body.dart';
 
 class OfferingsPage extends StatelessWidget {
@@ -126,38 +127,52 @@ class OfferingsPage extends StatelessWidget {
                 selected: o.id == shown,
                 onTap: () => _open(context, o),
               ),
-            if (state.status == LoadStatus.loading && state.all.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 72),
-                child: Center(child: CircularProgressIndicator.adaptive()),
-              )
-            else if (state.status == LoadStatus.failed && state.all.isEmpty)
-              EmptyState(
-                icon: CupertinoIcons.exclamationmark_circle,
-                action: RoundIconButton(
-                  icon: CupertinoIcons.arrow_clockwise,
-                  label: 'Try again',
-                  foreground: KeelColors.azure.of(context),
-                  background: KeelColors.mist.of(context),
-                  onPressed: () => context.read<OfferingsBloc>().add(
-                    const OfferingsRequested(),
+            // Loaded offerings stay on screen while a reload runs or fails.
+            ...switch (state.phase) {
+              LoadingPhase.loading when state.all.isEmpty => const [
+                SkeletonPulse(
+                  child: Column(
+                    children: [
+                      OfferingRowSkeleton(nameFactor: 0.8),
+                      OfferingRowSkeleton(nameFactor: 0.6),
+                      OfferingRowSkeleton(nameFactor: 0.9),
+                      OfferingRowSkeleton(nameFactor: 0.7),
+                      OfferingRowSkeleton(nameFactor: 0.55),
+                    ],
                   ),
                 ),
-              )
-            else if (visible.isEmpty)
-              EmptyState(
-                icon: CupertinoIcons.line_horizontal_3_decrease,
-                text: 'No matches',
-                action: RoundIconButton(
-                  icon: CupertinoIcons.arrow_counterclockwise,
-                  label: 'Clear filters',
-                  foreground: KeelColors.azure.of(context),
-                  background: KeelColors.mist.of(context),
-                  onPressed: () => context.read<OfferingsBloc>().add(
-                    const OfferingsFilterChanged(OfferingFilter()),
+              ],
+              LoadingPhase.failed when state.all.isEmpty => [
+                EmptyState(
+                  icon: CupertinoIcons.exclamationmark_circle,
+                  action: RoundIconButton(
+                    icon: CupertinoIcons.arrow_clockwise,
+                    label: 'Try again',
+                    foreground: KeelColors.azure.of(context),
+                    background: KeelColors.mist.of(context),
+                    onPressed: () => context.read<OfferingsBloc>().add(
+                      const OfferingsRequested(),
+                    ),
                   ),
                 ),
-              ),
+              ],
+              _ when visible.isEmpty => [
+                EmptyState(
+                  icon: CupertinoIcons.line_horizontal_3_decrease,
+                  text: 'No matches',
+                  action: RoundIconButton(
+                    icon: CupertinoIcons.arrow_counterclockwise,
+                    label: 'Clear filters',
+                    foreground: KeelColors.azure.of(context),
+                    background: KeelColors.mist.of(context),
+                    onPressed: () => context.read<OfferingsBloc>().add(
+                      const OfferingsFilterChanged(OfferingFilter()),
+                    ),
+                  ),
+                ),
+              ],
+              _ => const <Widget>[],
+            },
           ],
         ),
       ),

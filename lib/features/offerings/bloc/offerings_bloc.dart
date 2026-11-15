@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/load_status.dart';
+import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
 import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
@@ -19,12 +19,12 @@ class OfferingsBloc extends Bloc<OfferingsEvent, OfferingsState> {
     on<OfferingsRequested>((event, emit) async {
       _retry?.cancel();
       // A quiet retry leaves the failure on screen until it succeeds.
-      if (!event.quiet) emit(state.copyWith(status: LoadStatus.loading));
+      if (!event.quiet) emit(state.copyWith(phase: LoadingPhase.loading));
       try {
         final all = await _repository.fetchOfferings();
-        emit(state.copyWith(all: all, status: LoadStatus.ready));
+        emit(state.copyWith(all: all, phase: LoadingPhase.loaded));
       } on OfferingsUnavailable {
-        emit(state.copyWith(status: LoadStatus.failed));
+        emit(state.copyWith(phase: LoadingPhase.failed));
         _retry = Timer(
           _retryAfter,
           () => add(const OfferingsRequested(quiet: true)),
