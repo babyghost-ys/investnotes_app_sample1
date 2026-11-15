@@ -11,6 +11,7 @@ import 'package:investnotes_app_sample1/domain/models/issued_filter.dart';
 import 'package:investnotes_app_sample1/data/mappers/notes_mapper.dart';
 import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 import 'package:investnotes_app_sample1/domain/models/offering_filter.dart';
+import 'package:investnotes_app_sample1/features/education/view/article_pdf_page.dart';
 import 'package:investnotes_app_sample1/features/education/view/film_fullscreen.dart';
 import 'package:investnotes_app_sample1/features/issued/view/date_pick_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_filter_sheet.dart';
@@ -63,6 +64,10 @@ class CommonSheetApp extends StatelessWidget {
         asset: (argument as Map)['asset'] as String,
         start: Duration(milliseconds: argument['position'] as int),
         playing: argument['playing'] as bool,
+      ),
+      'pdf' => ArticlePdfPage(
+        path: (argument as Map)['path'] as String,
+        title: argument['title'] as String,
       ),
       final route => throw ArgumentError.value(route, 'route', 'Unknown sheet'),
     };

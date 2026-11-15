@@ -9,12 +9,16 @@ class Article extends Equatable {
     required this.title,
     required this.type,
     required this.paragraphs,
+    required this.pdf,
   });
 
   final String id;
   final String title;
   final NoteType type;
   final List<String> paragraphs;
+
+  /// The article as a PDF, the copy a download keeps.
+  final Uri pdf;
 
   @override
   List<Object?> get props => [id];

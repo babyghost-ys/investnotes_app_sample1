@@ -10,6 +10,8 @@ import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/features/education/bloc/education_bloc.dart';
 import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
+import 'package:investnotes_app_sample1/features/education/view/article_pdf_page.dart';
+import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';
 import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/article_group.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/explainer_card.dart';
@@ -135,7 +137,11 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
                             articles: group,
                             words: words.semantics,
                             general: general,
-                            onOpen: (a) => openArticle(context, a),
+                            // A downloaded article opens as its PDF.
+                            onOpen: (a) =>
+                                context.read<DownloadsBloc>().state.isKept(a.id)
+                                ? openArticlePdf(context, a)
+                                : openArticle(context, a),
                           ),
                         ),
                   ],

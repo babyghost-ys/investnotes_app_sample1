@@ -141,6 +141,7 @@ extension ArticleModelMapper on ArticleModel {
     title: title,
     type: NoteType.values.byName(type),
     paragraphs: paragraphs,
+    pdf: Uri.parse(pdf),
   );
 }
 
@@ -150,6 +151,7 @@ extension ArticleMapper on Article {
     title: title,
     type: type.name,
     paragraphs: paragraphs,
+    pdf: pdf.toString(),
   );
 }
 

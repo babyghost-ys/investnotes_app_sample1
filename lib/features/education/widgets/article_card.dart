@@ -68,7 +68,7 @@ class ArticleCard extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: SizedBox(
             width: pillWidth ?? double.infinity,
-            child: DownloadPill(article: article, words: words, onOpen: onOpen),
+            child: DownloadPill(article: article, words: words),
           ),
         ),
       ],

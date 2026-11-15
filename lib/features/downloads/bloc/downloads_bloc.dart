@@ -30,7 +30,8 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     final kept = await _repository.kept();
-    emit(state.copyWith(kept: kept));
+    final files = {for (final a in kept) a.id: await _repository.fileOf(a.id)};
+    emit(state.copyWith(kept: kept, files: files));
   }
 
   Future<void> _onRequested(
@@ -45,7 +46,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
 
     Article? arrived;
     await emit.onEach<ArticleTransfer>(
-      _repository.fetch(id).takeWhile((_) => current()),
+      _repository.fetch(event.article).takeWhile((_) => current()),
       onData: (transfer) {
         arrived = transfer.article ?? arrived;
         emit(
@@ -65,7 +66,8 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
       return;
     }
     final kept = [article, ...state.kept.where((a) => a.id != id)];
-    emit(state.copyWith(kept: kept, progress: progress));
+    final files = {...state.files, id: await _repository.fileOf(id)};
+    emit(state.copyWith(kept: kept, files: files, progress: progress));
     await _repository.keep(kept);
   }
 
@@ -79,7 +81,9 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     Emitter<DownloadsState> emit,
   ) async {
     final kept = state.kept.where((a) => a.id != event.id).toList();
-    emit(state.copyWith(kept: kept));
+    final files = Map.of(state.files)..remove(event.id);
+    emit(state.copyWith(kept: kept, files: files));
     await _repository.keep(kept);
+    await _repository.remove(event.id);
   }
 }

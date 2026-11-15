@@ -6,21 +6,16 @@ import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/domain/models/article.dart';
 import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';
+import 'package:investnotes_app_sample1/features/education/view/article_pdf_page.dart';
 
 /// An article's download control. Tapped, it fills from left to right as
 /// the file arrives; tapped again while filling, it stops; full, it opens
-/// the copy on the device.
+/// the PDF on the device.
 class DownloadPill extends StatelessWidget {
-  const DownloadPill({
-    super.key,
-    required this.article,
-    required this.words,
-    required this.onOpen,
-  });
+  const DownloadPill({super.key, required this.article, required this.words});
 
   final Article article;
   final EducationSemantics words;
-  final VoidCallback onOpen;
 
   static const radius = 12.0;
 
@@ -53,7 +48,7 @@ class DownloadPill extends StatelessWidget {
               HapticFeedback.selectionClick();
               final bloc = context.read<DownloadsBloc>();
               if (kept) {
-                onOpen();
+                openArticlePdf(context, article);
               } else if (arriving) {
                 bloc.add(DownloadCancelled(id));
               } else {
