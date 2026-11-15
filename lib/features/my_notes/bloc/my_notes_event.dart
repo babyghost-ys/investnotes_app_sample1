@@ -7,6 +7,7 @@ sealed class MyNotesEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class MyNotesStarted extends MyNotesEvent {
-  const MyNotesStarted();
+/// Fetches the holdings: on first showing the tab, and on trying again.
+final class MyNotesRequested extends MyNotesEvent {
+  const MyNotesRequested();
 }

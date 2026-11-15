@@ -8,7 +8,7 @@ import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 import 'package:investnotes_app_sample1/features/probe/widgets/payoff_probe.dart';
 
 Future<void> openArticle(BuildContext context, Article article) =>
-    context.push<void>(KeelRoutes.article(article.id));
+    context.push<void>(KeelRoutes.article(article.id), extra: article);
 
 /// An article, led by a payoff the reader can try for themselves.
 class ArticlePage extends StatelessWidget {

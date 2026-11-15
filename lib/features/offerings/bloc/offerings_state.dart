@@ -1,6 +1,6 @@
 part of 'offerings_bloc.dart';
 
-final class OfferingsState extends Equatable {
+final class OfferingsState extends Equatable implements Loadable {
   const OfferingsState({
     this.all = const [],
     this.phase = LoadingPhase.loading,
@@ -11,6 +11,7 @@ final class OfferingsState extends Equatable {
   });
 
   final List<Offering> all;
+  @override
   final LoadingPhase phase;
   final NoteType type;
   final OfferingFilter filter;

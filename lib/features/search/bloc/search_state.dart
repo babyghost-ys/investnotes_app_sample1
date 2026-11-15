@@ -1,16 +1,41 @@
 part of 'search_bloc.dart';
 
 final class SearchState extends Equatable {
-  const SearchState({this.query = '', this.results = const [], this.expanded});
+  const SearchState({
+    this.all = const [],
+    this.phase = LoadingPhase.loading,
+    this.query = '',
+    this.results = const [],
+    this.expanded,
+  });
 
+  /// Every note that can be found, once fetched.
+  final List<Product> all;
+  final LoadingPhase phase;
   final String query;
   final List<Product> results;
 
   /// The result showing its terms, if any.
   final String? expanded;
 
+  bool get typed => query.trim().isNotEmpty;
+
   bool get empty => results.isEmpty;
 
+  SearchState copyWith({
+    List<Product>? all,
+    LoadingPhase? phase,
+    String? query,
+    List<Product>? results,
+    String? Function()? expanded,
+  }) => SearchState(
+    all: all ?? this.all,
+    phase: phase ?? this.phase,
+    query: query ?? this.query,
+    results: results ?? this.results,
+    expanded: expanded != null ? expanded() : this.expanded,
+  );
+
   @override
-  List<Object?> get props => [query, results, expanded];
+  List<Object?> get props => [all, phase, query, results, expanded];
 }

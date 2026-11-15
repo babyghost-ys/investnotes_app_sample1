@@ -10,10 +10,12 @@ import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/data/repositories/biometric_repository.dart';
 import 'package:investnotes_app_sample1/data/repositories/connectivity_repository.dart';
-import 'package:investnotes_app_sample1/data/repositories/downloads_repository.dart';
+import 'package:investnotes_app_sample1/data/repositories/downloads_repository_impl.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/data/repositories/notes_repository_impl.dart';
 import 'package:investnotes_app_sample1/features/connectivity/bloc/connectivity_bloc.dart';
 import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';
+import 'package:investnotes_app_sample1/features/education/bloc/education_bloc.dart';
 import 'package:investnotes_app_sample1/features/finder/bloc/finder_bloc.dart';
 import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
 import 'package:investnotes_app_sample1/features/my_notes/bloc/my_notes_bloc.dart';
@@ -36,8 +38,9 @@ class KeelApp extends StatefulWidget {
 }
 
 class _KeelAppState extends State<KeelApp> {
-  final _repository = NotesRepository();
-  late final GoRouter _router = keelRouter(_repository);
+  /// Every note, holding and Education item comes from the Keel API.
+  final NotesRepository _repository = NotesRepositoryImpl();
+  late final GoRouter _router = keelRouter();
 
   /// Built once: the scopes above it change (who signs in with Face ID),
   /// and rebuilding the app would reset its native navigation stack.
@@ -55,7 +58,9 @@ class _KeelAppState extends State<KeelApp> {
   }
 
   @override
-  Widget build(BuildContext context) => RepositoryProvider.value(
+  Widget build(
+    BuildContext context,
+  ) => RepositoryProvider<NotesRepository>.value(
     value: _repository,
     child: MultiBlocProvider(
       providers: [
@@ -72,18 +77,18 @@ class _KeelAppState extends State<KeelApp> {
           create: (_) =>
               OfferingsBloc(_repository)..add(const OfferingsRequested()),
         ),
+        // Each fetches when its tab is first shown.
         BlocProvider(create: (_) => IssuedBloc(_repository)),
-        BlocProvider(
-          create: (_) => MyNotesBloc(_repository)..add(const MyNotesStarted()),
-        ),
+        BlocProvider(create: (_) => MyNotesBloc(_repository)),
+        BlocProvider(create: (_) => EducationBloc(_repository)),
         // Articles kept to read offline, and those still arriving.
         BlocProvider(
           create: (_) =>
-              DownloadsBloc(DownloadsRepository())
+              DownloadsBloc(DownloadsRepositoryImpl())
                 ..add(const DownloadsStarted()),
         ),
         // One run of "find my note" at a time; starting it clears the last.
-        BlocProvider(create: (_) => FinderBloc(_repository)),
+        BlocProvider(create: (_) => FinderBloc()),
         BlocProvider(
           create: (_) =>
               ConnectivityBloc(ConnectivityRepository())

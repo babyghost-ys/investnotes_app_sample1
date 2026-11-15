@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:investnotes_app_sample1/data/models/json.dart';
 import 'package:investnotes_app_sample1/data/models/payoff.dart';
 
 /// A short animated film in Education: one market path played out over a
@@ -11,6 +12,13 @@ class Explainer extends Equatable {
     required this.payoff,
     required this.path,
   });
+
+  factory Explainer.fromJson(Json json) => Explainer(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    payoff: Payoff.fromJson(json['payoff'] as Json),
+    path: JsonRead.numbers(json['path']),
+  );
 
   final String id;
   final String title;

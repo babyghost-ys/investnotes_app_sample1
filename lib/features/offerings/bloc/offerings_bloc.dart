@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:investnotes_app_sample1/core/loading/loadable.dart';
 import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
@@ -16,14 +18,15 @@ part 'offerings_state.dart';
 /// saved notes. A failed load tries again on its own every few seconds.
 class OfferingsBloc extends Bloc<OfferingsEvent, OfferingsState> {
   OfferingsBloc(this._repository) : super(const OfferingsState()) {
-    on<OfferingsRequested>((event, emit) async {
+    // One fetch at a time: asking again while one runs changes nothing.
+    on<OfferingsRequested>(transformer: droppable(), (event, emit) async {
       _retry?.cancel();
       // A quiet retry leaves the failure on screen until it succeeds.
       if (!event.quiet) emit(state.copyWith(phase: LoadingPhase.loading));
       try {
         final all = await _repository.fetchOfferings();
         emit(state.copyWith(all: all, phase: LoadingPhase.loaded));
-      } on OfferingsUnavailable {
+      } on NotesUnavailable {
         emit(state.copyWith(phase: LoadingPhase.failed));
         _retry = Timer(
           _retryAfter,
@@ -58,3 +61,7 @@ class OfferingsBloc extends Bloc<OfferingsEvent, OfferingsState> {
     return super.close();
   }
 }
+
+/// Asks [bloc] for the offerings, for a page that shows them.
+void requestOfferings(OfferingsBloc bloc) =>
+    bloc.add(const OfferingsRequested());

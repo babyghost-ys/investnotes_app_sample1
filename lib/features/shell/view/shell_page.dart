@@ -10,13 +10,15 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_master_detail.dart';
 import 'package:investnotes_app_sample1/features/home/view/home_page.dart';
-import 'package:investnotes_app_sample1/features/home/widgets/home_skeleton.dart';
 import 'package:investnotes_app_sample1/features/issued/widgets/issued_skeleton.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/education_skeleton.dart';
 import 'package:investnotes_app_sample1/features/my_notes/widgets/my_notes_skeleton.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_page.dart';
 import 'package:investnotes_app_sample1/features/education/view/education_page.dart';
 import 'package:investnotes_app_sample1/features/my_notes/view/my_notes_page.dart';
+import 'package:investnotes_app_sample1/features/my_notes/bloc/my_notes_bloc.dart';
+import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
+import 'package:investnotes_app_sample1/features/education/bloc/education_bloc.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_page.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
@@ -187,13 +189,26 @@ class _ShellPageState extends State<ShellPage> {
         index: tab.index,
         // In ShellTab order, so each page keeps its place as My Notes comes
         // and goes from the bar.
-        // Offerings switches on its own phase, from its real fetch.
+        // Home and Offerings show the offerings as they arrive, each in
+        // its own way; the other tabs wait for their fetch.
         children: const [
-          PageLoader(skeleton: HomeSkeleton(), child: HomePage()),
-          PageLoader(skeleton: MyNotesSkeleton(), child: MyNotesPage()),
+          HomePage(),
+          PageLoader<MyNotesBloc, MyNotesState>(
+            skeleton: MyNotesSkeleton(),
+            load: requestHoldings,
+            child: MyNotesPage(),
+          ),
           OfferingsPage(),
-          PageLoader(skeleton: IssuedSkeleton(), child: IssuedPage()),
-          PageLoader(skeleton: EducationSkeleton(), child: EducationPage()),
+          PageLoader<IssuedBloc, IssuedState>(
+            skeleton: IssuedSkeleton(),
+            load: requestIssued,
+            child: IssuedPage(),
+          ),
+          PageLoader<EducationBloc, EducationState>(
+            skeleton: EducationSkeleton(),
+            load: requestEducation,
+            child: EducationPage(),
+          ),
         ],
       ),
     );

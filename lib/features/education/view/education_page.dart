@@ -8,7 +8,6 @@ import 'package:material_ui/material_ui.dart' show Icons;
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/education/bloc/education_bloc.dart';
 import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
@@ -25,15 +24,12 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
   List<String> get namespaces => const [Locales.education, Locales.general];
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (_) => EducationBloc(),
-    child: LocalisedBuilder(
-      consumer: this,
-      builder: (context, locale) => _build(
-        context,
-        locale[0] as EducationLocale,
-        locale[1] as GeneralLocale,
-      ),
+  Widget build(BuildContext context) => LocalisedBuilder(
+    consumer: this,
+    builder: (context, locale) => _build(
+      context,
+      locale[0] as EducationLocale,
+      locale[1] as GeneralLocale,
     ),
   );
 
@@ -42,13 +38,12 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
     EducationLocale words,
     GeneralLocale general,
   ) {
-    final repository = context.read<NotesRepository>();
     final insets = MediaQuery.paddingOf(context);
     return ColoredBox(
       color: KeelColors.page.of(context),
       child: BlocBuilder<EducationBloc, EducationState>(
         builder: (context, state) {
-          final articles = repository.articles;
+          final articles = state.articles;
           return MediaQuery.removePadding(
             context: context,
             removeTop: true,
@@ -88,7 +83,7 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
                 const SizedBox(height: 22),
                 ...switch (state.segment) {
                   EducationSegment.videos => [
-                    for (final film in repository.films)
+                    for (final film in state.films)
                       // The recorded film leads, at the list's full width.
                       Center(
                         child: ConstrainedBox(
@@ -111,13 +106,14 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
                         return Wrap(
                           spacing: gap,
                           children: [
-                            for (final e in repository.explainers)
+                            for (final e in state.explainers)
                               SizedBox(
                                 width: width,
                                 child: ExplainerCard(
                                   explainer: e,
                                   onTap: () => context.push<void>(
                                     KeelRoutes.explainer(e.id),
+                                    extra: e,
                                   ),
                                 ),
                               ),

@@ -6,6 +6,8 @@ import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
+import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
+import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/search/bloc/search_bloc.dart';
@@ -31,7 +33,9 @@ class SearchPage extends StatelessWidget implements LocalisationConsumer {
     SearchLocale search,
     GeneralLocale general,
   ) => BlocProvider(
-    create: (context) => SearchBloc(context.read<NotesRepository>(), general),
+    create: (context) =>
+        SearchBloc(context.read<NotesRepository>(), general)
+          ..add(const SearchRequested()),
     child: BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
         final insets = MediaQuery.paddingOf(context);
@@ -71,11 +75,32 @@ class SearchPage extends StatelessWidget implements LocalisationConsumer {
                       openProduct(context, p);
                     },
                   ),
-                if (state.query.trim().isNotEmpty && state.empty)
-                  EmptyState(
-                    icon: CupertinoIcons.search,
-                    text: search.labels.nothingFound,
-                  ),
+                // The notes may still be on their way when typing starts.
+                if (state.typed)
+                  switch (state.phase) {
+                    LoadingPhase.loading => const Padding(
+                      padding: EdgeInsets.only(top: 40),
+                      child: CupertinoActivityIndicator(),
+                    ),
+                    LoadingPhase.failed => EmptyState(
+                      icon: CupertinoIcons.exclamationmark_circle,
+                      semanticLabel: general.semantics.didntLoad,
+                      action: RoundIconButton(
+                        icon: CupertinoIcons.arrow_clockwise,
+                        label: general.semantics.tryAgain,
+                        foreground: KeelColors.azure.of(context),
+                        background: KeelColors.mist.of(context),
+                        onPressed: () => context.read<SearchBloc>().add(
+                          const SearchRequested(),
+                        ),
+                      ),
+                    ),
+                    LoadingPhase.loaded when state.empty => EmptyState(
+                      icon: CupertinoIcons.search,
+                      text: search.labels.nothingFound,
+                    ),
+                    LoadingPhase.loaded => const SizedBox.shrink(),
+                  },
               ],
             ),
           ),

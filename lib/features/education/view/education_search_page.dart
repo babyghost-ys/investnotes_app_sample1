@@ -1,10 +1,8 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:keel_localisation/keel_localisation.dart';
 
-import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
@@ -22,6 +20,7 @@ import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.d
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row_skeleton.dart';
+import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 
 /// Education's search: the finder's questions at the top, then every open
 /// note by type, to filter by hand.
@@ -128,8 +127,7 @@ class EducationSearchPage extends StatelessWidget
                       for (final o in visible)
                         OfferingRow(
                           offering: o,
-                          onTap: () =>
-                              context.push<void>(KeelRoutes.offering(o.id)),
+                          onTap: () => openOffering(context, o),
                         ),
                       ...switch (offerings.phase) {
                         LoadingPhase.loading when offerings.all.isEmpty =>

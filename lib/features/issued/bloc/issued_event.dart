@@ -7,6 +7,11 @@ sealed class IssuedEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Fetches the issued notes: on first showing the tab, and on trying again.
+final class IssuedRequested extends IssuedEvent {
+  const IssuedRequested();
+}
+
 final class IssuedFilterChanged extends IssuedEvent {
   const IssuedFilterChanged(this.filter);
 

@@ -12,15 +12,13 @@ class FinderMatch {
 }
 
 final class FinderState extends Equatable {
-  const FinderState({required this.offerings, required this.answers});
-
-  final List<Offering> offerings;
+  const FinderState({required this.answers});
 
   /// Chosen option indexes per question; empty means any.
   final List<Set<int>> answers;
 
-  /// Offerings meeting every answer. When none does, the closest three.
-  List<FinderMatch> get matches {
+  /// [offerings] meeting every answer. When none does, the closest three.
+  List<FinderMatch> matchesIn(List<Offering> offerings) {
     final asked = [
       for (var q = 0; q < finderQuestions.length; q++)
         if (answers[q].isNotEmpty) q,
@@ -50,7 +48,6 @@ final class FinderState extends Equatable {
   }
 
   FinderState withAnswer(int question, Set<int> chosen) => FinderState(
-    offerings: offerings,
     answers: [
       for (var q = 0; q < answers.length; q++)
         q == question ? chosen : answers[q],
@@ -58,5 +55,5 @@ final class FinderState extends Equatable {
   );
 
   @override
-  List<Object?> get props => [offerings, answers];
+  List<Object?> get props => [answers];
 }

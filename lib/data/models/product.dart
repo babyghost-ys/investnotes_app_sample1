@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:investnotes_app_sample1/data/models/json.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/note_event.dart';
 import 'package:investnotes_app_sample1/data/models/payoff.dart';
@@ -24,6 +25,26 @@ class Product extends Equatable {
     this.calledOn,
     this.history = const [],
   });
+
+  factory Product.fromJson(Json json) => Product(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    underlying: json['underlying'] as String,
+    payoff: Payoff.fromJson(json['payoff'] as Json),
+    currency: Currency.values.byName(json['currency'] as String),
+    region: Region.values.byName(json['region'] as String),
+    assetClass: AssetClass.values.byName(json['assetClass'] as String),
+    fundserv: json['fundserv'] as String,
+    issueDate: JsonRead.date(json['issueDate']),
+    maturity: JsonRead.date(json['maturity']),
+    closes: JsonRead.dateOrNull(json['closes']),
+    status: switch (json['status']) {
+      final String status => IssuedStatus.values.byName(status),
+      _ => null,
+    },
+    calledOn: JsonRead.dateOrNull(json['calledOn']),
+    history: JsonRead.numbers(json['history']),
+  );
 
   final String id;
   final String name;
@@ -81,7 +102,7 @@ class Product extends Equatable {
       if (type == NoteType.auto)
         for (var year = 1; year < termYears; year++)
           if (!_anniversary(year).isAfter(end) &&
-              _anniversary(year) != calledOn)
+              !_sameDay(_anniversary(year), calledOn))
             NoteEvent(NoteEventKind.callCheck, _anniversary(year)),
       if (calledOn != null)
         NoteEvent(NoteEventKind.called, calledOn!)
@@ -92,6 +113,10 @@ class Product extends Equatable {
 
   DateTime _anniversary(int year) =>
       DateTime(issueDate.year + year, issueDate.month, issueDate.day);
+
+  /// Dates from the API carry a time of day; the calendar day decides.
+  static bool _sameDay(DateTime a, DateTime? b) =>
+      b != null && a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   List<Object?> get props => [id];

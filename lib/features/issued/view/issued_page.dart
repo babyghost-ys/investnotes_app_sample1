@@ -10,7 +10,6 @@ import 'package:investnotes_app_sample1/core/widgets/filter_icon_button.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/widgets/issued_row.dart';
@@ -118,10 +117,7 @@ class IssuedPage extends StatelessWidget implements LocalisationConsumer {
                   expanded: state.expanded.contains(n.id),
                   onToggle: () =>
                       context.read<IssuedBloc>().add(IssuedRowToggled(n.id)),
-                  onOpen: () => openProduct(
-                    context,
-                    context.read<NotesRepository>().productOfIssued(n),
-                  ),
+                  onOpen: () => openNote(context, n),
                 ),
               if (visible.isEmpty)
                 EmptyState(

@@ -7,6 +7,11 @@ sealed class SearchEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Fetches the notes to search: on opening the page, and on trying again.
+final class SearchRequested extends SearchEvent {
+  const SearchRequested();
+}
+
 final class SearchQueryChanged extends SearchEvent {
   const SearchQueryChanged(this.query);
 

@@ -29,9 +29,11 @@ Future<OfferingFilter?> showOfferingsFilter(
 }) => NativeSheet.show<OfferingFilter>(
   context: context,
   route: 'offeringsFilter',
+  // The sheet runs in its own engine: the offerings go with it as JSON.
   arguments: SheetArguments.wrap(context, {
     'filter': current.encode(),
     'type': type.name,
+    'offerings': [for (final o in offerings) o.toJson()],
   }),
   decodeResult: OfferingFilter.decode,
   detents: NativeFilterDetents.full,

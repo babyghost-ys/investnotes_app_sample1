@@ -6,7 +6,6 @@ import 'package:keel_localisation/keel_localisation.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';
 import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/article_row.dart';
@@ -26,8 +25,7 @@ class DownloadsPage extends StatelessWidget implements LocalisationConsumer {
   );
 
   Widget _build(BuildContext context, DownloadsLocale words) {
-    final all = context.read<NotesRepository>().articles;
-    final kept = context.watch<DownloadsBloc>().state.keptOf(all);
+    final kept = context.watch<DownloadsBloc>().state.kept;
     final insets = MediaQuery.paddingOf(context);
     return ColoredBox(
       color: KeelColors.page.of(context),

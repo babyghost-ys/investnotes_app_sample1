@@ -3,17 +3,16 @@ import 'package:equatable/equatable.dart';
 
 import 'package:investnotes_app_sample1/data/models/finder_question.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 
 part 'finder_event.dart';
 part 'finder_state.dart';
 
-/// The answers given in "find my note", and the offerings they lead to.
+/// The answers given in "find my note". The offerings they lead to come
+/// from the offerings already fetched (see [FinderState.matchesIn]).
 class FinderBloc extends Bloc<FinderEvent, FinderState> {
-  FinderBloc(NotesRepository repository)
+  FinderBloc()
     : super(
         FinderState(
-          offerings: repository.offerings,
           answers: List.generate(finderQuestions.length, (_) => const {}),
         ),
       ) {
@@ -32,7 +31,6 @@ class FinderBloc extends Bloc<FinderEvent, FinderState> {
     on<FinderRestarted>(
       (event, emit) => emit(
         FinderState(
-          offerings: state.offerings,
           answers: List.generate(finderQuestions.length, (_) => const {}),
         ),
       ),

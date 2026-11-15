@@ -7,6 +7,12 @@ sealed class EducationEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Fetches the films, explainers and articles: on first showing the tab,
+/// and on trying again.
+final class EducationRequested extends EducationEvent {
+  const EducationRequested();
+}
+
 final class EducationSegmentSelected extends EducationEvent {
   const EducationSegmentSelected(this.segment);
 

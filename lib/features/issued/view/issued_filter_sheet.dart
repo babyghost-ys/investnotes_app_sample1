@@ -25,7 +25,11 @@ Future<IssuedFilter?> showIssuedFilter(
 }) => NativeSheet.show<IssuedFilter>(
   context: context,
   route: 'issuedFilter',
-  arguments: SheetArguments.wrap(context, current.encode()),
+  // The sheet runs in its own engine: the notes go with it as JSON.
+  arguments: SheetArguments.wrap(context, {
+    'filter': current.encode(),
+    'notes': [for (final n in notes) n.toJson()],
+  }),
   decodeResult: IssuedFilter.decode,
   backgroundColor: KeelColors.page.of(context),
   builder: (_) => IssuedFilterSheet(initial: current, notes: notes),

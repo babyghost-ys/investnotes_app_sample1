@@ -9,15 +9,17 @@ import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_detail_page.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/data/models/explainer.dart';
+import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/features/downloads/view/downloads_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
+import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/finder/widgets/finder_results_skeleton.dart';
 import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
 import 'package:investnotes_app_sample1/features/education/view/education_search_page.dart';
 import 'package:investnotes_app_sample1/features/education/view/explainer_page.dart';
-import 'package:investnotes_app_sample1/features/education/widgets/article_skeleton.dart';
 import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
 import 'package:investnotes_app_sample1/features/saved/widgets/saved_skeleton.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
@@ -30,7 +32,7 @@ import 'package:investnotes_app_sample1/features/shell/view/shell_page.dart';
 
 /// Keel's routes. The shell is the root; every other page is pushed over
 /// it as an [NativePage], so iOS keeps the native push and swipe-back.
-GoRouter keelRouter(NotesRepository repository) => GoRouter(
+GoRouter keelRouter() => GoRouter(
   routes: [
     GoRoute(
       path: KeelRoutes.home,
@@ -38,42 +40,39 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
       routes: [
         GoRoute(
           path: 'offering/:id',
-          pageBuilder: (context, state) => _productPage(state, repository),
+          pageBuilder: (context, state) =>
+              _productPage(state, isOffering: true),
         ),
         GoRoute(
           path: 'offerings/:id',
           pageBuilder: (context, state) =>
-              _productPage(state, repository, responsive: true),
+              _productPage(state, isOffering: true, responsive: true),
         ),
         GoRoute(
           path: 'note/:id',
-          pageBuilder: (context, state) => _productPage(state, repository),
+          pageBuilder: (context, state) =>
+              _productPage(state, isOffering: false),
         ),
         GoRoute(
           path: 'article/:id',
           pageBuilder: (context, state) {
-            final id = state.pathParameters['id'];
-            final article = repository.articles.firstWhere((a) => a.id == id);
+            // Handed over whole by the list that opened it: a downloaded
+            // article opens with no connection.
+            final article = state.extra! as Article;
             return keelPage(
               state,
               namespaces: const [Locales.general],
               title: (_) => article.type.code,
               semanticTitle: (locale) =>
                   article.type.title(locale[0] as GeneralLocale),
-              child: PageLoader(
-                skeleton: const ArticleSkeleton(),
-                child: ArticlePage(article: article),
-              ),
+              child: ArticlePage(article: article),
             );
           },
         ),
         GoRoute(
           path: 'explainer/:id',
           pageBuilder: (context, state) {
-            final id = state.pathParameters['id'];
-            final explainer = repository.explainers.firstWhere(
-              (e) => e.id == id,
-            );
+            final explainer = state.extra! as Explainer;
             final type = explainer.payoff.type;
             return keelPage(
               state,
@@ -110,8 +109,9 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
             state,
             namespaces: const [Locales.saved],
             title: (locale) => (locale[0] as SavedLocale).labels.title,
-            child: const PageLoader(
+            child: const PageLoader<OfferingsBloc, OfferingsState>(
               skeleton: SavedSkeleton(),
+              load: requestOfferings,
               child: SavedPage(),
             ),
           ),
@@ -151,8 +151,9 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
                 onPressed: () => context.go(KeelRoutes.home),
               ),
             ],
-            child: const PageLoader(
+            child: const PageLoader<OfferingsBloc, OfferingsState>(
               skeleton: FinderResultsSkeleton(),
+              load: requestOfferings,
               child: FinderResultsPage(),
             ),
           ),
@@ -185,16 +186,19 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
   ],
 );
 
-/// A note's page, open or issued. The page carries its own scaffold for
-/// its bookmark. A [responsive] page is the detail of a list that splits in
-/// a wide window, and steps back to that split when the window widens.
+/// A note's page, open or issued, fetched as it opens. The page carries its
+/// own scaffold for its bookmark. A [responsive] page is the detail of a
+/// list that splits in a wide window, and steps back to that split when the
+/// window widens.
 NativePage<void> _productPage(
-  GoRouterState state,
-  NotesRepository repository, {
+  GoRouterState state, {
+  required bool isOffering,
   bool responsive = false,
 }) {
   final page = ProductPage(
-    product: repository.productById(state.pathParameters['id']!)!,
+    id: state.pathParameters['id']!,
+    isOffering: isOffering,
+    type: state.extra as NoteType?,
   );
   return NativePage<void>(
     key: state.pageKey,

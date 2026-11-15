@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/data/models/article_transfer.dart';
 import 'package:investnotes_app_sample1/data/repositories/downloads_repository.dart';
 
 part 'downloads_event.dart';
@@ -42,17 +43,29 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     _runs[id] = token;
     bool current() => identical(_runs[id], token);
 
-    await emit.onEach<double>(
-      _repository.fetch(event.article).takeWhile((_) => current()),
-      onData: (received) =>
-          emit(state.copyWith(progress: {...state.progress, id: received})),
+    Article? arrived;
+    await emit.onEach<ArticleTransfer>(
+      _repository.fetch(id).takeWhile((_) => current()),
+      onData: (transfer) {
+        arrived = transfer.article ?? arrived;
+        emit(
+          state.copyWith(progress: {...state.progress, id: transfer.received}),
+        );
+      },
+      // A transfer that breaks off leaves the article as it was, ready to
+      // be asked for again.
+      onError: (_, _) {},
     );
     if (!current()) return;
     _runs.remove(id);
-    final kept = [id, ...state.kept.where((k) => k != id)];
-    emit(
-      state.copyWith(kept: kept, progress: Map.of(state.progress)..remove(id)),
-    );
+    final article = arrived;
+    final progress = Map.of(state.progress)..remove(id);
+    if (article == null) {
+      emit(state.copyWith(progress: progress));
+      return;
+    }
+    final kept = [article, ...state.kept.where((a) => a.id != id)];
+    emit(state.copyWith(kept: kept, progress: progress));
     await _repository.keep(kept);
   }
 
@@ -65,7 +78,7 @@ class DownloadsBloc extends Bloc<DownloadsEvent, DownloadsState> {
     DownloadRemoved event,
     Emitter<DownloadsState> emit,
   ) async {
-    final kept = state.kept.where((k) => k != event.id).toList();
+    final kept = state.kept.where((a) => a.id != event.id).toList();
     emit(state.copyWith(kept: kept));
     await _repository.keep(kept);
   }

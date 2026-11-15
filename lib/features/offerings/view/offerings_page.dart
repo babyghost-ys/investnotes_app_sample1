@@ -17,13 +17,13 @@ import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 import 'package:investnotes_app_sample1/data/models/offering.dart';
 import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/offerings/view/offerings_filter_sheet.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/load_failure_notice.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row.dart';
 import 'package:investnotes_app_sample1/features/offerings/widgets/offering_row_skeleton.dart';
-import 'package:investnotes_app_sample1/features/product/widgets/product_body.dart';
+import 'package:investnotes_app_sample1/features/product/widgets/product_loader.dart';
+import 'package:investnotes_app_sample1/features/product/widgets/product_scope.dart';
 
 class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
   const OfferingsPage({super.key});
@@ -48,7 +48,10 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
     ResponsiveMasterDetail.open(
       context,
       select: () => bloc.add(OfferingSelected(offering.id)),
-      push: () => context.push<void>(KeelRoutes.offeringsItem(offering.id)),
+      push: () => context.push<void>(
+        KeelRoutes.offeringsItem(offering.id),
+        extra: offering.type,
+      ),
       onClosed: () => bloc.add(const OfferingSelected(null)),
     );
   }
@@ -76,19 +79,17 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
     GeneralLocale general,
   ) {
     final detail = state.detail;
-    final product = detail == null
-        ? null
-        : context.read<NotesRepository>().productById(detail.id);
     return ResponsiveMasterDetail(
       master: Builder(
         builder: (context) => _list(context, state, offerings, general),
       ),
-      detail: product == null
+      // Fetched as it is chosen; a new choice starts its own fetch.
+      detail: detail == null
           ? null
           : ColoredBox(
-              key: ValueKey(product.id),
+              key: ValueKey(detail.id),
               color: KeelColors.page.of(context),
-              child: ProductBody(product: product),
+              child: ProductScope(id: detail.id, child: const ProductLoader()),
             ),
       // Folded with an offering open: it carries on as its own page.
       onCollapse: state.selectedId == null || detail == null
