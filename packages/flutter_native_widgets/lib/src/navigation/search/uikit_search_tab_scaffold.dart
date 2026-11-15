@@ -231,8 +231,9 @@ class _SearchTabsState extends State<UiKitSearchTabScaffold> {
               creationParams: _configuration(),
               creationParamsCodec: const StandardMessageCodec(),
               onPlatformViewCreated: (id) {
-                _channel = MethodChannel('flutter_native_widgets/search_tabs_$id')
-                  ..setMethodCallHandler(_onNativeCall);
+                _channel = MethodChannel(
+                  'flutter_native_widgets/search_tabs_$id',
+                )..setMethodCallHandler(_onNativeCall);
                 _channel!.invokeMethod<void>('configure', _configuration());
                 if (_scrollOffset != 0) {
                   _channel!.invokeMethod<void>(

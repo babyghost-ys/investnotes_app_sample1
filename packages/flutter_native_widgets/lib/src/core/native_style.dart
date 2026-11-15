@@ -23,9 +23,7 @@ enum NativeStyle {
   /// platform's own family.
   static NativeStyle of(BuildContext context) {
     final requested =
-        context
-            .dependOnInheritedWidgetOfExactType<NativeStyleScope>()
-            ?.style ??
+        context.dependOnInheritedWidgetOfExactType<NativeStyleScope>()?.style ??
         platformDefault;
     return requested == native && !PlatformInfo.isIOS ? material : requested;
   }

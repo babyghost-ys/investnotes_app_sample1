@@ -757,7 +757,8 @@ final _class_NativeSizesApiSetup = objc.getClass(
   ).cast(),
 );
 @ffi.Native<ffi.Pointer<objc.ObjCObjectImpl>>(
-  symbol: 'OBJC_CLASS_\$__TtC22flutter_native_widgets24NativeSizesNumberWrapper',
+  symbol:
+      'OBJC_CLASS_\$__TtC22flutter_native_widgets24NativeSizesNumberWrapper',
 )
 external ffi.Pointer<objc.ObjCObjectImpl> _class_NativeSizesNumberWrapper_raw;
 final _class_NativeSizesNumberWrapper = objc.getClass(
@@ -800,7 +801,8 @@ final _class_PigeonError = objc.getClass(
   ).cast(),
 );
 @ffi.Native<ffi.Pointer<objc.ObjCObjectImpl>>(
-  symbol: 'OBJC_CLASS_\$__TtC22flutter_native_widgets24SearchHeaderLayoutBridge',
+  symbol:
+      'OBJC_CLASS_\$__TtC22flutter_native_widgets24SearchHeaderLayoutBridge',
 )
 external ffi.Pointer<objc.ObjCObjectImpl> _class_SearchHeaderLayoutBridge_raw;
 final _class_SearchHeaderLayoutBridge = objc.getClass(

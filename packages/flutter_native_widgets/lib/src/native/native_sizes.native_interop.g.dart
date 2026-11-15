@@ -6,7 +6,8 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io' show Platform;
-import 'dart:typed_data' show Float32List, Float64List, Int32List, Int64List, TypedData;
+import 'dart:typed_data'
+    show Float32List, Float64List, Int32List, Int64List, TypedData;
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:ffi/ffi.dart';
@@ -31,13 +32,14 @@ class _PigeonFfiCodec {
       } else if (type == bool) {
         return numValue.boolValue;
       }
-      
 
       return numValue.longValue;
     } else if (NSString.isA(value)) {
       return NSString.as(value).toDartString();
     } else if (ffi_bridge.NativeSizesPigeonTypedData.isA(value)) {
-      return _getValueFromPigeonTypedData(value as ffi_bridge.NativeSizesPigeonTypedData);
+      return _getValueFromPigeonTypedData(
+        value as ffi_bridge.NativeSizesPigeonTypedData,
+      );
     } else if (NSArray.isA(value)) {
       final NSArray array = NSArray.as(value);
       final List<Object?> res = <Object?>[];
@@ -51,16 +53,23 @@ class _PigeonFfiCodec {
       final Map<Object?, Object?> res = <Object?, Object?>{};
       for (int i = 0; i < keys.count; i++) {
         final ObjCObject key = keys.objectAtIndex(i);
-        res[readValue(key, type, type2)] = readValue(dict.objectForKey(key), type, type2);
+        res[readValue(key, type, type2)] = readValue(
+          dict.objectForKey(key),
+          type,
+          type2,
+        );
       }
       return res;
     } else if (ffi_bridge.NativeSizesNumberWrapper.isA(value)) {
-      return _convertNumberWrapperToDart(ffi_bridge.NativeSizesNumberWrapper.as(value));
-          } else if (ffi_bridge.SearchHeaderLayoutBridge.isA(value)) {
-        return PigeonInternalSearchHeaderLayoutNativeInterop.fromFfi(ffi_bridge.SearchHeaderLayoutBridge.as(value));
-        
+      return _convertNumberWrapperToDart(
+        ffi_bridge.NativeSizesNumberWrapper.as(value),
+      );
+    } else if (ffi_bridge.SearchHeaderLayoutBridge.isA(value)) {
+      return PigeonInternalSearchHeaderLayoutNativeInterop.fromFfi(
+        ffi_bridge.SearchHeaderLayoutBridge.as(value),
+      );
     } else {
-    throw ArgumentError.value(value);
+      throw ArgumentError.value(value);
     }
   }
 
@@ -69,59 +78,67 @@ class _PigeonFfiCodec {
     bool generic = false,
   }) {
     if (value == null) {
-      if (_isTypeOrNullableType<T>(ObjCObject) || _isTypeOrNullableType<T>(NSObject)) {
+      if (_isTypeOrNullableType<T>(ObjCObject) ||
+          _isTypeOrNullableType<T>(NSObject)) {
         return ffi_bridge.NativeSizesPigeonInternalNull() as T;
       }
       return null as T;
     }
     if (value is bool) {
       return (generic
-          ? _convertToFfiNumberWrapper(value)
-          : NSNumber.alloc().initWithLong(value ? 1 : 0)) as T;
+              ? _convertToFfiNumberWrapper(value)
+              : NSNumber.alloc().initWithLong(value ? 1 : 0))
+          as T;
     } else if (value is double) {
       return (generic
-          ? _convertToFfiNumberWrapper(value)
-          : NSNumber.alloc().initWithDouble(value)) as T;
+              ? _convertToFfiNumberWrapper(value)
+              : NSNumber.alloc().initWithDouble(value))
+          as T;
       // ignore: avoid_double_and_int_checks
     } else if (value is int) {
       return (generic
-          ? _convertToFfiNumberWrapper(value)
-          : NSNumber.alloc().initWithLong(value)) as T;
+              ? _convertToFfiNumberWrapper(value)
+              : NSNumber.alloc().initWithLong(value))
+          as T;
     } else if (value is Enum) {
       return (generic
-          ? _convertToFfiNumberWrapper(value)
-          : NSNumber.alloc().initWithLong(value.index)) as T;
+              ? _convertToFfiNumberWrapper(value)
+              : NSNumber.alloc().initWithLong(value.index))
+          as T;
     } else if (value is String) {
       return NSString(value) as T;
     } else if (value is TypedData) {
       return _toPigeonTypedData(value) as T;
-        } else if (value is List<String> && _isTypeOrNullableType<NSMutableArray>(T)) {
+    } else if (value is List<String> &&
+        _isTypeOrNullableType<NSMutableArray>(T)) {
       final NSMutableArray res = NSMutableArray();
       for (final String entry in value) {
         res.addObject(writeValue<NSString>(entry, generic: true));
       }
       return res as T;
-        
     } else if (value is List) {
       final NSMutableArray res = NSMutableArray();
       for (final Object? entry in value) {
-        res.addObject(entry == null
-            ? ffi_bridge.NativeSizesPigeonInternalNull()
-            : writeValue(entry, generic: true));
+        res.addObject(
+          entry == null
+              ? ffi_bridge.NativeSizesPigeonInternalNull()
+              : writeValue(entry, generic: true),
+        );
       }
       return res as T;
-    
     } else if (value is Map) {
       final NSMutableDictionary res = NSMutableDictionary();
       for (final MapEntry<Object?, Object?> entry in value.entries) {
-        res.setObject(writeValue(entry.value, generic: true), forKey: NSCopying.as(writeValue(entry.key, generic: true)));
+        res.setObject(
+          writeValue(entry.value, generic: true),
+          forKey: NSCopying.as(writeValue(entry.key, generic: true)),
+        );
       }
       return res as T;
-          } else if (value is SearchHeaderLayout) {
-        return value.toFfi() as T;
-        
+    } else if (value is SearchHeaderLayout) {
+      return value.toFfi() as T;
     } else {
-    throw ArgumentError.value(value);
+      throw ArgumentError.value(value);
     }
   }
 }
@@ -130,7 +147,9 @@ class _PigeonFfiCodec {
 NSData _typedDataToNSData(TypedData value) {
   final int lengthInBytes = value.lengthInBytes;
   // `malloc(0)` may return null, which `NSData` can't own.
-  final Pointer<Uint8> bytes = malloc<Uint8>(lengthInBytes == 0 ? 1 : lengthInBytes);
+  final Pointer<Uint8> bytes = malloc<Uint8>(
+    lengthInBytes == 0 ? 1 : lengthInBytes,
+  );
   bytes
       .asTypedList(lengthInBytes)
       .setAll(0, value.buffer.asUint8List(value.offsetInBytes, lengthInBytes));
@@ -156,9 +175,9 @@ ffi_bridge.NativeSizesPigeonTypedData _toPigeonTypedData(TypedData value) {
   );
 }
 
-
-
-Object? _getValueFromPigeonTypedData(ffi_bridge.NativeSizesPigeonTypedData value) {
+Object? _getValueFromPigeonTypedData(
+  ffi_bridge.NativeSizesPigeonTypedData value,
+) {
   final NSData data = value.data;
   final ObjCObjectRef dataRef = data.object$.ref;
   try {
@@ -194,7 +213,6 @@ Object? _getValueFromPigeonTypedData(ffi_bridge.NativeSizesPigeonTypedData value
     dataRef.release();
   }
 }
-    
 
 // ignore: unused_element
 class _PigeonFfiBuffers {
@@ -216,7 +234,9 @@ class _PigeonFfiBuffers {
 
   static NSData encode(Object? value) {
     final ByteData data = pigeon_NativeSizesmessageCodec.encodeMessage(value)!;
-    return _typedDataToNSData(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+    return _typedDataToNSData(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
   }
 
   static NSData? encodeOrNull(Object? value) {
@@ -225,10 +245,13 @@ class _PigeonFfiBuffers {
 
   static Object? decode(NSData? data) {
     final Uint8List? bytes = toUint8List(data);
-    return bytes == null ? null : pigeon_NativeSizesmessageCodec.decodeMessage(ByteData.sublistView(bytes));
+    return bytes == null
+        ? null
+        : pigeon_NativeSizesmessageCodec.decodeMessage(
+            ByteData.sublistView(bytes),
+          );
   }
 }
-
 
 Object? _convertNumberWrapperToDart(ffi_bridge.NativeSizesNumberWrapper value) {
   switch (value.type) {
@@ -242,18 +265,29 @@ Object? _convertNumberWrapperToDart(ffi_bridge.NativeSizesNumberWrapper value) {
       throw ArgumentError.value(value);
   }
 }
+
 ffi_bridge.NativeSizesNumberWrapper _convertToFfiNumberWrapper(Object value) {
   switch (value) {
     case int _:
-      return ffi_bridge.NativeSizesNumberWrapper.alloc().initWithNumber(NSNumber.alloc().initWithLong(value), type: 1);
+      return ffi_bridge.NativeSizesNumberWrapper.alloc().initWithNumber(
+        NSNumber.alloc().initWithLong(value),
+        type: 1,
+      );
     case double _:
-      return ffi_bridge.NativeSizesNumberWrapper.alloc().initWithNumber(NSNumber.alloc().initWithDouble(value), type: 2);
+      return ffi_bridge.NativeSizesNumberWrapper.alloc().initWithNumber(
+        NSNumber.alloc().initWithDouble(value),
+        type: 2,
+      );
     case bool _:
-      return ffi_bridge.NativeSizesNumberWrapper.alloc().initWithNumber(NSNumber.alloc().initWithLong(value ? 1 : 0), type: 3);
+      return ffi_bridge.NativeSizesNumberWrapper.alloc().initWithNumber(
+        NSNumber.alloc().initWithLong(value ? 1 : 0),
+        type: 3,
+      );
     default:
       throw ArgumentError.value(value);
   }
 }
+
 bool _isType<T>(Type t) => T == t;
 bool _isTypeOrNullableType<T>(Type t) => _isType<T>(t) || _isType<T?>(t);
 
@@ -303,8 +337,6 @@ void _reportFfiError(ffi_bridge.PigeonError errorOut, Object e) {
   }
 }
 
-
-
 extension PigeonInternalSearchHeaderLayoutNativeInterop on SearchHeaderLayout {
   ffi_bridge.SearchHeaderLayoutBridge toFfi() {
     return ffi_bridge.SearchHeaderLayoutBridge.alloc().initWithHeight(
@@ -313,11 +345,12 @@ extension PigeonInternalSearchHeaderLayoutNativeInterop on SearchHeaderLayout {
     );
   }
 
-  static SearchHeaderLayout? fromFfi(ffi_bridge.SearchHeaderLayoutBridge? ffiClass) {
-    return ffiClass == null ? null : SearchHeaderLayout(
-      height: ffiClass.height,
-      bottom: ffiClass.bottom,
-    );
+  static SearchHeaderLayout? fromFfi(
+    ffi_bridge.SearchHeaderLayoutBridge? ffiClass,
+  ) {
+    return ffiClass == null
+        ? null
+        : SearchHeaderLayout(height: ffiClass.height, bottom: ffiClass.bottom);
   }
 }
 
@@ -325,34 +358,43 @@ NativeSizesApiForNativeInterop? pigeon_getInstance_NativeSizesApi({
   String channelName = defaultInstanceName,
 }) => _NativeSizesApiForNativeInterop.getInstance(channelName: channelName);
 
-
-class _NativeSizesApiForNativeInterop implements NativeSizesApiForNativeInterop {
-  _NativeSizesApiForNativeInterop._withRegistrar({ffi_bridge.NativeSizesApiSetup? ffiApi}) : _ffiApi = ffiApi;
+class _NativeSizesApiForNativeInterop
+    implements NativeSizesApiForNativeInterop {
+  _NativeSizesApiForNativeInterop._withRegistrar({
+    ffi_bridge.NativeSizesApiSetup? ffiApi,
+  }) : _ffiApi = ffiApi;
 
   /// Returns instance of NativeSizesApiForNativeInterop with specified [channelName] if one has been registered.
   ///
   /// Returns the instance registered by this isolate's engine when it is known,
   /// and otherwise the most recent registration.
-  static NativeSizesApiForNativeInterop? getInstance({String channelName = defaultInstanceName}) {
- if (Platform.isIOS || Platform.isMacOS) {
+  static NativeSizesApiForNativeInterop? getInstance({
+    String channelName = defaultInstanceName,
+  }) {
+    if (Platform.isIOS || Platform.isMacOS) {
       final int? engineId = PlatformDispatcher.instance.engineId;
-      final ffi_bridge.NativeSizesApiSetup? link = ffi_bridge.NativeSizesApiSetup.pigeonResolveInstanceWithEngineId(
-        engineId ?? _pigeonNoEngineKey,
-        affinityKey: _pigeonEngineAffinity ?? _pigeonNoEngineKey,
-        name: NSString(channelName),
-      );
+      final ffi_bridge.NativeSizesApiSetup? link =
+          ffi_bridge.NativeSizesApiSetup.pigeonResolveInstanceWithEngineId(
+            engineId ?? _pigeonNoEngineKey,
+            affinityKey: _pigeonEngineAffinity ?? _pigeonNoEngineKey,
+            name: NSString(channelName),
+          );
       if (link == null) {
         _throwNoInstanceError(channelName);
       }
       if (link != null && _pigeonEngineAffinity == null) {
-        final int linkEngineKey = ffi_bridge.NativeSizesApiSetup.pigeonEngineKeyOf(link);
-        if (linkEngineKey != _pigeonNoEngineKey && (engineId == null || linkEngineKey < 0)) {
+        final int linkEngineKey =
+            ffi_bridge.NativeSizesApiSetup.pigeonEngineKeyOf(link);
+        if (linkEngineKey != _pigeonNoEngineKey &&
+            (engineId == null || linkEngineKey < 0)) {
           _pigeonEngineAffinity = linkEngineKey;
         }
       }
       return _NativeSizesApiForNativeInterop._withRegistrar(ffiApi: link);
     } else {
-      throw UnsupportedError('Native Interop is not supported on this platform. Use NativeSizesApi instead.');
+      throw UnsupportedError(
+        'Native Interop is not supported on this platform. Use NativeSizesApi instead.',
+      );
     }
   }
 
@@ -360,10 +402,14 @@ class _NativeSizesApiForNativeInterop implements NativeSizesApiForNativeInterop 
 
   @override
   double? tabBarHeight(double width, List<String> labels) {
- if (_ffiApi != null) {
+    if (_ffiApi != null) {
       final pigeonVar_error = ffi_bridge.PigeonError();
       final NSData pigeonVar_args = _PigeonFfiBuffers.encode(<Object?>[labels]);
-      final NSNumber? pigeonVar_res = _ffiApi.tabBarHeightWithWidth(width, pigeonVar_args: pigeonVar_args, wrappedError: pigeonVar_error);
+      final NSNumber? pigeonVar_res = _ffiApi.tabBarHeightWithWidth(
+        width,
+        pigeonVar_args: pigeonVar_args,
+        wrappedError: pigeonVar_error,
+      );
       _throwIfFfiError(pigeonVar_error);
       return pigeonVar_res?.doubleValue;
     } else {
@@ -372,10 +418,21 @@ class _NativeSizesApiForNativeInterop implements NativeSizesApiForNativeInterop 
   }
 
   @override
-  double? popupMenuButtonWidth(String? title, String? iconName, double? iconSize, String style) {
- if (_ffiApi != null) {
+  double? popupMenuButtonWidth(
+    String? title,
+    String? iconName,
+    double? iconSize,
+    String style,
+  ) {
+    if (_ffiApi != null) {
       final pigeonVar_error = ffi_bridge.PigeonError();
-      final NSNumber? pigeonVar_res = _ffiApi.popupMenuButtonWidthWithTitle(title == null ? null : NSString(title), iconName: iconName == null ? null : NSString(iconName), iconSize: _PigeonFfiCodec.writeValue<NSNumber?>(iconSize), style: NSString(style), wrappedError: pigeonVar_error);
+      final NSNumber? pigeonVar_res = _ffiApi.popupMenuButtonWidthWithTitle(
+        title == null ? null : NSString(title),
+        iconName: iconName == null ? null : NSString(iconName),
+        iconSize: _PigeonFfiCodec.writeValue<NSNumber?>(iconSize),
+        style: NSString(style),
+        wrappedError: pigeonVar_error,
+      );
       _throwIfFfiError(pigeonVar_error);
       return pigeonVar_res?.doubleValue;
     } else {
@@ -385,14 +442,15 @@ class _NativeSizesApiForNativeInterop implements NativeSizesApiForNativeInterop 
 
   @override
   SearchHeaderLayout? searchHeaderLayout() {
- if (_ffiApi != null) {
+    if (_ffiApi != null) {
       final pigeonVar_error = ffi_bridge.PigeonError();
-      final NSData? pigeonVar_res = _ffiApi.searchHeaderLayoutWithWrappedError(pigeonVar_error);
+      final NSData? pigeonVar_res = _ffiApi.searchHeaderLayoutWithWrappedError(
+        pigeonVar_error,
+      );
       _throwIfFfiError(pigeonVar_error);
       return _PigeonFfiBuffers.decode(pigeonVar_res) as SearchHeaderLayout?;
     } else {
       throw Exception('No JNI or FFI api available');
     }
   }
-
 }

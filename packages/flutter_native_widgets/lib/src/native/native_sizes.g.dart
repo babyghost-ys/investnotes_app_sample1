@@ -8,15 +8,16 @@ import 'dart:typed_data' show Float64List, Int32List, Int64List;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart' show immutable, internal, protected, visibleForTesting;
+import 'package:meta/meta.dart'
+    show immutable, internal, protected, visibleForTesting;
 import './native_sizes.g.dart'
     if (dart.library.ffi) './native_sizes.native_interop.g.dart'
     as pigeon_native;
 
 Object? _extractReplyValueOrThrow(
-    List<Object?>? replyList,
-    String channelName, {
-    required bool isNullValid,
+  List<Object?>? replyList,
+  String channelName, {
+  required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -50,8 +51,9 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -100,13 +102,9 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-
 /// Where UIKit laid out a navigation search header.
 class SearchHeaderLayout {
-  SearchHeaderLayout({
-    required this.height,
-    required this.bottom,
-  });
+  SearchHeaderLayout({required this.height, required this.bottom});
 
   /// From the top safe area to the bottom of the search field.
   double height;
@@ -115,14 +113,12 @@ class SearchHeaderLayout {
   double bottom;
 
   List<Object?> _toList() {
-    return <Object?>[
-      height,
-      bottom,
-    ];
+    return <Object?>[height, bottom];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SearchHeaderLayout decode(Object result) {
     result as List<Object?>;
@@ -141,7 +137,8 @@ class SearchHeaderLayout {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(height, other.height) && _deepEquals(bottom, other.bottom);
+    return _deepEquals(height, other.height) &&
+        _deepEquals(bottom, other.bottom);
   }
 
   @override
@@ -154,7 +151,6 @@ class SearchHeaderLayout {
   }
 }
 
-
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -162,7 +158,7 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is SearchHeaderLayout) {
+    } else if (value is SearchHeaderLayout) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
     } else {
@@ -183,7 +179,8 @@ class _PigeonCodec extends StandardMessageCodec {
 
 @internal
 const StandardMessageCodec pigeon_NativeSizesmessageCodec = _PigeonCodec();
-const String defaultInstanceName = 'PigeonDefaultClassName32uh4ui3lh445uh4h3l2l455g4y34u';
+const String defaultInstanceName =
+    'PigeonDefaultClassName32uh4ui3lh445uh4h3l2l455g4y34u';
 
 @internal
 NativeSizesApiForNativeInterop? pigeon_getInstance_NativeSizesApi({
@@ -194,15 +191,21 @@ NativeSizesApiForNativeInterop? pigeon_getInstance_NativeSizesApi({
   );
 }
 
-
 abstract class NativeSizesApiForNativeInterop {
   /// Returns instance of NativeSizesApiForNativeInterop with specified [channelName] if one has been registered.
-  static NativeSizesApiForNativeInterop? getInstance({String channelName = defaultInstanceName}) =>
+  static NativeSizesApiForNativeInterop? getInstance({
+    String channelName = defaultInstanceName,
+  }) =>
       pigeon_native.pigeon_getInstance_NativeSizesApi(channelName: channelName);
 
   double? tabBarHeight(double width, List<String> labels);
 
-  double? popupMenuButtonWidth(String? title, String? iconName, double? iconSize, String style);
+  double? popupMenuButtonWidth(
+    String? title,
+    String? iconName,
+    double? iconSize,
+    String style,
+  );
 
   SearchHeaderLayout? searchHeaderLayout();
 }
@@ -216,14 +219,14 @@ class NativeSizesApi {
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   NativeSizesApi({
-      BinaryMessenger? binaryMessenger, 
-      String messageChannelSuffix = '', 
-      NativeSizesApiForNativeInterop? nativeInteropApi,
-  })
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '',
-  _nativeInteropApi = nativeInteropApi;
-
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+    NativeSizesApiForNativeInterop? nativeInteropApi,
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '',
+       _nativeInteropApi = nativeInteropApi;
 
   /// Creates an instance of [NativeSizesApi] that requests an instance of
   /// [NativeSizesApiForNativeInterop] from the host platform with a matching instance name
@@ -241,8 +244,10 @@ class NativeSizesApi {
     }
     final NativeSizesApiForNativeInterop? nativeInteropApi =
         NativeSizesApiForNativeInterop.getInstance(
-      channelName: messageChannelSuffix.isEmpty ? defaultInstanceName : messageChannelSuffix,
-    );
+          channelName: messageChannelSuffix.isEmpty
+              ? defaultInstanceName
+              : messageChannelSuffix,
+        );
     if (nativeInteropApi == null) {
       throw ArgumentError(
         'No NativeSizesApi instance with ${messageChannelSuffix.isEmpty ? 'no ' : ''}instance name ${messageChannelSuffix.isNotEmpty ? '"$messageChannelSuffix" ' : ''}found.',
@@ -268,43 +273,57 @@ class NativeSizesApi {
     if (_nativeInteropApi != null) {
       return _nativeInteropApi.tabBarHeight(width, labels);
     }
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_native_widgets.NativeSizesApi.tabBarHeight$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_native_widgets.NativeSizesApi.tabBarHeight$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[width, labels]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[width, labels],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as double?;
   }
 
   /// The width of a popup menu button showing [title] and the SF Symbol
   /// [iconName] in [style]. Null when UIKit has no answer.
-  Future<double?> popupMenuButtonWidth(String? title, String? iconName, double? iconSize, String style) async {
+  Future<double?> popupMenuButtonWidth(
+    String? title,
+    String? iconName,
+    double? iconSize,
+    String style,
+  ) async {
     if (_nativeInteropApi != null) {
-      return _nativeInteropApi.popupMenuButtonWidth(title, iconName, iconSize, style);
+      return _nativeInteropApi.popupMenuButtonWidth(
+        title,
+        iconName,
+        iconSize,
+        style,
+      );
     }
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_native_widgets.NativeSizesApi.popupMenuButtonWidth$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_native_widgets.NativeSizesApi.popupMenuButtonWidth$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[title, iconName, iconSize, style]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[title, iconName, iconSize, style],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as double?;
   }
 
@@ -314,7 +333,8 @@ class NativeSizesApi {
     if (_nativeInteropApi != null) {
       return _nativeInteropApi.searchHeaderLayout();
     }
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_native_widgets.NativeSizesApi.searchHeaderLayout$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_native_widgets.NativeSizesApi.searchHeaderLayout$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -323,11 +343,10 @@ class NativeSizesApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as SearchHeaderLayout?;
   }
 }
