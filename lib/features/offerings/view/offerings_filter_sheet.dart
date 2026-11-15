@@ -28,9 +28,8 @@ Future<OfferingFilter?> showOfferingsFilter(
   arguments: {'filter': current.encode(), 'type': type.name},
   decodeResult: OfferingFilter.decode,
   detents: NativeFilterDetents.full,
-  // A long sheet scrolls; dragging belongs to its content, and the close
-  // control dismisses it.
-  isDismissible: false,
+  // The grabber shows, and a swipe down closes it; UIKit hands the drag to
+  // the sheet once its list is scrolled to the top.
   backgroundColor: KeelColors.page.of(context),
   builder: (_) =>
       OfferingsFilterSheet(initial: current, type: type, offerings: offerings),

@@ -17,10 +17,10 @@ import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
 import 'package:investnotes_app_sample1/features/saved/widgets/saved_skeleton.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/search/view/search_page.dart';
-import 'package:investnotes_app_sample1/features/search/widgets/search_skeleton.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/view/biometric_settings_page.dart';
 import 'package:investnotes_app_sample1/features/session/view/sign_in_route.dart';
+import 'package:investnotes_app_sample1/features/settings/view/settings_page.dart';
 import 'package:investnotes_app_sample1/features/shell/view/shell_page.dart';
 
 /// Keel's routes. The shell is the root; every other page is pushed over
@@ -64,10 +64,8 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
           pageBuilder: (context, state) => keelPage(
             state,
             title: 'Search',
-            child: const PageLoader(
-              skeleton: SearchSkeleton(),
-              child: SearchPage(),
-            ),
+            // Nothing to load before typing: the field shows at once.
+            child: const SearchPage(),
           ),
         ),
         GoRoute(
@@ -109,6 +107,11 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
               child: FinderResultsPage(),
             ),
           ),
+        ),
+        GoRoute(
+          path: 'settings',
+          pageBuilder: (context, state) =>
+              keelPage(state, title: 'Settings', child: const SettingsPage()),
         ),
         GoRoute(
           path: 'settings/biometric',

@@ -21,6 +21,13 @@ abstract final class KeelColors {
     darkColor: Color(0xFF4C93FF),
   );
 
+  /// The bar's blue as ink on the page: tide by day; at night the tide
+  /// sinks into the page, so a brighter blue takes its place.
+  static const tideInk = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFF0B3D91),
+    darkColor: Color(0xFF5B95F0),
+  );
+
   /// Soft accent behind glyphs and selected chips.
   static const mist = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFE6EFFC),

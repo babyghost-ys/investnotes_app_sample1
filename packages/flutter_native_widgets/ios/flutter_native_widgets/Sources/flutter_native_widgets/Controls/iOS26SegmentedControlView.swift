@@ -31,7 +31,7 @@ class iOS26SegmentedControlViewFactory: NSObject, FlutterPlatformViewFactory {
 /// Native iOS 26 segmented control implementation
 class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
     private var _view: UIView
-    private var segmentedControl: UISegmentedControl!
+    private var segmentedControl: FlutterSizedSegmentedControl!
     private var channel: FlutterMethodChannel
     private var controlId: Int
     private var isDark: Bool = false
@@ -113,6 +113,8 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
                     segmentedControl.insertSegment(withTitle: label, at: index, animated: false)
                 }
             }
+
+            segmentedControl.semanticLabels = config["semanticLabels"] as? [String]
 
             // Set enabled state
             if let enabled = config["enabled"] as? Bool {
@@ -215,6 +217,12 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
             }
             result(nil)
 
+        case "setSemanticLabels":
+            let args = call.arguments as? [String: Any]
+            segmentedControl.semanticLabels = args?["labels"] as? [String]
+            UIAccessibility.post(notification: .layoutChanged, argument: nil)
+            result(nil)
+
         case "setBrightness":
             if let args = call.arguments as? [String: Any] {
                 if let dark = args["isDark"] as? Bool {
@@ -254,10 +262,69 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
 private final class FlutterSizedSegmentedControl: UISegmentedControl {
     private var laidOutSize: CGSize?
 
+    /// What VoiceOver says for each segment in place of its title, such as
+    /// "System" for "SYS". UIKit has no label for a title segment of its
+    /// own, so the control then offers one element per segment instead.
+    var semanticLabels: [String]? {
+        didSet { segmentElements = [] }
+    }
+
+    private var segmentElements: [SegmentElement] = []
+
+    override var accessibilityElements: [Any]? {
+        get {
+            guard let labels = semanticLabels, !labels.isEmpty,
+                  labels.count == numberOfSegments else {
+                return super.accessibilityElements
+            }
+            if segmentElements.count != labels.count {
+                segmentElements = labels.indices.map {
+                    SegmentElement(accessibilityContainer: self, index: $0)
+                }
+            }
+            // Segments share the width evenly, laid out in reading order.
+            let width = bounds.width / CGFloat(labels.count)
+            let rightToLeft = effectiveUserInterfaceLayoutDirection == .rightToLeft
+            for (index, element) in segmentElements.enumerated() {
+                let slot = rightToLeft ? labels.count - 1 - index : index
+                element.accessibilityLabel = labels[index]
+                element.accessibilityFrameInContainerSpace = CGRect(
+                    x: CGFloat(slot) * width, y: 0, width: width, height: bounds.height)
+                var traits: UIAccessibilityTraits = .button
+                if index == selectedSegmentIndex { traits.insert(.selected) }
+                if !isEnabled { traits.insert(.notEnabled) }
+                element.accessibilityTraits = traits
+            }
+            return segmentElements
+        }
+        set { super.accessibilityElements = newValue }
+    }
+
     override func layoutSubviews() {
         let resized = laidOutSize != nil && laidOutSize != bounds.size
         laidOutSize = bounds.size
         guard resized else { return super.layoutSubviews() }
         UIView.performWithoutAnimation { super.layoutSubviews() }
+    }
+}
+
+/// One segment as VoiceOver sees it: its spoken label, and a double tap
+/// that picks it the way a touch would.
+private final class SegmentElement: UIAccessibilityElement {
+    let index: Int
+
+    init(accessibilityContainer container: UISegmentedControl, index: Int) {
+        self.index = index
+        super.init(accessibilityContainer: container)
+    }
+
+    override func accessibilityActivate() -> Bool {
+        guard let control = accessibilityContainer as? UISegmentedControl,
+              control.isEnabled else { return false }
+        if control.selectedSegmentIndex != index {
+            control.selectedSegmentIndex = index
+            control.sendActions(for: .valueChanged)
+        }
+        return true
     }
 }

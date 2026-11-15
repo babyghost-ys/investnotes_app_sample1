@@ -23,6 +23,7 @@ class NativeSegmentedControl extends StatelessWidget {
     this.iconColor,
     this.textColor,
     this.selectedTextColor,
+    this.semanticLabels,
   });
 
   /// Segment labels to display, in order
@@ -62,6 +63,11 @@ class NativeSegmentedControl extends StatelessWidget {
   /// Optional text color for the selected segment.
   final Color? selectedTextColor;
 
+  /// What assistive technologies say for each segment, in order, in place
+  /// of its visible label or icon: "System" for a segment that shows
+  /// "SYS". Never drawn. Ignored unless it has one entry per segment.
+  final List<String>? semanticLabels;
+
   @override
   Widget build(BuildContext context) {
     return switch (NativeStyle.of(context)) {
@@ -78,6 +84,7 @@ class NativeSegmentedControl extends StatelessWidget {
         iconColor: iconColor,
         textColor: textColor,
         selectedTextColor: selectedTextColor,
+        semanticLabels: semanticLabels,
       ),
       NativeStyle.material => _buildMaterialSegmentedButton(context),
     };
@@ -95,6 +102,7 @@ class NativeSegmentedControl extends StatelessWidget {
     final icons = this.icons;
     final useIcons = icons != null && icons.isNotEmpty;
     final itemCount = useIcons ? icons.length : labels.length;
+    final spoken = semanticLabels?.length == itemCount ? semanticLabels : null;
 
     for (int i = 0; i < itemCount; i++) {
       if (useIcons) {
@@ -106,6 +114,7 @@ class NativeSegmentedControl extends StatelessWidget {
               icons[i].iconData,
               size: iconSize ?? 20,
               color: iconColor,
+              semanticLabel: spoken?[i],
             ),
           ),
         );
@@ -116,6 +125,7 @@ class NativeSegmentedControl extends StatelessWidget {
             value: i,
             label: Text(
               labels[i],
+              semanticsLabel: spoken?[i],
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

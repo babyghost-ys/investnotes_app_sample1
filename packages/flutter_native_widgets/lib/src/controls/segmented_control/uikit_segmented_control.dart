@@ -22,6 +22,7 @@ class UiKitSegmentedControl extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.selectedTextColor,
+    this.semanticLabels,
   });
 
   /// Segment labels to display, in order
@@ -59,6 +60,9 @@ class UiKitSegmentedControl extends StatefulWidget {
 
   /// Optional text color for the selected segment.
   final Color? selectedTextColor;
+
+  /// What VoiceOver says for each segment, in place of its visible label.
+  final List<String>? semanticLabels;
 
   @override
   State<UiKitSegmentedControl> createState() => _UiKitSegmentedControlState();
@@ -150,6 +154,12 @@ class _UiKitSegmentedControlState extends State<UiKitSegmentedControl> {
       });
     }
 
+    if (!listEquals(widget.semanticLabels, oldWidget.semanticLabels)) {
+      _channel.invokeMethod('setSemanticLabels', {
+        'labels': widget.semanticLabels,
+      });
+    }
+
     _syncThemeIfNeeded();
   }
 
@@ -196,6 +206,10 @@ class _UiKitSegmentedControlState extends State<UiKitSegmentedControl> {
       'isDark': isDark,
       ..._buildThemeParams(),
     };
+
+    if (widget.semanticLabels != null) {
+      params['semanticLabels'] = widget.semanticLabels!;
+    }
 
     // Add SF symbols if provided
     if (widget.icons != null && widget.icons!.isNotEmpty) {
@@ -256,6 +270,9 @@ class _UiKitSegmentedControlState extends State<UiKitSegmentedControl> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Text(
           widget.labels[i],
+          semanticsLabel: widget.semanticLabels?.length == widget.labels.length
+              ? widget.semanticLabels![i]
+              : null,
           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         ),
       );

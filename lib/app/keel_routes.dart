@@ -7,6 +7,7 @@ abstract final class KeelRoutes {
   /// Opening an account straight from Home, outside sign-in.
   static const register = '/register';
   static const finderResults = '/finder/results';
+  static const settings = '/settings';
   static const biometricSettings = '/settings/biometric';
 
   /// Sign-in on Android; on iOS it rises as a native sheet instead.

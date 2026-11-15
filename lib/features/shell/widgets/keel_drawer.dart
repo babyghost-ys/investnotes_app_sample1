@@ -168,6 +168,11 @@ class KeelDrawer extends StatelessWidget {
             title: biometric.title,
             onTap: () => open(KeelRoutes.biometricSettings),
           ),
+        DrawerRow(
+          icon: CupertinoIcons.gear_alt_fill,
+          title: 'Settings',
+          onTap: () => open(KeelRoutes.settings),
+        ),
       ],
     );
   }
