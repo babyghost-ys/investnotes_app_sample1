@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/data/models/explainer.dart';
 import 'package:investnotes_app_sample1/data/models/holding.dart';
 import 'package:investnotes_app_sample1/data/models/issued_note.dart';
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
@@ -578,6 +579,97 @@ class NotesRepository {
             'falls you earn nothing, but your deposit is returned in full.',
         'Interest is usually paid only at maturity, and early withdrawal is '
             'limited, so match the term to when you need the money.',
+      ],
+    ),
+  ];
+
+  late final List<Explainer> explainers = const [
+    Explainer(
+      id: 'v-floor',
+      title: 'A floor in a falling market',
+      payoff: Payoff(type: NoteType.ppn, participation: 1.4),
+      path: [
+        0,
+        0.04,
+        0.02,
+        -0.06,
+        -0.03,
+        -0.12,
+        -0.09,
+        -0.17,
+        -0.21,
+        -0.18,
+        -0.25,
+      ],
+    ),
+    Explainer(
+      id: 'v-cap',
+      title: 'When the cap bites',
+      payoff: Payoff(type: NoteType.mld, cap: 0.3),
+      path: [0, 0.03, 0.08, 0.06, 0.14, 0.19, 0.17, 0.26, 0.33, 0.38, 0.45],
+    ),
+    Explainer(
+      id: 'v-buffer',
+      title: 'A buffer taking the first hit',
+      payoff: Payoff(
+        type: NoteType.par,
+        participation: 1.6,
+        cap: 0.45,
+        buffer: 0.2,
+      ),
+      path: [
+        0,
+        -0.02,
+        0.03,
+        -0.04,
+        -0.08,
+        -0.05,
+        -0.11,
+        -0.09,
+        -0.14,
+        -0.1,
+        -0.12,
+      ],
+    ),
+    Explainer(
+      id: 'v-below',
+      title: 'Falling through the buffer',
+      payoff: Payoff(
+        type: NoteType.par,
+        participation: 1.6,
+        cap: 0.45,
+        buffer: 0.2,
+      ),
+      path: [
+        0,
+        -0.03,
+        -0.08,
+        -0.06,
+        -0.15,
+        -0.19,
+        -0.24,
+        -0.22,
+        -0.3,
+        -0.33,
+        -0.35,
+      ],
+    ),
+    Explainer(
+      id: 'v-autocall',
+      title: 'Riding out a dip to the coupon',
+      payoff: Payoff(type: NoteType.auto, coupon: 0.25, barrier: -0.3),
+      path: [
+        0,
+        -0.05,
+        -0.12,
+        -0.2,
+        -0.24,
+        -0.18,
+        -0.13,
+        -0.07,
+        -0.02,
+        0.03,
+        0.05,
       ],
     ),
   ];

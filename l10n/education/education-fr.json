@@ -1,0 +1,16 @@
+{
+  "labels": {
+    "searchTitle": "Recherche"
+  },
+  "semantics": {
+    "searchNotes": "Rechercher des billets",
+    "videos": "Vidéos",
+    "articles": "Articles",
+    "play": "Lire",
+    "pause": "Pause",
+    "replay": "Revoir",
+    "position": "Position de lecture",
+    "noteReturns": "Le billet rapporte {value}",
+    "marketMoves": "Le marché a varié de {value}"
+  }
+}

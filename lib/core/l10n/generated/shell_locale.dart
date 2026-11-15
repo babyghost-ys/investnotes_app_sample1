@@ -46,8 +46,8 @@ class ShellLabels {
   /// Issued
   final String issued;
 
-  /// Learn
-  final String learn;
+  /// Education
+  final String education;
 
   /// Saved
   final String saved;
@@ -64,7 +64,7 @@ class ShellLabels {
     required this.myNotes,
     required this.offerings,
     required this.issued,
-    required this.learn,
+    required this.education,
     required this.saved,
     required this.findMyNote,
     required this.settings,
@@ -76,7 +76,7 @@ class ShellLabels {
     myNotes: json['myNotes'] as String,
     offerings: json['offerings'] as String,
     issued: json['issued'] as String,
-    learn: json['learn'] as String,
+    education: json['education'] as String,
     saved: json['saved'] as String,
     findMyNote: json['findMyNote'] as String,
     settings: json['settings'] as String,
@@ -88,7 +88,7 @@ class ShellLabels {
     'myNotes': myNotes,
     'offerings': offerings,
     'issued': issued,
-    'learn': learn,
+    'education': education,
     'saved': saved,
     'findMyNote': findMyNote,
     'settings': settings,

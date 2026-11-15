@@ -7,7 +7,7 @@ enum ShellTab {
   myNotes,
   offerings,
   issued,
-  learn;
+  education;
 
   /// The tabs in the bar, in order, for whether someone is signed in.
   static List<ShellTab> shown({required bool signedIn}) => [

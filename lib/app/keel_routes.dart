@@ -8,6 +8,9 @@ abstract final class KeelRoutes {
   static const register = '/register';
   static const finderResults = '/finder/results';
   static const settings = '/settings';
+
+  /// Education's search: the finder's way in, then open notes by type.
+  static const educationSearch = '/education/search';
   static const biometricSettings = '/settings/biometric';
 
   /// Sign-in on Android; on iOS it rises as a native sheet instead.
@@ -25,5 +28,6 @@ abstract final class KeelRoutes {
   static String offeringsItem(String id) => '/offerings/$id';
   static String note(String id) => '/note/$id';
   static String article(String id) => '/article/$id';
+  static String explainer(String id) => '/explainer/$id';
   static String finderStep(int step) => '/finder/step/$step';
 }

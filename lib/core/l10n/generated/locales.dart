@@ -6,6 +6,7 @@ import 'package:keel_localisation/keel_localisation.dart';
 
 import 'account_locale.dart';
 import 'connectivity_locale.dart';
+import 'education_locale.dart';
 import 'finder_locale.dart';
 import 'general_locale.dart';
 import 'home_locale.dart';
@@ -21,6 +22,7 @@ import 'shell_locale.dart';
 
 export 'account_locale.dart';
 export 'connectivity_locale.dart';
+export 'education_locale.dart';
 export 'finder_locale.dart';
 export 'general_locale.dart';
 export 'home_locale.dart';
@@ -38,6 +40,7 @@ export 'shell_locale.dart';
 abstract final class Locales {
   static const account = 'account';
   static const connectivity = 'connectivity';
+  static const education = 'education';
   static const finder = 'finder';
   static const general = 'general';
   static const home = 'home';
@@ -54,6 +57,7 @@ abstract final class Locales {
   static const all = [
     account,
     connectivity,
+    education,
     finder,
     general,
     home,
@@ -73,6 +77,7 @@ abstract final class Locales {
 const localeRegistry = LocaleRegistry({
   Locales.account: AccountLocale.fromJson,
   Locales.connectivity: ConnectivityLocale.fromJson,
+  Locales.education: EducationLocale.fromJson,
   Locales.finder: FinderLocale.fromJson,
   Locales.general: GeneralLocale.fromJson,
   Locales.home: HomeLocale.fromJson,

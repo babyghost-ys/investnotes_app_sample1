@@ -13,8 +13,10 @@ import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart'
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
 import 'package:investnotes_app_sample1/features/finder/widgets/finder_results_skeleton.dart';
-import 'package:investnotes_app_sample1/features/learn/view/article_page.dart';
-import 'package:investnotes_app_sample1/features/learn/widgets/article_skeleton.dart';
+import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
+import 'package:investnotes_app_sample1/features/education/view/education_search_page.dart';
+import 'package:investnotes_app_sample1/features/education/view/explainer_page.dart';
+import 'package:investnotes_app_sample1/features/education/widgets/article_skeleton.dart';
 import 'package:investnotes_app_sample1/features/saved/view/saved_page.dart';
 import 'package:investnotes_app_sample1/features/saved/widgets/saved_skeleton.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
@@ -63,6 +65,33 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
               ),
             );
           },
+        ),
+        GoRoute(
+          path: 'explainer/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'];
+            final explainer = repository.explainers.firstWhere(
+              (e) => e.id == id,
+            );
+            final type = explainer.payoff.type;
+            return keelPage(
+              state,
+              namespaces: const [Locales.general],
+              title: (_) => type.code,
+              semanticTitle: (locale) => type.title(locale[0] as GeneralLocale),
+              child: ExplainerPage(explainer: explainer),
+            );
+          },
+        ),
+        GoRoute(
+          path: 'education/search',
+          pageBuilder: (context, state) => keelPage(
+            state,
+            namespaces: const [Locales.education],
+            title: (locale) =>
+                (locale[0] as EducationLocale).labels.searchTitle,
+            child: const EducationSearchPage(),
+          ),
         ),
         GoRoute(
           path: 'search',

@@ -6,7 +6,7 @@ import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
 import 'package:investnotes_app_sample1/data/models/article.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 
-/// Learn's hero: the lead article, its payoff drawn large on the band.
+/// The Articles segment's lead, its payoff drawn large on the band.
 class LeadArticleCard extends StatelessWidget {
   const LeadArticleCard({
     super.key,

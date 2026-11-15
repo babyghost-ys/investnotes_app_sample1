@@ -1,0 +1,16 @@
+{
+  "labels": {
+    "searchTitle": "Search"
+  },
+  "semantics": {
+    "searchNotes": "Search notes",
+    "videos": "Videos",
+    "articles": "Articles",
+    "play": "Play",
+    "pause": "Pause",
+    "replay": "Play again",
+    "position": "Playback position",
+    "noteReturns": "Note returns {value}",
+    "marketMoves": "Market moved {value}"
+  }
+}

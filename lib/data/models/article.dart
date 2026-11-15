@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'package:investnotes_app_sample1/data/models/note_enums.dart';
 
-/// A short read in Learn, illustrated by the payoff of [type].
+/// A short read in Education, illustrated by the payoff of [type].
 class Article extends Equatable {
   const Article({
     required this.id,
