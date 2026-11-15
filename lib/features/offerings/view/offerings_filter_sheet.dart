@@ -13,9 +13,10 @@ import 'package:investnotes_app_sample1/core/widgets/filter_sheet_layout.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
 import 'package:investnotes_app_sample1/core/widgets/option_chip.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
-import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
+import 'package:investnotes_app_sample1/data/mappers/notes_mapper.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/offering_filter.dart';
 import 'package:investnotes_app_sample1/features/issued/view/date_pick_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/widgets/range_button.dart';
 
@@ -33,7 +34,7 @@ Future<OfferingFilter?> showOfferingsFilter(
   arguments: SheetArguments.wrap(context, {
     'filter': current.encode(),
     'type': type.name,
-    'offerings': [for (final o in offerings) o.toJson()],
+    'offerings': NotesJson.fromOfferings(offerings),
   }),
   decodeResult: OfferingFilter.decode,
   detents: NativeFilterDetents.full,

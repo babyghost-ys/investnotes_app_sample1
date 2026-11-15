@@ -7,7 +7,7 @@ import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
 
 /// An offering in a list: its payoff shape, its name, and the number people
 /// compare it by. A closing date shows only when it is close.

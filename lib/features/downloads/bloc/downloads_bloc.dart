@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/article.dart';
-import 'package:investnotes_app_sample1/data/models/article_transfer.dart';
-import 'package:investnotes_app_sample1/data/repositories/downloads_repository.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article_transfer.dart';
+import 'package:investnotes_app_sample1/domain/repositories/downloads_repository.dart';
 
 part 'downloads_event.dart';
 part 'downloads_state.dart';

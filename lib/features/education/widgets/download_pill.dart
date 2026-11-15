@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
 import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';
 
 /// An article's download control. Tapped, it fills from left to right as

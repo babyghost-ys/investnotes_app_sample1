@@ -1,6 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import 'package:investnotes_app_sample1/data/models/network_status.dart';
+import 'package:investnotes_app_sample1/domain/models/network_status.dart';
 
 /// Whether the device has any network to reach the service through.
 class ConnectivityRepository {

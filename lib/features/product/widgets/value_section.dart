@@ -5,7 +5,7 @@ import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
 
 /// Where the note stands now: its indicative price per 100 of principal,
 /// the change since issue, and how far through its term it is.

@@ -2,8 +2,8 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
 
 /// Words for the finder, read from its namespace and the general one.
 typedef FinderWords = String Function(

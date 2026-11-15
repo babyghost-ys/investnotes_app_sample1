@@ -7,7 +7,7 @@ import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
 
 /// An offering about to close, as a wide card on Home.
 class ClosingCard extends StatelessWidget implements LocalisationConsumer {

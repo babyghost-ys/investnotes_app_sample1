@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/credentials.dart';
+import 'package:investnotes_app_sample1/domain/models/credentials.dart';
 
 part 'register_event.dart';
 part 'register_state.dart';

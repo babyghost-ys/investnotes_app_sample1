@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 import 'package:investnotes_app_sample1/features/probe/widgets/payoff_probe.dart';
 

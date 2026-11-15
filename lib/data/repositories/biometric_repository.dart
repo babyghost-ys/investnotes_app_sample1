@@ -1,7 +1,7 @@
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
+import 'package:investnotes_app_sample1/domain/models/biometric_kind.dart';
 
 /// The device's biometric check, and who on this device signs in with it.
 ///

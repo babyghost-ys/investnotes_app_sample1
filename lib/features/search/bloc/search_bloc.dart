@@ -4,10 +4,10 @@ import 'package:equatable/equatable.dart';
 
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
-import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
+import 'package:investnotes_app_sample1/domain/repositories/notes_repository.dart';
 
 part 'search_event.dart';
 part 'search_state.dart';

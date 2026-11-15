@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/finder_question.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/finder_question.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
 
 part 'finder_event.dart';
 part 'finder_state.dart';

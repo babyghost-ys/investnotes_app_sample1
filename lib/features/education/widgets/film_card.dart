@@ -5,7 +5,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/film.dart';
+import 'package:investnotes_app_sample1/domain/models/film.dart';
 import 'package:investnotes_app_sample1/features/education/view/film_fullscreen.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/film_view.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/play_glyph.dart';

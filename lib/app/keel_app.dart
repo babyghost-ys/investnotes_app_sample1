@@ -11,7 +11,7 @@ import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/data/repositories/biometric_repository.dart';
 import 'package:investnotes_app_sample1/data/repositories/connectivity_repository.dart';
 import 'package:investnotes_app_sample1/data/repositories/downloads_repository_impl.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/domain/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository_impl.dart';
 import 'package:investnotes_app_sample1/features/connectivity/bloc/connectivity_bloc.dart';
 import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';

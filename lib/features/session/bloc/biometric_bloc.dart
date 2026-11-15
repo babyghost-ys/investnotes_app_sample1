@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
+import 'package:investnotes_app_sample1/domain/models/biometric_kind.dart';
 import 'package:investnotes_app_sample1/data/repositories/biometric_repository.dart';
 
 part 'biometric_event.dart';

@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/network_status.dart';
+import 'package:investnotes_app_sample1/domain/models/network_status.dart';
 import 'package:investnotes_app_sample1/data/repositories/connectivity_repository.dart';
 
 part 'connectivity_event.dart';

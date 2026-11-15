@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 
 /// Education's hero and its way into search: every note family's payoff

@@ -1,10 +1,10 @@
-import 'package:investnotes_app_sample1/data/models/article.dart';
-import 'package:investnotes_app_sample1/data/models/explainer.dart';
-import 'package:investnotes_app_sample1/data/models/film.dart';
-import 'package:investnotes_app_sample1/data/models/holding.dart';
-import 'package:investnotes_app_sample1/data/models/issued_note.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/explainer.dart';
+import 'package:investnotes_app_sample1/domain/models/film.dart';
+import 'package:investnotes_app_sample1/domain/models/holding.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_note.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
 
 /// The notes, the investor's holdings and Education's content. Every call
 /// fails with [NotesUnavailable] when the service cannot hand them over.

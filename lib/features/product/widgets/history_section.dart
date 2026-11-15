@@ -8,7 +8,7 @@ import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/sparkline.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
 
 /// The note's indicative value since issue, against par, with its high
 /// and low.

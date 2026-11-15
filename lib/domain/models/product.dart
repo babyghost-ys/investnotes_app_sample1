@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/json.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/note_event.dart';
-import 'package:investnotes_app_sample1/data/models/payoff.dart';
-import 'package:investnotes_app_sample1/data/models/product_section.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/note_event.dart';
+import 'package:investnotes_app_sample1/domain/models/payoff.dart';
+import 'package:investnotes_app_sample1/domain/models/product_section.dart';
 
 /// A note as its page shows it: an offering still open for subscription,
 /// or a note already issued, with its value since.
@@ -25,26 +24,6 @@ class Product extends Equatable {
     this.calledOn,
     this.history = const [],
   });
-
-  factory Product.fromJson(Json json) => Product(
-    id: json['id'] as String,
-    name: json['name'] as String,
-    underlying: json['underlying'] as String,
-    payoff: Payoff.fromJson(json['payoff'] as Json),
-    currency: Currency.values.byName(json['currency'] as String),
-    region: Region.values.byName(json['region'] as String),
-    assetClass: AssetClass.values.byName(json['assetClass'] as String),
-    fundserv: json['fundserv'] as String,
-    issueDate: JsonRead.date(json['issueDate']),
-    maturity: JsonRead.date(json['maturity']),
-    closes: JsonRead.dateOrNull(json['closes']),
-    status: switch (json['status']) {
-      final String status => IssuedStatus.values.byName(status),
-      _ => null,
-    },
-    calledOn: JsonRead.dateOrNull(json['calledOn']),
-    history: JsonRead.numbers(json['history']),
-  );
 
   final String id;
   final String name;

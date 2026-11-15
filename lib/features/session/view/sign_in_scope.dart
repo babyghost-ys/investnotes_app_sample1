@@ -2,7 +2,7 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
+import 'package:investnotes_app_sample1/domain/models/biometric_kind.dart';
 
 /// The account that signs in with Face ID or Touch ID, and which.
 typedef BiometricAccount = ({String name, BiometricKind kind});

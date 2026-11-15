@@ -6,7 +6,7 @@ import 'package:keel_localisation/keel_localisation.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/payoff.dart';
+import 'package:investnotes_app_sample1/domain/models/payoff.dart';
 
 /// What the note pays at maturity for a ladder of market moves, the
 /// market's move drawn as a thin line under the note's bar.

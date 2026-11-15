@@ -6,13 +6,11 @@ import 'package:material_ui/material_ui.dart';
 
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
-import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
-import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
-import 'package:investnotes_app_sample1/data/models/issued_note.dart';
-import 'package:investnotes_app_sample1/data/models/json.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
-import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
+import 'package:investnotes_app_sample1/domain/models/biometric_kind.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_filter.dart';
+import 'package:investnotes_app_sample1/data/mappers/notes_mapper.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/offering_filter.dart';
 import 'package:investnotes_app_sample1/features/education/view/film_fullscreen.dart';
 import 'package:investnotes_app_sample1/features/issued/view/date_pick_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/view/issued_filter_sheet.dart';
@@ -49,11 +47,11 @@ class CommonSheetApp extends StatelessWidget {
       'offeringsFilter' => OfferingsFilterSheet(
         initial: OfferingFilter.decode((argument as Map)['filter'] as Object),
         type: NoteType.values.byName(argument['type'] as String),
-        offerings: _list(argument['offerings'], Offering.fromJson),
+        offerings: NotesJson.toOfferings(argument['offerings']),
       ),
       'issuedFilter' => IssuedFilterSheet(
         initial: IssuedFilter.decode((argument as Map)['filter'] as Object),
-        notes: _list(argument['notes'], IssuedNote.fromJson),
+        notes: NotesJson.toIssued(argument['notes']),
       ),
       'datePick' => DatePickSheet(
         date: DateTime.parse((argument as Map)['date'] as String),
@@ -69,22 +67,6 @@ class CommonSheetApp extends StatelessWidget {
       final route => throw ArgumentError.value(route, 'route', 'Unknown sheet'),
     };
   }
-
-  /// A list the page handed over as JSON. The platform channel gives maps
-  /// back untyped, so each is copied into a [Json] first.
-  static List<T> _list<T>(Object? value, T Function(Json json) decode) => [
-    for (final item in value as List) decode(_json(item)),
-  ];
-
-  /// A map from the channel, nested maps and lists included, as [Json].
-  static Json _json(Object? value) => {
-    for (final MapEntry(:key, :value) in (value as Map).entries)
-      key as String: switch (value) {
-        Map() => _json(value),
-        List() => [for (final v in value) v is Map ? _json(v) : v],
-        _ => value,
-      },
-  };
 
   @override
   Widget build(BuildContext context) => BlocProvider(

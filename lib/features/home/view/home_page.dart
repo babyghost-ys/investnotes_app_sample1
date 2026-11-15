@@ -6,8 +6,8 @@ import 'package:investnotes_app_sample1/app/keel_routes.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/skeleton_pulse.dart';
-import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/account_banner.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/closing_card.dart';

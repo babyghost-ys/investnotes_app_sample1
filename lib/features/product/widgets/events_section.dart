@@ -5,7 +5,7 @@ import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/note_event.dart';
+import 'package:investnotes_app_sample1/domain/models/note_event.dart';
 
 /// The note's dated steps down a line: past ones filled, the next one
 /// ringed, later ones open.

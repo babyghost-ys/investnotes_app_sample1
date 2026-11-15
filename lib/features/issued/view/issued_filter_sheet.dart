@@ -3,6 +3,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:keel_localisation/keel_localisation.dart';
 
+import 'package:investnotes_app_sample1/data/mappers/notes_mapper.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
@@ -11,9 +12,9 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/filter_sheet_layout.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
 import 'package:investnotes_app_sample1/core/widgets/option_chip.dart';
-import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
-import 'package:investnotes_app_sample1/data/models/issued_note.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_filter.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_note.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 import 'package:investnotes_app_sample1/features/issued/view/date_pick_sheet.dart';
 import 'package:investnotes_app_sample1/features/issued/widgets/range_button.dart';
 
@@ -28,7 +29,7 @@ Future<IssuedFilter?> showIssuedFilter(
   // The sheet runs in its own engine: the notes go with it as JSON.
   arguments: SheetArguments.wrap(context, {
     'filter': current.encode(),
-    'notes': [for (final n in notes) n.toJson()],
+    'notes': NotesJson.fromIssued(notes),
   }),
   decodeResult: IssuedFilter.decode,
   backgroundColor: KeelColors.page.of(context),

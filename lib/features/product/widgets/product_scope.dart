@@ -1,7 +1,7 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/domain/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/product/bloc/product_load_bloc.dart';
 
 /// Provides the [ProductLoadBloc] that fetches note [id], for [child] and

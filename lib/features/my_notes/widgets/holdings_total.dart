@@ -5,7 +5,7 @@ import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/holding.dart';
+import 'package:investnotes_app_sample1/domain/models/holding.dart';
 
 /// What everything held is worth today, its return since issue, and how it
 /// splits across the notes, one segment each in the shades of their rows.

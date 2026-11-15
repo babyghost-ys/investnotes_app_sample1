@@ -2,7 +2,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:investnotes_app_sample1/core/widgets/error_snack_bar.dart';
-import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
+import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 
 /// Says so with an [ErrorSnackBar] when the offerings fail to load, while

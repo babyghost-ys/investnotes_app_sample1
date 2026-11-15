@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
 
 enum OfferingSort { closing, headline, term }
 

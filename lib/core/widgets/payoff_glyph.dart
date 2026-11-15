@@ -1,6 +1,6 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 
-import 'package:investnotes_app_sample1/data/models/payoff.dart';
+import 'package:investnotes_app_sample1/domain/models/payoff.dart';
 
 /// A note's payoff drawn as a single line: the shape that tells one note
 /// family from another at a glance.

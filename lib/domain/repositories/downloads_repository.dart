@@ -1,5 +1,5 @@
-import 'package:investnotes_app_sample1/data/models/article.dart';
-import 'package:investnotes_app_sample1/data/models/article_transfer.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article_transfer.dart';
 
 /// Articles kept on this device to read offline.
 abstract interface class DownloadsRepository {

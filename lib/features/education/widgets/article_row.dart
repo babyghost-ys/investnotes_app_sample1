@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
-import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
 import 'package:investnotes_app_sample1/features/home/widgets/type_tile.dart';
 
 /// An article in Education: the payoff it explains, and its title.

@@ -5,7 +5,7 @@ import 'package:keel_localisation/keel_localisation.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/draft/draft_bloc.dart';
 import 'package:investnotes_app_sample1/core/widgets/keel_field.dart';
-import 'package:investnotes_app_sample1/data/models/credentials.dart';
+import 'package:investnotes_app_sample1/domain/models/credentials.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/advance_button.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/flow_body.dart';
 import 'package:investnotes_app_sample1/features/account/widgets/flow_done.dart';

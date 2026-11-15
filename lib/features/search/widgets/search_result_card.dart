@@ -9,8 +9,8 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
 
 /// A search result. Closed, it shows the note's shape, name and standing;
 /// tapped, its header turns the bar's blue and its order terms unfold,

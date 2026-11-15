@@ -8,7 +8,7 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
 import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/core/widgets/skeleton_pulse.dart';
-import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
+import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
 
 /// A page's body behind the [LoadingPhase] of the bloc [B] that fetches its
 /// data: the page's own [skeleton] while it loads, then [child], faded in

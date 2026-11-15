@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
 
 /// How far an article's download has come. The last one carries the
 /// [article] as it arrived, ready to keep.

@@ -4,11 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:investnotes_app_sample1/data/api/api_config.dart';
-import 'package:investnotes_app_sample1/data/models/article.dart';
-import 'package:investnotes_app_sample1/data/models/article_transfer.dart';
+import 'package:investnotes_app_sample1/data/mappers/notes_mapper.dart';
+import 'package:investnotes_app_sample1/data/models/article_model.dart';
+import 'package:investnotes_app_sample1/domain/models/article.dart';
+import 'package:investnotes_app_sample1/domain/models/article_transfer.dart';
 import 'package:investnotes_app_sample1/data/models/json.dart';
-import 'package:investnotes_app_sample1/data/repositories/downloads_repository.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/domain/repositories/downloads_repository.dart';
+import 'package:investnotes_app_sample1/domain/repositories/notes_repository.dart';
 
 /// [DownloadsRepository] over the Keel API, keeping each article whole in
 /// shared preferences so it reads with no connection.
@@ -50,7 +52,10 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
         }
       }
       final body = jsonDecode(utf8.decode(bytes)) as Json;
-      yield ArticleTransfer(1, Article.fromJson(body['data'] as Json));
+      yield ArticleTransfer(
+        1,
+        ArticleModel.fromJson(JsonRead.object(body['data'])).toDomain(),
+      );
     } catch (_) {
       throw const NotesUnavailable();
     }
@@ -62,13 +67,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     await preferences.remove(_oldKey);
     return [
       for (final saved in preferences.getStringList(_key) ?? const <String>[])
-        Article.fromJson(jsonDecode(saved) as Json),
+        ArticleModel.fromJson(jsonDecode(saved) as Json).toDomain(),
     ];
   }
 
   @override
   Future<void> keep(List<Article> articles) async =>
       (await SharedPreferences.getInstance()).setStringList(_key, [
-        for (final a in articles) jsonEncode(a.toJson()),
+        for (final a in articles) jsonEncode(a.toModel().toJson()),
       ]);
 }

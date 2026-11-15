@@ -7,7 +7,7 @@ import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/sparkline.dart';
-import 'package:investnotes_app_sample1/data/models/holding.dart';
+import 'package:investnotes_app_sample1/domain/models/holding.dart';
 
 /// A note held: its shade in the split, its path, its name and worth, and
 /// its return. Opens the note's page.

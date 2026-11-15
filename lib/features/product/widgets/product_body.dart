@@ -2,8 +2,8 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
-import 'package:investnotes_app_sample1/data/models/product_section.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
+import 'package:investnotes_app_sample1/domain/models/product_section.dart';
 import 'package:investnotes_app_sample1/features/probe/widgets/payoff_probe.dart';
 import 'package:investnotes_app_sample1/features/product/bloc/product_bloc.dart';
 import 'package:investnotes_app_sample1/features/product/widgets/events_section.dart';

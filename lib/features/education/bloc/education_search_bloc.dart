@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
-import 'package:investnotes_app_sample1/data/models/offering_filter.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/offering_filter.dart';
 
 part 'education_search_event.dart';
 part 'education_search_state.dart';

@@ -1,7 +1,7 @@
 import 'package:investnotes_app_sample1/core/formatting/formats.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/offering.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/offering.dart';
 
 /// Figures as VoiceOver and TalkBack should say them: with what they mean,
 /// where the screen shows only the number. In the language of [general].

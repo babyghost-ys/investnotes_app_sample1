@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:cupertino_ui/cupertino_ui.dart';
 
-import 'package:investnotes_app_sample1/data/models/biometric_kind.dart';
+import 'package:investnotes_app_sample1/domain/models/biometric_kind.dart';
 
 /// The Face ID or Touch ID glyph, drawn in one even stroke.
 class BiometricGlyph extends StatelessWidget {

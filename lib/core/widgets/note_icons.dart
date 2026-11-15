@@ -1,6 +1,6 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 
 /// Flutter-drawn icons for values shown in Flutter widgets. Native controls
 /// use the SF Symbol names kept on the enums.

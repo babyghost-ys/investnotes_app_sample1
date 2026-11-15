@@ -2,8 +2,7 @@ import 'dart:math' as math;
 
 import 'package:equatable/equatable.dart';
 
-import 'package:investnotes_app_sample1/data/models/json.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 
 /// What a note pays at maturity for a given move in its underlying.
 ///
@@ -19,24 +18,6 @@ class Payoff extends Equatable {
     this.coupon = 0,
     this.barrier = 0,
   });
-
-  factory Payoff.fromJson(Json json) => Payoff(
-    type: NoteType.values.byName(json['type'] as String),
-    participation: JsonRead.number(json['participation']),
-    cap: JsonRead.numberOrNull(json['cap']),
-    buffer: JsonRead.number(json['buffer']),
-    coupon: JsonRead.number(json['coupon']),
-    barrier: JsonRead.number(json['barrier']),
-  );
-
-  Json toJson() => {
-    'type': type.name,
-    'participation': participation,
-    'cap': cap,
-    'buffer': buffer,
-    'coupon': coupon,
-    'barrier': barrier,
-  };
 
   final NoteType type;
   final double participation;

@@ -8,8 +8,8 @@ import 'package:investnotes_app_sample1/core/formatting/spoken.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/note_icons.dart';
 import 'package:investnotes_app_sample1/core/widgets/payoff_glyph.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/product.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/product.dart';
 
 /// The note's name, its payoff shape, and how it stands: open until a
 /// date, or active, called or matured.

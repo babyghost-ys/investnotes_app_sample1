@@ -2,7 +2,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/services.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/explainer.dart';
+import 'package:investnotes_app_sample1/domain/models/explainer.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/explainer_stage.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/play_glyph.dart';
 

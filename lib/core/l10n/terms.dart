@@ -1,8 +1,8 @@
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
-import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
-import 'package:investnotes_app_sample1/data/models/note_event.dart';
-import 'package:investnotes_app_sample1/data/models/product_section.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_filter.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/note_event.dart';
+import 'package:investnotes_app_sample1/domain/models/product_section.dart';
 
 /// What each value of the notes' enums is called, in a namespace's language.
 /// The enums stay plain data; their words live in the JSON.

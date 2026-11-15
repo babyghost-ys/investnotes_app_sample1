@@ -3,10 +3,10 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:investnotes_app_sample1/core/loading/loadable.dart';
-import 'package:investnotes_app_sample1/data/models/issued_filter.dart';
-import 'package:investnotes_app_sample1/data/models/issued_note.dart';
-import 'package:investnotes_app_sample1/data/models/loading_phase.dart';
-import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_filter.dart';
+import 'package:investnotes_app_sample1/domain/models/issued_note.dart';
+import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
+import 'package:investnotes_app_sample1/domain/repositories/notes_repository.dart';
 
 part 'issued_event.dart';
 part 'issued_state.dart';

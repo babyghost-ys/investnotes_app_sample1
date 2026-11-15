@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:cupertino_ui/cupertino_ui.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
-import 'package:investnotes_app_sample1/data/models/explainer.dart';
-import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/domain/models/explainer.dart';
+import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 
 /// An explainer film's frame at [progress] (0 at issue, 1 at maturity):
 /// the market's path in pale white, the note's return over it in bright
