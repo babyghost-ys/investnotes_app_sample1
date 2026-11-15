@@ -10,8 +10,10 @@ import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/app/keel_theme.dart';
 import 'package:investnotes_app_sample1/data/repositories/biometric_repository.dart';
 import 'package:investnotes_app_sample1/data/repositories/connectivity_repository.dart';
+import 'package:investnotes_app_sample1/data/repositories/downloads_repository.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/connectivity/bloc/connectivity_bloc.dart';
+import 'package:investnotes_app_sample1/features/downloads/bloc/downloads_bloc.dart';
 import 'package:investnotes_app_sample1/features/finder/bloc/finder_bloc.dart';
 import 'package:investnotes_app_sample1/features/issued/bloc/issued_bloc.dart';
 import 'package:investnotes_app_sample1/features/my_notes/bloc/my_notes_bloc.dart';
@@ -73,6 +75,12 @@ class _KeelAppState extends State<KeelApp> {
         BlocProvider(create: (_) => IssuedBloc(_repository)),
         BlocProvider(
           create: (_) => MyNotesBloc(_repository)..add(const MyNotesStarted()),
+        ),
+        // Articles kept to read offline, and those still arriving.
+        BlocProvider(
+          create: (_) =>
+              DownloadsBloc(DownloadsRepository())
+                ..add(const DownloadsStarted()),
         ),
         // One run of "find my note" at a time; starting it clears the last.
         BlocProvider(create: (_) => FinderBloc(_repository)),

@@ -13,6 +13,9 @@
     "noteReturns": "Note returns {value}",
     "marketMoves": "Market moved {value}",
     "fullScreen": "Full screen",
-    "exitFullScreen": "Exit full screen"
+    "exitFullScreen": "Exit full screen",
+    "download": "Download",
+    "cancelDownload": "Stop download",
+    "openDownload": "Open download"
   }
 }

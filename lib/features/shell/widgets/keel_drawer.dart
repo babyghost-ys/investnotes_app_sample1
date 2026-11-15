@@ -172,6 +172,11 @@ class KeelDrawer extends StatelessWidget implements LocalisationConsumer {
           onTap: () => open(KeelRoutes.saved),
         ),
         DrawerRow(
+          icon: CupertinoIcons.arrow_down_circle_fill,
+          title: words.labels.downloads,
+          onTap: () => open(KeelRoutes.downloads),
+        ),
+        DrawerRow(
           icon: CupertinoIcons.wand_stars,
           title: words.labels.findMyNote,
           onTap: () async {

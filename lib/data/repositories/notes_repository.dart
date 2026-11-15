@@ -582,6 +582,46 @@ class NotesRepository {
             'limited, so match the term to when you need the money.',
       ],
     ),
+    Article(
+      id: 'a-participation',
+      title: 'Participation: how much of the rise you keep',
+      type: NoteType.ppn,
+      paragraphs: [
+        'Participation is the share of the underlying’s rise a protected '
+            'note pays at maturity. At 140%, a 10% rise returns 14%.',
+        'It is set on the day the note is struck, from interest rates and '
+            'the price of options. Higher rates and calmer markets lift it.',
+        'Some notes trade a higher participation for a cap. Work out the '
+            'rise at which the capped note stops beating the uncapped one.',
+      ],
+    ),
+    Article(
+      id: 'a-barrier',
+      title: 'Accelerated returns above a barrier',
+      type: NoteType.par,
+      paragraphs: [
+        'An accelerated return note multiplies the rise of its underlying, '
+            'often by one and a half or two times, up to a maximum return.',
+        'Your principal is at risk. A barrier, say 30% below the start, '
+            'decides how a fall is treated: above it you get your money back; '
+            'below it you lose as much as the underlying.',
+        'The barrier is usually checked only at maturity, so a deep fall '
+            'during the term matters less than where the market ends.',
+      ],
+    ),
+    Article(
+      id: 'a-memory',
+      title: 'Memory coupons, missed and repaid',
+      type: NoteType.auto,
+      paragraphs: [
+        'A coupon with memory is skipped, not lost, when the underlying is '
+            'below its coupon level on an observation date.',
+        'If a later observation is back above that level, every missed '
+            'coupon is paid at once with the current one.',
+        'Memory makes a choppy market less costly, but coupons missed in '
+            'the final years may never be repaid if the market stays low.',
+      ],
+    ),
   ];
 
   late final List<Film> films = const [

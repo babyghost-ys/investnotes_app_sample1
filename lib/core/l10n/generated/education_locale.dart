@@ -78,6 +78,15 @@ class EducationSemantics {
   /// Exit full screen
   final String exitFullScreen;
 
+  /// Download
+  final String download;
+
+  /// Stop download
+  final String cancelDownload;
+
+  /// Open download
+  final String openDownload;
+
   const EducationSemantics({
     required this.searchNotes,
     required this.videos,
@@ -90,6 +99,9 @@ class EducationSemantics {
     required this._marketMoves,
     required this.fullScreen,
     required this.exitFullScreen,
+    required this.download,
+    required this.cancelDownload,
+    required this.openDownload,
   });
 
   factory EducationSemantics.fromJson(Map<String, Object?> json) =>
@@ -105,6 +117,9 @@ class EducationSemantics {
         marketMoves: json['marketMoves'] as String,
         fullScreen: json['fullScreen'] as String,
         exitFullScreen: json['exitFullScreen'] as String,
+        download: json['download'] as String,
+        cancelDownload: json['cancelDownload'] as String,
+        openDownload: json['openDownload'] as String,
       );
 
   Map<String, Object?> toJson() => {
@@ -119,6 +134,9 @@ class EducationSemantics {
     'marketMoves': _marketMoves,
     'fullScreen': fullScreen,
     'exitFullScreen': exitFullScreen,
+    'download': download,
+    'cancelDownload': cancelDownload,
+    'openDownload': openDownload,
   };
 
   String noteReturns({required Object value}) =>

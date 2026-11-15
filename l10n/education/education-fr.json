@@ -13,6 +13,9 @@
     "noteReturns": "Le billet rapporte {value}",
     "marketMoves": "Le marché a varié de {value}",
     "fullScreen": "Plein écran",
-    "exitFullScreen": "Quitter le plein écran"
+    "exitFullScreen": "Quitter le plein écran",
+    "download": "Télécharger",
+    "cancelDownload": "Arrêter le téléchargement",
+    "openDownload": "Ouvrir le téléchargement"
   }
 }

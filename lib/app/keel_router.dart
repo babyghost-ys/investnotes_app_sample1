@@ -10,6 +10,7 @@ import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
 import 'package:investnotes_app_sample1/core/widgets/responsive_detail_page.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
+import 'package:investnotes_app_sample1/features/downloads/view/downloads_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_page.dart';
 import 'package:investnotes_app_sample1/features/finder/view/finder_results_page.dart';
 import 'package:investnotes_app_sample1/features/finder/widgets/finder_results_skeleton.dart';
@@ -113,6 +114,16 @@ GoRouter keelRouter(NotesRepository repository) => GoRouter(
               skeleton: SavedSkeleton(),
               child: SavedPage(),
             ),
+          ),
+        ),
+        GoRoute(
+          path: 'downloads',
+          pageBuilder: (context, state) => keelPage(
+            state,
+            namespaces: const [Locales.downloads],
+            title: (locale) => (locale[0] as DownloadsLocale).labels.title,
+            // Kept on the device: nothing to wait for.
+            child: const DownloadsPage(),
           ),
         ),
         GoRoute(

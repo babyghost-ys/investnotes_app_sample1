@@ -4,6 +4,9 @@ abstract final class KeelRoutes {
   static const search = '/search';
   static const saved = '/saved';
 
+  /// Articles kept on the device to read offline.
+  static const downloads = '/downloads';
+
   /// Opening an account straight from Home, outside sign-in.
   static const register = '/register';
   static const finderResults = '/finder/results';

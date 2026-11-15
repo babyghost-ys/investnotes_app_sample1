@@ -34,6 +34,12 @@ abstract final class KeelColors {
     darkColor: Color(0xFF13233F),
   );
 
+  /// [mist] one step deeper: what fills a control as its work completes.
+  static const mistDeep = CupertinoDynamicColor.withBrightness(
+    color: Color(0xFFC6DAF7),
+    darkColor: Color(0xFF1F3B66),
+  );
+
   /// Light lines drawn on the tide band.
   static const foam = Color(0xFFBFD6FA);
 

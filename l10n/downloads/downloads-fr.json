@@ -1,0 +1,9 @@
+{
+  "labels": {
+    "title": "Téléchargements"
+  },
+  "semantics": {
+    "nothingDownloaded": "Aucun téléchargement",
+    "remove": "Supprimer le téléchargement"
+  }
+}

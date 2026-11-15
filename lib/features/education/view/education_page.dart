@@ -11,10 +11,10 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/data/repositories/notes_repository.dart';
 import 'package:investnotes_app_sample1/features/education/bloc/education_bloc.dart';
 import 'package:investnotes_app_sample1/features/education/view/article_page.dart';
-import 'package:investnotes_app_sample1/features/education/widgets/article_row.dart';
+import 'package:investnotes_app_sample1/data/models/note_enums.dart';
+import 'package:investnotes_app_sample1/features/education/widgets/article_group.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/explainer_card.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/film_card.dart';
-import 'package:investnotes_app_sample1/features/education/widgets/lead_article_card.dart';
 import 'package:investnotes_app_sample1/features/education/widgets/search_band.dart';
 
 /// Education: the way into search, then films or articles.
@@ -22,19 +22,26 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
   const EducationPage({super.key});
 
   @override
-  List<String> get namespaces => const [Locales.education];
+  List<String> get namespaces => const [Locales.education, Locales.general];
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => EducationBloc(),
     child: LocalisedBuilder(
       consumer: this,
-      builder: (context, locale) =>
-          _build(context, locale[0] as EducationLocale),
+      builder: (context, locale) => _build(
+        context,
+        locale[0] as EducationLocale,
+        locale[1] as GeneralLocale,
+      ),
     ),
   );
 
-  Widget _build(BuildContext context, EducationLocale words) {
+  Widget _build(
+    BuildContext context,
+    EducationLocale words,
+    GeneralLocale general,
+  ) {
     final repository = context.read<NotesRepository>();
     final insets = MediaQuery.paddingOf(context);
     return ColoredBox(
@@ -119,17 +126,22 @@ class EducationPage extends StatelessWidget implements LocalisationConsumer {
                       },
                     ),
                   ],
+                  // Grouped by family, in the order the families are
+                  // offered.
                   EducationSegment.articles => [
-                    LeadArticleCard(
-                      article: articles.first,
-                      onTap: () => openArticle(context, articles.first),
-                    ),
-                    const SizedBox(height: 8),
-                    for (final a in articles.skip(1))
-                      ArticleRow(
-                        article: a,
-                        onTap: () => openArticle(context, a),
-                      ),
+                    for (final type in NoteType.values)
+                      if (articles.where((a) => a.type == type).toList()
+                          case final group when group.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 30),
+                          child: ArticleGroup(
+                            type: type,
+                            articles: group,
+                            words: words.semantics,
+                            general: general,
+                            onOpen: (a) => openArticle(context, a),
+                          ),
+                        ),
                   ],
                 },
               ],

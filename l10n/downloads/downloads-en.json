@@ -1,0 +1,9 @@
+{
+  "labels": {
+    "title": "Downloads"
+  },
+  "semantics": {
+    "nothingDownloaded": "Nothing downloaded",
+    "remove": "Remove download"
+  }
+}
