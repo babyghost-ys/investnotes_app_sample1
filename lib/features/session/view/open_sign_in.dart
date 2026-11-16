@@ -2,11 +2,9 @@ import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:keel_localisation/keel_localisation.dart';
 
 import 'package:investnotes_app_sample1/app/sheet_arguments.dart';
 import 'package:investnotes_app_sample1/app/keel_routes.dart';
-import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/biometric_bloc.dart';
 import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart';
@@ -16,7 +14,15 @@ import 'package:investnotes_app_sample1/features/session/bloc/session_bloc.dart'
 ///
 /// An account that signs in with Face ID or Touch ID is welcomed back
 /// first; otherwise sign-in opens on username and password.
-Future<void> openSignIn(BuildContext context) async {
+///
+/// [title] and [homeTitle] are the sheet's first bar, the words its own
+/// route sets (sign_in_route): [title] over sign-in, [homeTitle] on the
+/// welcome back's close.
+Future<void> openSignIn(
+  BuildContext context, {
+  required String title,
+  required String homeTitle,
+}) async {
   final biometric = context.read<BiometricBloc>().state;
   if (NativeStyle.of(context) != NativeStyle.native) {
     await context.push<void>(
@@ -25,15 +31,6 @@ Future<void> openSignIn(BuildContext context) async {
     return;
   }
   final session = context.read<SessionBloc>();
-  // The first page's bar, as the sheet's own route sets it (sign_in_route).
-  final words =
-      context
-              .read<LocalisationBloc>()
-              .state
-              .catalogue
-              .all(const [Locales.session])
-              .first
-          as SessionLocale;
   final name = await NativeSheet.show<String>(
     context: context,
     route: 'signIn',
@@ -56,9 +53,9 @@ Future<void> openSignIn(BuildContext context) async {
     barShadow: NativeTheme.of(context).barStyle.shadow,
     plainBarButtons: true,
     barTitleStyle: NativeTheme.of(context).barStyle.titleStyle,
-    barTitle: biometric.enabled ? null : words.labels.signIn,
+    barTitle: biometric.enabled ? null : title,
     barClose: true,
-    barCloseTitle: biometric.enabled ? words.labels.home : null,
+    barCloseTitle: biometric.enabled ? homeTitle : null,
     // The sheet runs its own engine and router; see the native sheet app.
     builder: (_) => const SizedBox.shrink(),
   );

@@ -25,15 +25,23 @@ class KeelDrawer extends StatelessWidget implements LocalisationConsumer {
   static const _white = CupertinoColors.white;
 
   @override
-  List<String> get namespaces => const [Locales.shell];
+  List<String> get namespaces => const [Locales.shell, Locales.session];
 
   @override
   Widget build(BuildContext context) => LocalisedBuilder(
     consumer: this,
-    builder: (context, locale) => _build(context, locale[0] as ShellLocale),
+    builder: (context, locale) => _build(
+      context,
+      locale[0] as ShellLocale,
+      locale[1] as SessionLocale,
+    ),
   );
 
-  Widget _build(BuildContext context, ShellLocale words) {
+  Widget _build(
+    BuildContext context,
+    ShellLocale words,
+    SessionLocale sessionWords,
+  ) {
     final shell = context.watch<ShellBloc>().state;
     final session = context.watch<SessionBloc>().state;
     final biometric = context.watch<BiometricBloc>().state.kind;
@@ -105,7 +113,13 @@ class KeelDrawer extends StatelessWidget implements LocalisationConsumer {
                   iconSize: 22,
                   onPressed: () async {
                     await close();
-                    if (host.mounted) await openSignIn(host);
+                    if (host.mounted) {
+                      await openSignIn(
+                        host,
+                        title: sessionWords.labels.signIn,
+                        homeTitle: sessionWords.labels.home,
+                      );
+                    }
                   },
                 ),
             ],
