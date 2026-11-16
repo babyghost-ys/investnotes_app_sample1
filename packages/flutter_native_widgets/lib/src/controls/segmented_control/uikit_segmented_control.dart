@@ -154,6 +154,10 @@ class _UiKitSegmentedControlState extends State<UiKitSegmentedControl> {
       });
     }
 
+    if (!listEquals(widget.labels, oldWidget.labels)) {
+      _channel.invokeMethod('setLabels', {'labels': widget.labels});
+    }
+
     if (!listEquals(widget.semanticLabels, oldWidget.semanticLabels)) {
       _channel.invokeMethod('setSemanticLabels', {
         'labels': widget.semanticLabels,

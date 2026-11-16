@@ -217,6 +217,21 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
             }
             result(nil)
 
+        case "setLabels":
+            // A new language renames the segments in place: same count,
+            // same selection, so the control neither rebuilds nor slides.
+            if let args = call.arguments as? [String: Any],
+               let labels = args["labels"] as? [String],
+               labels.count == segmentedControl.numberOfSegments {
+                for (index, label) in labels.enumerated()
+                where segmentedControl.titleForSegment(at: index) != label {
+                    segmentedControl.setTitle(label, forSegmentAt: index)
+                }
+                segmentedControl.invalidateIntrinsicContentSize()
+                segmentedControl.setNeedsLayout()
+            }
+            result(nil)
+
         case "setSemanticLabels":
             let args = call.arguments as? [String: Any]
             segmentedControl.semanticLabels = args?["labels"] as? [String]
