@@ -1,6 +1,7 @@
 import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:keel_localisation/keel_localisation.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 import 'package:investnotes_app_sample1/app/common_overlay.dart';
 import 'package:investnotes_app_sample1/app/keel_app.dart';
@@ -9,7 +10,14 @@ import 'package:investnotes_app_sample1/app/common_sheet_app.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/features/splash/view/splash_page.dart';
 
+/// Every engine in the process shares one PDFium: the main window and each
+/// native sheet. Without the gate, a sheet's engine closing tears PDFium
+/// down under the main window, and its next PDF call (a swiped-away
+/// download's thumbnail closing, say) crashes the app.
+void _sharePdfium() => Pdfrx.useProcessWidePdfiumGate = true;
+
 Future<void> main() async {
+  _sharePdfium();
   final binding = WidgetsFlutterBinding.ensureInitialized();
   // The strip below the status bar, where it is drawn in this isolate.
   NativeOverlayContainer.builder = CommonOverlay.build;
@@ -47,5 +55,6 @@ Future<void> main() async {
 /// Each native sheet runs in an engine of its own, started here.
 @pragma('vm:entry-point')
 void commonSheetMain() {
+  _sharePdfium();
   runCommonSheetApp();
 }
