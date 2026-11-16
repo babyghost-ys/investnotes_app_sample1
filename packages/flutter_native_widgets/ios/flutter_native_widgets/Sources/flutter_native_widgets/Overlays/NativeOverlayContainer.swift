@@ -51,6 +51,11 @@ final class NativeOverlayContainer {
     /// The overlay engine has drawn its first frame.
     private var ready = false
     private var appeared = false
+    /// Floating views by id, over everything the root shows.
+    private var floats: [String: NativeOverlayFloatView] = [:]
+
+    /// Tells the page's isolate when a floating view went by a person's hand.
+    var channel: FlutterMethodChannel?
 
     private init() {}
 
@@ -63,8 +68,53 @@ final class NativeOverlayContainer {
             request = nil
             apply(animated: true)
             result(nil)
+        case "float":
+            float(call.arguments as? [String: Any] ?? [:])
+            result(nil)
+        case "unfloat":
+            if let id = (call.arguments as? [String: Any])?["id"] as? String {
+                floats[id]?.dismiss()
+            }
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
+        }
+    }
+
+    /// Lays a floating view over the root, above its bars, the iPhone Duo's
+    /// vertical bar and tab bars among them, or changes the one with this id.
+    private func float(_ arguments: [String: Any]) {
+        guard let id = arguments["id"] as? String,
+              let root = windowProvider()?.rootViewController else { return }
+        let view = floats[id] ?? {
+            let view = NativeOverlayFloatView()
+            view.onGone = { [weak self, weak view] byHand in
+                guard let self, let view, self.floats[id] === view else { return }
+                self.floats[id] = nil
+                if byHand { self.channel?.invokeMethod("floatDismissed", arguments: ["id": id]) }
+            }
+            floats[id] = view
+            return view
+        }()
+        if view.superview !== root.view {
+            view.removeFromSuperview()
+            root.view.addSubview(view)
+        }
+        root.view.bringSubviewToFront(view)
+        view.configure(arguments)
+        view.present()
+    }
+
+    /// Keeps the floating views on top of the root, moving them when it changes.
+    private func raiseFloats() {
+        guard let root = windowProvider()?.rootViewController else { return }
+        for view in floats.values {
+            if view.superview !== root.view {
+                view.removeFromSuperview()
+                root.view.addSubview(view)
+            }
+            root.view.bringSubviewToFront(view)
+            view.setNeedsLayout()
         }
     }
 
@@ -139,10 +189,13 @@ final class NativeOverlayContainer {
     /// over from the page's Flutter controller): move the strip onto it.
     func rootChanged() {
         apply(animated: false)
+        raiseFloats()
     }
 
-    /// A navigation controller laid out: keep the strip on top and over the bar.
+    /// A navigation controller laid out: keep the strip on top and over the
+    /// bar, and the floating views above it.
     func relayout() {
+        defer { raiseFloats() }
         guard shown else { return }
         // The window's root can change under it (the search tabs take over).
         if let root = windowProvider()?.rootViewController, root !== self.root {
@@ -160,6 +213,7 @@ final class NativeOverlayContainer {
             strip.panel.backgroundColor = UIColor(argb: color)
         }
         root.view.bringSubviewToFront(strip)
+        raiseFloats()
         let visible = ready && request != nil
         guard visible != shown else { return }
         shown = visible
@@ -351,14 +405,16 @@ final class NativeOverlayLabelView: UIView {
             .map { UIColor(argb: $0.intValue) } ?? .white
         let fontSize = (content["fontSize"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 15
         let symbolSize = (content["symbolSize"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? fontSize
+        let weight = UIFont.Weight.css(content["fontWeight"] as? NSNumber)
         let value = content["text"] as? String ?? ""
         text.attributedText = NSAttributedString(string: value, attributes: [
-            .font: UIFont.systemFont(ofSize: fontSize, weight: .semibold),
+            .font: UIFont.systemFont(ofSize: fontSize, weight: weight),
             .foregroundColor: foreground,
             .kern: -0.2,
         ])
         if let name = content["symbol"] as? String {
-            let configuration = UIImage.SymbolConfiguration(pointSize: symbolSize, weight: .semibold)
+            let configuration = UIImage.SymbolConfiguration(
+                pointSize: symbolSize, weight: UIImage.SymbolWeight.matching(weight))
             symbol.image = UIImage(systemName: name, withConfiguration: configuration)
             symbol.tintColor = foreground
             symbol.isHidden = symbol.image == nil
@@ -366,5 +422,198 @@ final class NativeOverlayLabelView: UIView {
             symbol.isHidden = true
         }
         accessibilityLabel = value
+    }
+}
+
+/// A floating view of the overlay container: a symbol and a line of text on
+/// a rounded panel, laid over the root's own views, bars included. Anchored
+/// to the top or bottom edge at a distance the caller gives (where the page
+/// keeps its own content), and `margin` in from the sides of the window, so
+/// on an iPhone Duo it runs over the vertical bar like everything above it.
+///
+/// Request keys: `content` (as for a strip), `color` (ARGB), `edge` (`top`
+/// or `bottom`), `offset` and `margin` in points, `dismissible` (a tap or a
+/// swipe towards its edge puts it away).
+final class NativeOverlayFloatView: UIView {
+    /// Runs once the view has gone; true when a person put it away.
+    var onGone: ((Bool) -> Void)?
+
+    private let panel = UIView()
+    private let stack = UIStackView()
+    private let symbol = UIImageView()
+    private let text = UILabel()
+    private var edge = "bottom"
+    private var offset: CGFloat = 0
+    private var margin: CGFloat = 16
+    private var dismissible = true
+    private var leaving = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowRadius = 9
+        layer.shadowOffset = CGSize(width: 0, height: 6)
+        panel.clipsToBounds = true
+        addSubview(panel)
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.spacing = 12
+        symbol.contentMode = .scaleAspectFit
+        symbol.setContentHuggingPriority(.required, for: .horizontal)
+        text.numberOfLines = 2
+        text.lineBreakMode = .byTruncatingTail
+        stack.addArrangedSubview(symbol)
+        stack.addArrangedSubview(text)
+        panel.addSubview(stack)
+        addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapped)))
+        addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(panned(_:))))
+        isAccessibilityElement = true
+        accessibilityTraits = .staticText
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    func configure(_ request: [String: Any]) {
+        let content = request["content"] as? [String: Any] ?? [:]
+        let foreground = (content["foreground"] as? NSNumber)
+            .map { UIColor(argb: $0.intValue) } ?? .white
+        let fontSize = (content["fontSize"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 16
+        let symbolSize = (content["symbolSize"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? fontSize
+        let weight = UIFont.Weight.css(content["fontWeight"] as? NSNumber)
+        let value = content["text"] as? String ?? ""
+        text.attributedText = NSAttributedString(string: value, attributes: [
+            .font: UIFont.systemFont(ofSize: fontSize, weight: weight),
+            .foregroundColor: foreground,
+            .kern: -0.2,
+        ])
+        if let name = content["symbol"] as? String {
+            symbol.image = UIImage(systemName: name, withConfiguration: UIImage.SymbolConfiguration(
+                pointSize: symbolSize, weight: UIImage.SymbolWeight.matching(weight)))
+            symbol.tintColor = foreground
+        } else {
+            symbol.image = nil
+        }
+        symbol.isHidden = symbol.image == nil
+        panel.backgroundColor = (request["color"] as? NSNumber).map { UIColor(argb: $0.intValue) }
+            ?? UIColor(white: 0.2, alpha: 1)
+        edge = request["edge"] as? String == "top" ? "top" : "bottom"
+        offset = (request["offset"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 0
+        margin = (request["margin"] as? NSNumber).map { CGFloat($0.doubleValue) } ?? 16
+        dismissible = request["dismissible"] as? Bool ?? true
+        accessibilityLabel = value
+        setNeedsLayout()
+    }
+
+    /// Where it rests, in its parent's coordinates.
+    private func restingFrame() -> CGRect {
+        guard let parent = superview else { return .zero }
+        let width = max(0, parent.bounds.width - margin * 2)
+        let inner = CGSize(width: width - 40, height: .greatestFiniteMagnitude)
+        let height = ceil(stack.systemLayoutSizeFitting(
+            inner, withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel).height) + 32
+        let y = edge == "top" ? offset : parent.bounds.height - offset - height
+        return CGRect(x: margin, y: y, width: width, height: height)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        panel.frame = bounds
+        panel.layer.cornerRadius = bounds.height / 2
+        layer.shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: bounds.height / 2).cgPath
+        stack.frame = bounds.insetBy(dx: 20, dy: 16)
+    }
+
+    /// Where it rests while it shows, after the root lays out.
+    override func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        if superview != nil { place() }
+    }
+
+    func place() {
+        guard !leaving else { return }
+        frame = restingFrame()
+    }
+
+    /// The distance it slides in from, towards its edge.
+    private var away: CGAffineTransform {
+        CGAffineTransform(translationX: 0, y: edge == "top" ? -24 : 24)
+    }
+
+    func present() {
+        let first = alpha < 1 || leaving || isHidden
+        leaving = false
+        isHidden = false
+        place()
+        guard first else { return }
+        alpha = 0
+        transform = away
+        UIView.animate(withDuration: 0.32, delay: 0, options: [.curveEaseOut, .beginFromCurrentState]) {
+            self.alpha = 1
+            self.transform = .identity
+        }
+        UIAccessibility.post(notification: .announcement, argument: accessibilityLabel)
+    }
+
+    /// Slides away towards its edge and leaves the view tree.
+    func dismiss(byHand: Bool = false) {
+        guard !leaving else { return }
+        leaving = true
+        UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseIn, .beginFromCurrentState],
+                       animations: {
+                           self.alpha = 0
+                           self.transform = self.away
+                       }, completion: { _ in
+                           guard self.leaving else { return }
+                           self.removeFromSuperview()
+                           self.onGone?(byHand)
+                       })
+    }
+
+    @objc private func tapped() {
+        if dismissible { dismiss(byHand: true) }
+    }
+
+    @objc private func panned(_ gesture: UIPanGestureRecognizer) {
+        guard dismissible, gesture.state == .ended else { return }
+        let velocity = gesture.velocity(in: self).y
+        if edge == "top" ? velocity < 0 : velocity > 0 { dismiss(byHand: true) }
+    }
+}
+
+extension UIFont.Weight {
+    /// A weight from 100 to 900, as Flutter's `FontWeight.value` gives it;
+    /// semibold when there is none.
+    static func css(_ value: NSNumber?) -> UIFont.Weight {
+        switch value?.intValue ?? 600 {
+        case ..<150: .ultraLight
+        case ..<250: .thin
+        case ..<350: .light
+        case ..<450: .regular
+        case ..<550: .medium
+        case ..<650: .semibold
+        case ..<750: .bold
+        case ..<850: .heavy
+        default: .black
+        }
+    }
+}
+
+extension UIImage.SymbolWeight {
+    /// The symbol weight drawn with text of [weight].
+    static func matching(_ weight: UIFont.Weight) -> UIImage.SymbolWeight {
+        switch weight {
+        case .ultraLight: .ultraLight
+        case .thin: .thin
+        case .light: .light
+        case .regular: .regular
+        case .medium: .medium
+        case .bold: .bold
+        case .heavy: .heavy
+        case .black: .black
+        default: .semibold
+        }
     }
 }

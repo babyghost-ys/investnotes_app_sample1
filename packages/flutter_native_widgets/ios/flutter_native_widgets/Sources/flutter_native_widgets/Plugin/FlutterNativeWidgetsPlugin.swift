@@ -84,6 +84,7 @@ public class FlutterNativeWidgetsPlugin: NSObject, FlutterPlugin {
             let overlayChannel = FlutterMethodChannel(
                 name: "flutter_native_widgets/overlay_container", binaryMessenger: registrar.messenger())
             let overlay = NativeOverlayContainer.shared
+            overlay.channel = overlayChannel
             overlay.windowProvider = {
                 NativeNavigationHost.installed?.window ?? registrar.viewController?.view.window
             }

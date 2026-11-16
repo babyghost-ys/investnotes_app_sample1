@@ -1,11 +1,11 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:investnotes_app_sample1/core/widgets/error_snack_bar.dart';
+import 'package:investnotes_app_sample1/core/widgets/custom_snack_bar.dart';
 import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 
-/// Says so with an [ErrorSnackBar] when the offerings fail to load, while
+/// Says so with an [CustomSnackBar] when the offerings fail to load, while
 /// this tab is on screen: when it comes into view while they are failing,
 /// and on each failed attempt the person asked for. A load that succeeds
 /// puts the snack bar away.
@@ -39,7 +39,7 @@ class _LoadFailureNoticeState extends State<LoadFailureNotice> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !_onScreen) return;
         if (context.read<OfferingsBloc>().state.phase == LoadingPhase.failed) {
-          ErrorSnackBar.show(context, widget.message);
+          CustomSnackBar.show(context, widget.message);
         }
       });
     }
@@ -51,11 +51,11 @@ class _LoadFailureNoticeState extends State<LoadFailureNotice> {
       BlocListener<OfferingsBloc, OfferingsState>(
         listenWhen: (before, now) => before.phase != now.phase,
         listener: (context, state) => switch (state.phase) {
-          LoadingPhase.failed when _onScreen => ErrorSnackBar.show(
+          LoadingPhase.failed when _onScreen => CustomSnackBar.show(
             context,
             widget.message,
           ),
-          LoadingPhase.loaded => ErrorSnackBar.hide(),
+          LoadingPhase.loaded => CustomSnackBar.hide(),
           _ => null,
         },
         child: widget.child,
