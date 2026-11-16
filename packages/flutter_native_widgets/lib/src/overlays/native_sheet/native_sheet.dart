@@ -304,6 +304,11 @@ class NativeSheet {
   /// weight; a font from Flutter assets needs
   /// [NativeFonts.registerAssets] first). The sheet's pages fill
   /// it in through [setBar].
+  ///
+  /// [barTitle], [barClose] and [barCloseTitle] give the first page's bar
+  /// before the sheet shows, as its own [setBar] will. On an iPhone Duo UIKit
+  /// leaves out the title band of a bar with nothing in it, so a bar filled
+  /// in only once the page has built would appear a moment after the sheet.
   static Future<T?> show<T>({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -320,6 +325,9 @@ class NativeSheet {
     bool barShadow = false,
     bool plainBarButtons = false,
     TextStyle? barTitleStyle,
+    String? barTitle,
+    bool barClose = false,
+    String? barCloseTitle,
   }) async {
     final native = NativeStyle.of(context) == NativeStyle.native;
     if (fullScreen && !native) {
@@ -378,6 +386,11 @@ class NativeSheet {
               'fontSize': barTitleStyle.fontSize,
               'fontWeight': barTitleStyle.fontWeight?.value,
             },
+          'bar': {
+            'title': barTitle,
+            'close': barClose,
+            'closeTitle': ?barCloseTitle,
+          },
         },
       });
       if (value == null) return null;

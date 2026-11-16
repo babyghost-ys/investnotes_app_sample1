@@ -300,6 +300,11 @@ final class NativeWidgetSheet: NSObject, UIAdaptivePresentationControllerDelegat
             }
             navigation.overrideUserInterfaceStyle = controller.overrideUserInterfaceStyle
             navigation.view.backgroundColor = controller.view.backgroundColor
+            // The first page's bar before the sheet shows: on an iPhone Duo an
+            // empty bar has no title band, which would appear a moment later.
+            if let bar = args["bar"] as? [String: Any] {
+                navigation.setBar(bar)
+            }
         }
         controller.onTransition = { [weak self] coordinator in
             self?.observeHeightTransition(coordinator)
@@ -962,8 +967,20 @@ final class SheetNavigationController: UINavigationController,
     /// whenever there is a page to go back to.
     func setBar(_ args: [String: Any]) {
         guard let page = front else { return }
+        // The same bar again, such as the first page confirming what the
+        // sheet was shown with: keep the items already on screen.
+        if page === barPage, let last = barArgs,
+           NSDictionary(dictionary: last).isEqual(to: args) {
+            return
+        }
+        barPage = page
+        barArgs = args
         configureItems(of: page, args, back: viewControllers.count > 1)
     }
+
+    /// The page and words the bar was last set to.
+    private weak var barPage: SheetPageController?
+    private var barArgs: [String: Any]?
 
     private func configureItems(of page: SheetPageController, _ args: [String: Any],
                                 back: Bool) {
