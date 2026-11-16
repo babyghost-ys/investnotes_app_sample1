@@ -30,6 +30,11 @@ abstract final class KeelRoutes {
   /// back to the split when the window widens.
   static String offeringsItem(String id) => '/offerings/$id';
   static String note(String id) => '/note/$id';
+
+  /// An issued note opened from the Issued list on a single pane. In a
+  /// split window it shows beside the list instead, and this page steps
+  /// back to the split when the window widens.
+  static String issuedItem(String id) => '/issued/$id';
   static String article(String id) => '/article/$id';
   static String explainer(String id) => '/explainer/$id';
   static String finderStep(int step) => '/finder/step/$step';

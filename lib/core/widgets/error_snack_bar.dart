@@ -6,6 +6,8 @@ import 'package:material_ui/material_ui.dart' show Theme;
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
 /// A charcoal pill just above the tab bar that says something went wrong,
+/// clear of the side bar where the system keeps one (an unfolded iPhone
+/// Duo), since UIKit draws that bar above anything the app draws,
 /// then slides away on its own after [duration]. Tapping it, or swiping it
 /// down, puts it away sooner. One shows at a time.
 abstract final class ErrorSnackBar {
@@ -19,14 +21,15 @@ abstract final class ErrorSnackBar {
     Duration duration = const Duration(seconds: 4),
   }) {
     _entry?.remove();
-    // Above the tab bar and home indicator, as the page itself sees them.
-    final bottom = MediaQuery.paddingOf(context).bottom;
+    // Above the tab bar and home indicator, and beside a vertical bar, as
+    // the page itself sees them.
+    final insets = MediaQuery.paddingOf(context);
     final key = GlobalKey<_SnackState>();
     late final OverlayEntry entry;
     entry = OverlayEntry(
       builder: (_) => _Snack(
         key: key,
-        bottom: bottom,
+        insets: insets,
         icon: icon,
         message: message,
         duration: duration,
@@ -49,14 +52,14 @@ abstract final class ErrorSnackBar {
 class _Snack extends StatefulWidget {
   const _Snack({
     super.key,
-    required this.bottom,
+    required this.insets,
     required this.icon,
     required this.message,
     required this.duration,
     required this.onGone,
   });
 
-  final double bottom;
+  final EdgeInsets insets;
   final IconData icon;
   final String message;
   final Duration duration;
@@ -103,9 +106,9 @@ class _SnackState extends State<_Snack> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     const foreground = Color(0xFFF2F4F7);
     return Positioned(
-      left: 16,
-      right: 16,
-      bottom: widget.bottom + 12,
+      left: widget.insets.left + 16,
+      right: widget.insets.right + 16,
+      bottom: widget.insets.bottom + 12,
       child: AnimatedBuilder(
         animation: _curve,
         builder: (context, child) => Opacity(

@@ -54,6 +54,11 @@ GoRouter keelRouter() => GoRouter(
               _productPage(state, isOffering: false),
         ),
         GoRoute(
+          path: 'issued/:id',
+          pageBuilder: (context, state) =>
+              _productPage(state, isOffering: false, responsive: true),
+        ),
+        GoRoute(
           path: 'article/:id',
           pageBuilder: (context, state) {
             // Handed over whole by the list that opened it: a downloaded

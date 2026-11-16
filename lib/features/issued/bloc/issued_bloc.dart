@@ -26,6 +26,9 @@ class IssuedBloc extends Bloc<IssuedEvent, IssuedState> {
     on<IssuedFilterChanged>(
       (event, emit) => emit(state.copyWith(filter: event.filter)),
     );
+    on<IssuedNoteSelected>(
+      (event, emit) => emit(state.copyWith(selectedId: () => event.id)),
+    );
     on<IssuedRowToggled>((event, emit) {
       final expanded = {...state.expanded};
       if (!expanded.remove(event.id)) expanded.add(event.id);

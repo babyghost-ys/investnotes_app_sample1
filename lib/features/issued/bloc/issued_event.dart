@@ -30,3 +30,13 @@ final class IssuedRowToggled extends IssuedEvent {
   @override
   List<Object?> get props => [id];
 }
+
+/// A note opened from the list, or null once it is closed.
+final class IssuedNoteSelected extends IssuedEvent {
+  const IssuedNoteSelected(this.id);
+
+  final String? id;
+
+  @override
+  List<Object?> get props => [id];
+}

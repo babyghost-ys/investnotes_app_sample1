@@ -13,7 +13,8 @@ import 'package:investnotes_app_sample1/core/widgets/sparkline.dart';
 import 'package:investnotes_app_sample1/domain/models/issued_note.dart';
 import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
 
-/// An issued note: its status, name and return. Opens to show its path.
+/// An issued note: its status, name and return. Opens to show its path,
+/// or, beside a split window's detail pane, picks the note shown there.
 class IssuedRow extends StatelessWidget implements LocalisationConsumer {
   const IssuedRow({
     super.key,
@@ -21,6 +22,8 @@ class IssuedRow extends StatelessWidget implements LocalisationConsumer {
     required this.expanded,
     required this.onToggle,
     this.onOpen,
+    this.onSelect,
+    this.selected = false,
   });
 
   final IssuedNote note;
@@ -29,6 +32,15 @@ class IssuedRow extends StatelessWidget implements LocalisationConsumer {
 
   /// Opens the note's page from the unfolded row.
   final VoidCallback? onOpen;
+
+  /// In a split window, shows the note beside the list. The row then picks
+  /// rather than unfolds: the pane beside it holds the whole note.
+  final VoidCallback? onSelect;
+
+  /// The note shown beside the list.
+  final bool selected;
+
+  static const _reach = 12.0;
 
   @override
   List<String> get namespaces => const [Locales.issued, Locales.general];
@@ -52,83 +64,117 @@ class IssuedRow extends StatelessWidget implements LocalisationConsumer {
     final azure = KeelColors.azure.of(context);
     final changeColor = n.change < 0 ? KeelColors.loss.of(context) : azure;
     final live = n.status == IssuedStatus.active;
+    final picks = onSelect != null;
+    final open = expanded && !picks;
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: KeelColors.hairline.of(context)),
+          bottom: BorderSide(
+            color: selected
+                ? const Color(0x00000000)
+                : KeelColors.hairline.of(context),
+          ),
         ),
       ),
       child: Column(
         children: [
           Semantics(
             button: true,
-            expanded: expanded,
+            expanded: picks ? null : expanded,
+            selected: picks ? selected : null,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
                 HapticFeedback.selectionClick();
-                onToggle();
+                (onSelect ?? onToggle)();
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: live ? KeelColors.mist.of(context) : null,
-                        border: live
-                            ? null
-                            : Border.all(
-                                color: KeelColors.hairline.of(context),
-                              ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        NoteIcons.status(n.status),
-                        size: 19,
-                        color: live ? azure : muted,
-                        semanticLabel: n.status.title(general),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        n.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 16,
-                          height: 1.25,
-                          fontWeight: FontWeight.w600,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // The highlight reaches past the row's edges, its ends
+                  // round like the status disc's.
+                  Positioned.fill(
+                    left: -_reach,
+                    right: -_reach,
+                    child: AnimatedOpacity(
+                      opacity: selected ? 1 : 0,
+                      duration: const Duration(milliseconds: 180),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: KeelColors.mist.of(context),
+                          borderRadius: BorderRadius.circular(20 + _reach),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      formats.percent(n.change, signed: true),
-                      semanticsLabel: Spoken(general).change(n.change),
-                      style: TextStyle(
-                        color: changeColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: live
+                                ? (selected
+                                      ? KeelColors.raised.of(context)
+                                      : KeelColors.mist.of(context))
+                                : null,
+                            border: live
+                                ? null
+                                : Border.all(
+                                    color: KeelColors.hairline.of(context),
+                                  ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            NoteIcons.status(n.status),
+                            size: 19,
+                            color: live ? azure : muted,
+                            semanticLabel: n.status.title(general),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            n.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 16,
+                              height: 1.25,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          formats.percent(n.change, signed: true),
+                          semanticsLabel: Spoken(general).change(n.change),
+                          style: TextStyle(
+                            color: changeColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        if (!picks) ...[
+                          const SizedBox(width: 6),
+                          AnimatedRotation(
+                            turns: expanded ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 220),
+                            child: Icon(
+                              CupertinoIcons.chevron_down,
+                              size: 16,
+                              color: muted,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    AnimatedRotation(
-                      turns: expanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 220),
-                      child: Icon(
-                        CupertinoIcons.chevron_down,
-                        size: 16,
-                        color: muted,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -136,7 +182,7 @@ class IssuedRow extends StatelessWidget implements LocalisationConsumer {
             duration: const Duration(milliseconds: 260),
             curve: Curves.easeOutCubic,
             alignment: Alignment.topCenter,
-            child: expanded
+            child: open
                 ? Padding(
                     padding: const EdgeInsets.only(bottom: 18),
                     child: Column(
