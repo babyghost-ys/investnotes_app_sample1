@@ -31,3 +31,15 @@ final class SearchRowToggled extends SearchEvent {
   @override
   List<Object?> get props => [id];
 }
+
+/// Opens a result's note: beside the results in a split window, or as its
+/// own page on a single pane. Its card stays open on returning. Null
+/// closes it.
+final class SearchResultSelected extends SearchEvent {
+  const SearchResultSelected(this.id);
+
+  final String? id;
+
+  @override
+  List<Object?> get props => [id];
+}

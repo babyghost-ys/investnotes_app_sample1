@@ -15,6 +15,9 @@ import 'package:investnotes_app_sample1/domain/models/product.dart';
 /// A search result. Closed, it shows the note's shape, name and standing;
 /// tapped, its header turns the bar's blue and its order terms unfold,
 /// with a control to the note's page.
+///
+/// In a split window it does not [unfold]: tapping it opens the note beside
+/// the results, and its header stays blue while the note is [selected].
 class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
   const SearchResultCard({
     super.key,
@@ -22,12 +25,21 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
     required this.expanded,
     required this.onToggle,
     required this.onOpen,
+    this.unfolds = true,
+    this.selected = false,
   });
 
   final Product product;
   final bool expanded;
   final VoidCallback onToggle;
   final VoidCallback onOpen;
+
+  /// Whether a tap unfolds the terms in place. Off in a split window, where
+  /// the note itself shows beside the results.
+  final bool unfolds;
+
+  /// Marks the note open beside the results in a split window.
+  final bool selected;
 
   static const _duration = Duration(milliseconds: 280);
   static const _curve = Curves.easeOutCubic;
@@ -75,12 +87,13 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
     final azure = KeelColors.azure.of(context);
     final tide = KeelColors.tide.of(context);
     final tideDeep = KeelColors.tideDeep.of(context);
+    final lit = unfolds ? expanded : selected;
     final status = p.status;
     final live = status == null || status == IssuedStatus.active;
     final standing = status == null
         ? Formats(general).until(p.closes!)
         : status.title(general);
-    final accent = expanded ? KeelColors.foam : (live ? azure : muted);
+    final accent = lit ? KeelColors.foam : (live ? azure : muted);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: AnimatedContainer(
@@ -90,7 +103,7 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
           color: raised,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: expanded ? tide : KeelColors.hairline.of(context),
+            color: lit ? tide : KeelColors.hairline.of(context),
           ),
           boxShadow: expanded
               ? [
@@ -107,7 +120,8 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
           children: [
             Semantics(
               button: true,
-              expanded: expanded,
+              expanded: unfolds ? expanded : null,
+              selected: unfolds ? null : selected,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
@@ -122,7 +136,7 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: expanded ? [tide, tideDeep] : [raised, raised],
+                      colors: lit ? [tide, tideDeep] : [raised, raised],
                     ),
                   ),
                   child: Row(
@@ -141,7 +155,7 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
                         alignment: Alignment.center,
                         child: PayoffGlyph(
                           payoff: p.payoff,
-                          color: expanded ? CupertinoColors.white : azure,
+                          color: lit ? CupertinoColors.white : azure,
                           size: 34,
                         ),
                       ),
@@ -153,7 +167,7 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
                             AnimatedDefaultTextStyle(
                               duration: _duration,
                               style: TextStyle(
-                                color: expanded ? CupertinoColors.white : ink,
+                                color: lit ? CupertinoColors.white : ink,
                                 fontSize: 16,
                                 height: 1.25,
                                 fontWeight: FontWeight.w600,
@@ -189,17 +203,19 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      AnimatedRotation(
-                        turns: expanded ? 0.5 : 0,
-                        duration: _duration,
-                        curve: _curve,
-                        child: Icon(
-                          CupertinoIcons.chevron_down,
-                          size: 17,
-                          color: expanded ? CupertinoColors.white : muted,
+                      if (unfolds) ...[
+                        const SizedBox(width: 10),
+                        AnimatedRotation(
+                          turns: expanded ? 0.5 : 0,
+                          duration: _duration,
+                          curve: _curve,
+                          child: Icon(
+                            CupertinoIcons.chevron_down,
+                            size: 17,
+                            color: lit ? CupertinoColors.white : muted,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -209,7 +225,7 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
               duration: _duration,
               curve: _curve,
               alignment: Alignment.topCenter,
-              child: expanded
+              child: unfolds && expanded
                   ? _Terms(
                       terms: _terms(search, general),
                       onOpen: onOpen,

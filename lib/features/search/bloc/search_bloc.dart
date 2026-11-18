@@ -14,7 +14,8 @@ part 'search_state.dart';
 
 /// Searches open offerings and issued notes by name, code, underlying,
 /// type, region, asset class, currency and status. Every word must match
-/// somewhere. Results open one at a time in place.
+/// somewhere. Results open one at a time: in place on a single pane, beside
+/// the results in a split window.
 ///
 /// The notes are fetched as the page opens, while the person types; what
 /// they typed is matched as soon as the notes arrive.
@@ -49,6 +50,14 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       (event, emit) => emit(
         state.copyWith(
           expanded: () => state.expanded == event.id ? null : event.id,
+        ),
+      ),
+    );
+    on<SearchResultSelected>(
+      (event, emit) => emit(
+        state.copyWith(
+          selectedId: () => event.id,
+          expanded: event.id == null ? null : () => event.id,
         ),
       ),
     );

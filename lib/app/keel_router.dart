@@ -100,11 +100,12 @@ GoRouter keelRouter() => GoRouter(
         ),
         GoRoute(
           path: 'search',
-          pageBuilder: (context, state) => keelPage(
-            state,
-            namespaces: const [Locales.search],
-            title: (locale) => (locale[0] as SearchLocale).labels.title,
-            // Nothing to load before typing: the field shows at once.
+          // Nothing to load before typing: the field shows at once. The page
+          // carries its own bar, for the bookmark of an offering open
+          // beside the results.
+          pageBuilder: (context, state) => NativePage<void>(
+            key: state.pageKey,
+            name: state.matchedLocation,
             child: const SearchPage(),
           ),
         ),
