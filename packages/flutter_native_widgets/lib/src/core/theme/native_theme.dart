@@ -1,6 +1,8 @@
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'solid_bar_page_transitions_builder.dart';
+
 /// How navigation bars look across the app.
 @immutable
 class NativeBarStyle {
@@ -105,17 +107,37 @@ class NativeThemeData {
   );
 
   /// Material theme for [brightness].
-  ThemeData material(Brightness brightness) => ThemeData(
-    useMaterial3: true,
-    brightness: brightness,
-    colorScheme: primaryColor == null
+  ThemeData material(Brightness brightness) {
+    final colorScheme = primaryColor == null
         ? null
         : ColorScheme.fromSeed(
             seedColor: primaryColor!,
             brightness: brightness,
+          );
+    final theme = ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: background,
+    );
+    final barColor = barStyle.color;
+    if (barColor == null) return theme;
+    // A solid bar stays solid while Android pages move under it.
+    return theme.copyWith(
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: SolidBarPageTransitionsBuilder(
+            barColor: barColor,
+            background: theme.scaffoldBackgroundColor,
           ),
-    scaffoldBackgroundColor: background,
-  );
+          TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: const CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: const ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: const ZoomPageTransitionsBuilder(),
+        },
+      ),
+    );
+  }
 
   @override
   bool operator ==(Object other) =>
