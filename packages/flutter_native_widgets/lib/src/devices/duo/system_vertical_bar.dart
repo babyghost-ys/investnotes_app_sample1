@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/native_style.dart';
+
 /// Where the system places its vertical bar for this window, as a physical
 /// side (`UITraitCollection.verticalBarEdge`, iOS 27.1).
 enum SystemVerticalBarEdge {
@@ -49,10 +51,13 @@ abstract final class SystemVerticalBar {
     null,
   );
 
-  /// The current edge. Starts listening on first use, so only read it where
-  /// the channel exists (iOS 26+); it stays [SystemVerticalBarEdge.unknown]
-  /// until the first reading arrives.
+  /// The current edge. Starts listening on first use where the channel exists
+  /// (iOS 26+); elsewhere it never listens and stays
+  /// [SystemVerticalBarEdge.unknown], as it does until the first reading.
   static ValueListenable<SystemVerticalBarEdge> get edge {
+    // Listening where no native side answers reports a
+    // MissingPluginException through FlutterError, not the stream.
+    if (!NativeCapabilities.systemVerticalBarEdge) return _edge;
     _sub ??= _channel.receiveBroadcastStream().listen((value) {
       final map = value is Map ? value : null;
       _edge.value = SystemVerticalBarEdge.fromWire(map?['edge'] ?? value);
