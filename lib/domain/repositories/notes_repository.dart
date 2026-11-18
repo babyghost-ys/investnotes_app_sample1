@@ -24,6 +24,11 @@ abstract interface class NotesRepository {
   /// One note's page, open or issued.
   Future<Product> fetchProduct(String id);
 
+  /// The note's page as last fetched in this session, if it has been: a
+  /// note that moves from one place on screen to another (a Duo unfolding)
+  /// shows at once instead of loading again.
+  Product? fetchedProduct(String id);
+
   Future<List<Article>> fetchArticles();
 
   Future<List<Film>> fetchFilms();

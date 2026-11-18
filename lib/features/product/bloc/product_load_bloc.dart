@@ -12,7 +12,9 @@ part 'product_load_state.dart';
 
 /// One note's page, open or issued, fetched by its id.
 class ProductLoadBloc extends Bloc<ProductLoadEvent, ProductLoadState> {
-  ProductLoadBloc(this._repository, this.id) : super(const ProductLoadState()) {
+  /// A note already fetched in this session starts loaded.
+  ProductLoadBloc(this._repository, this.id)
+    : super(_fetched(_repository.fetchedProduct(id))) {
     on<ProductLoadRequested>(transformer: droppable(), (event, emit) async {
       emit(ProductLoadState(product: state.product));
       try {
@@ -28,4 +30,8 @@ class ProductLoadBloc extends Bloc<ProductLoadEvent, ProductLoadState> {
 
   final NotesRepository _repository;
   final String id;
+
+  static ProductLoadState _fetched(Product? product) => product == null
+      ? const ProductLoadState()
+      : ProductLoadState(product: product, phase: LoadingPhase.loaded);
 }

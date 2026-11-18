@@ -30,6 +30,9 @@ class NotesRepositoryImpl implements NotesRepository {
 
   final http.Client _client;
 
+  /// Every note's page fetched so far in this session, by id.
+  final _products = <String, Product>{};
+
   @override
   Future<List<Offering>> fetchOfferings() => _get(
     'offerings',
@@ -56,18 +59,31 @@ class NotesRepositoryImpl implements NotesRepository {
   );
 
   @override
-  Future<List<Product>> fetchProducts() => _get(
-    'products',
-    (data) => [
-      for (final m in JsonRead.list(data, ProductModel.fromJson)) m.toDomain(),
-    ],
-  );
+  Future<List<Product>> fetchProducts() async {
+    final products = await _get(
+      'products',
+      (data) => [
+        for (final m in JsonRead.list(data, ProductModel.fromJson))
+          m.toDomain(),
+      ],
+    );
+    for (final p in products) {
+      _products[p.id] = p;
+    }
+    return products;
+  }
 
   @override
-  Future<Product> fetchProduct(String id) => _get(
-    'products/${Uri.encodeComponent(id)}',
-    (data) => ProductModel.fromJson(JsonRead.object(data)).toDomain(),
-  );
+  Future<Product> fetchProduct(String id) async {
+    final product = await _get(
+      'products/${Uri.encodeComponent(id)}',
+      (data) => ProductModel.fromJson(JsonRead.object(data)).toDomain(),
+    );
+    return _products[id] = product;
+  }
+
+  @override
+  Product? fetchedProduct(String id) => _products[id];
 
   @override
   Future<List<Article>> fetchArticles() => _get(

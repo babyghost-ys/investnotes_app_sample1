@@ -114,7 +114,9 @@ extension NativeNavigationHost {
         synchronizingNativeStack = true
         preparingPop = true
         popCompletion = result
-        navigation.popToViewController(managedRoutes[index].content, animated: true)
+        // A page giving way to content that takes its place pops in place.
+        navigation.popToViewController(managedRoutes[index].content,
+                                       animated: args["animated"] as? Bool ?? true)
     }
 
     func showNativeRoute(_ args: [String: Any], result: @escaping FlutterResult) {

@@ -24,6 +24,24 @@ abstract final class NativeNavigator {
     route.navigation.backButtonVisibilityChanged(route);
   }
 
+  /// Pops the page [context] belongs to without the slide, when the page
+  /// gives way to content that takes its place on screen: the detail of a
+  /// split view that widens again folds back into its column, as UIKit's
+  /// split view does when it expands. Does nothing unless that page is the
+  /// one in front.
+  static void popInPlace(BuildContext context) {
+    final route = ModalRoute.of(context);
+    if (route == null || !route.isCurrent) return;
+    switch (route) {
+      case _NativePageRoute<dynamic>():
+        route.popInPlace = true;
+      case _MaterialPageBasedRoute<dynamic>():
+        route.popInPlace = true;
+      default:
+    }
+    Navigator.of(context).pop();
+  }
+
   /// Pushes [builder] and returns the value supplied to [Navigator.pop].
   ///
   /// A cancelled UIKit back swipe leaves the Flutter route and its state intact.
@@ -99,6 +117,13 @@ final class _MaterialPageBasedRoute<T> extends PageRoute<T>
 
   NativePage<T> get _page => settings as NativePage<T>;
 
+  /// Set by [NativeNavigator.popInPlace].
+  bool popInPlace = false;
+
+  @override
+  Duration get reverseTransitionDuration =>
+      popInPlace ? Duration.zero : super.reverseTransitionDuration;
+
   @override
   Widget buildContent(BuildContext context) => _page.child;
 
@@ -141,6 +166,10 @@ final class _NativeStack {
   final routes = <_NativePageRoute<dynamic>>[];
   int revision = 0;
   bool preparing = false;
+
+  /// The next native stack change happens without a transition: a page was
+  /// popped in place.
+  bool syncInPlace = false;
   Future<void>? nativePush;
 
   /// Declarative pages prepare UIKit one at a time, in stack order.
@@ -384,6 +413,7 @@ final class _NativeNavigation {
   }
 
   void popped(_NativePageRoute<dynamic> route) {
+    if (route.popInPlace) route.stack.syncInPlace = true;
     _routes.remove(route.id);
     route.stack.routes.remove(route);
     _synchronizeAfterFrame(route.stack);
@@ -417,11 +447,14 @@ final class _NativeNavigation {
     // Native completes this method after its transition finishes. UIKit
     // refuses while another transition (a push, a fold) is settling; wait
     // for it rather than leaving the Flutter and UIKit stacks apart.
+    final animated = !stack.syncInPlace;
     for (var attempt = 0; ; attempt++) {
       try {
         await _channel.invokeMethod<void>('syncStack', {
           'routeIds': stack.routeIds,
+          'animated': animated,
         });
+        stack.syncInPlace = false;
         break;
       } on PlatformException catch (error) {
         if (error.code != 'navigation_busy' || attempt >= 120) rethrow;
@@ -491,6 +524,9 @@ final class _NativePageRoute<T> extends PageRoute<T> {
   final ToolbarRegistry? toolbarRegistry;
   bool? nativePopEnabled;
   bool nativeBackButtonVisible = true;
+
+  /// Set by [NativeNavigator.popInPlace].
+  bool popInPlace = false;
 
   /// A page-based route waits for UIKit to prepare before showing content.
   bool _awaitingNative;

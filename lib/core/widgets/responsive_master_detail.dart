@@ -11,15 +11,15 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 /// [master] sits on the left and the [detail] on the right, split at the
 /// hinge when the display reports one.
 ///
-/// On iPhone Duo folded, the open [detail] takes the list's place on this
-/// same page, and Back closes it ([onClose]) to show the list again.
-/// Folding and unfolding therefore only change the layout: nothing is pushed
-/// or popped, and the item stays on screen the whole time.
+/// On a single pane, an iPhone or a folded Duo, only the [master] shows and
+/// tapping an item pushes it as its own page ([open]), with the native slide
+/// and swipe-back.
 ///
-/// On any other single pane, such as an iPhone, only the [master] shows and
-/// the caller pushes the item as its own page, so the native push and
-/// swipe-back stay as they are. Open items with [open], which picks the
-/// right one for the window.
+/// Folding and unfolding keep the open item on screen, as UIKit's split
+/// view does: folding a Duo with an item open beside the list keeps it in
+/// the list's place on this same page, and Back ([onClose]) brings the list
+/// back; unfolding puts it beside the list again. An item pushed on the
+/// folded Duo hands over to the split when it unfolds (`SplitDetailPage`).
 class ResponsiveMasterDetail extends StatefulWidget {
   const ResponsiveMasterDetail({
     super.key,
@@ -63,30 +63,25 @@ class ResponsiveMasterDetail extends StatefulWidget {
         size.shortestSide >= minSplitShortestSide;
   }
 
-  /// Whether an opened item stays on the list's own page: beside the list
-  /// in a split window, or in its place on iPhone Duo (folded, its cover
-  /// display holds the system's vertical bar strip, which no other iPhone
-  /// has), so a fold or an unfold never has a page to push or pop.
-  static bool opensInPlace(BuildContext context) =>
-      isSplit(context) || DuoPoseScope.of(context) != null;
-
-  /// Whether an opened item takes the list's place: a folded Duo.
+  /// Whether an item open beside the list keeps its place when the window
+  /// stops splitting: iPhone Duo folded (its cover display holds the
+  /// system's vertical bar strip, which no other iPhone has).
   static bool showsInPlace(BuildContext context) =>
       !isSplit(context) && DuoPoseScope.of(context) != null;
 
-  /// Opens an item: [select] always runs, so this page can show it; where
-  /// it does not ([opensInPlace]), [push] opens its own page too, and
-  /// [onClosed] runs once that page is closed.
+  /// Opens an item: beside the list in a split window ([select]); anywhere
+  /// else, a folded Duo included, as its own pushed page ([push]), with the
+  /// native slide and swipe-back.
   static Future<void> open(
     BuildContext context, {
     required VoidCallback select,
     required Future<void> Function() push,
-    VoidCallback? onClosed,
   }) async {
-    select();
-    if (opensInPlace(context)) return;
+    if (isSplit(context)) {
+      select();
+      return;
+    }
     await push();
-    if (context.mounted && !opensInPlace(context)) onClosed?.call();
   }
 
   @override

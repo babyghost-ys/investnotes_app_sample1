@@ -20,10 +20,10 @@ import 'package:investnotes_app_sample1/features/search/widgets/search_result_ca
 /// Searches every offering and issued note as you type.
 ///
 /// On a single pane each result opens in place to its order terms, and from
-/// there to the note. In a split window, such as an unfolded iPhone Duo, the
-/// results sit on one side of the hinge and a tapped result's note opens on
-/// the other; folded, the note takes the results' place on this page, and
-/// Back brings them back. The bar stays the same whatever the window does.
+/// there to the note's page. In a split window, such as an unfolded iPhone
+/// Duo, the results sit on one side of the hinge and a tapped result's note
+/// opens on the other. Folding with a note open keeps it on screen in the
+/// results' place, and Back brings them back.
 class SearchPage extends StatelessWidget implements LocalisationConsumer {
   const SearchPage({super.key});
 
@@ -50,16 +50,15 @@ class SearchPage extends StatelessWidget implements LocalisationConsumer {
     ),
   );
 
-  /// Shows [p] on this page (beside the results, or in their place on a
-  /// folded Duo), or pushes its page on an iPhone.
+  /// Shows [p] beside the results in a split window, or pushes its page.
   void _open(BuildContext context, Product p) {
     FocusManager.instance.primaryFocus?.unfocus();
     final bloc = context.read<SearchBloc>();
+    void select() => bloc.add(SearchResultSelected(p.id));
     ResponsiveMasterDetail.open(
       context,
-      select: () => bloc.add(SearchResultSelected(p.id)),
-      push: () => openProduct(context, p),
-      onClosed: () => bloc.add(const SearchResultSelected(null)),
+      select: select,
+      push: () => openProduct(context, p, select: select),
     );
   }
 

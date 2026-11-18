@@ -42,18 +42,17 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
     if (result != null) bloc.add(OfferingsFilterChanged(result));
   }
 
-  /// Shows [offering] on this page (beside the list, or in its place on a
-  /// folded Duo), or pushes its page on an iPhone.
+  /// Shows [offering] beside the list in a split window, or pushes its page.
   void _open(BuildContext context, Offering offering) {
     final bloc = context.read<OfferingsBloc>();
+    void select() => bloc.add(OfferingSelected(offering.id));
     ResponsiveMasterDetail.open(
       context,
-      select: () => bloc.add(OfferingSelected(offering.id)),
+      select: select,
       push: () => context.push<void>(
         KeelRoutes.offering(offering.id),
-        extra: offering.type,
+        extra: (type: offering.type, select: select),
       ),
-      onClosed: () => bloc.add(const OfferingSelected(null)),
     );
   }
 

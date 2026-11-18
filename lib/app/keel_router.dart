@@ -8,6 +8,7 @@ import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
+import 'package:investnotes_app_sample1/core/widgets/split_detail_page.dart';
 import 'package:investnotes_app_sample1/domain/models/article.dart';
 import 'package:investnotes_app_sample1/domain/models/explainer.dart';
 import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
@@ -182,15 +183,21 @@ GoRouter keelRouter() => GoRouter(
 
 /// A note's page, open or issued, fetched as it opens. The page carries its
 /// own scaffold for its bookmark.
-NativePage<void> _productPage(
-  GoRouterState state, {
-  required bool isOffering,
-}) => NativePage<void>(
-  key: state.pageKey,
-  name: state.matchedLocation,
-  child: ProductPage(
+NativePage<void> _productPage(GoRouterState state, {required bool isOffering}) {
+  final extra = state.extra;
+  // Pushed on a single pane by a list that splits: the page hands over to
+  // that split when the window widens.
+  final opening = extra is SplitOpening ? extra : null;
+  final page = ProductPage(
     id: state.pathParameters['id']!,
     isOffering: isOffering,
-    type: state.extra as NoteType?,
-  ),
-);
+    type: opening?.type ?? extra as NoteType?,
+  );
+  return NativePage<void>(
+    key: state.pageKey,
+    name: state.matchedLocation,
+    child: opening == null
+        ? page
+        : SplitDetailPage(onSplit: opening.select, child: page),
+  );
+}

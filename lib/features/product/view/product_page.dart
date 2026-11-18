@@ -17,6 +17,12 @@ import 'package:investnotes_app_sample1/features/product/widgets/product_loader.
 import 'package:investnotes_app_sample1/features/product/widgets/product_scope.dart';
 import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 
+/// What a list that splits in a wide window hands the note's page it
+/// pushes on a single pane: the note's type, so the bar is titled while the
+/// page loads, and how to choose the note in that list, so the page can hand
+/// over to the split when the window widens (a Duo unfolding).
+typedef SplitOpening = ({NoteType type, VoidCallback select});
+
 /// Pushes an offering's page. Its type goes along, so the bar is titled
 /// while the page loads.
 Future<void> openOffering(BuildContext context, Offering offering) =>
@@ -26,14 +32,18 @@ Future<void> openOffering(BuildContext context, Offering offering) =>
 Future<void> openNote(BuildContext context, IssuedNote note) =>
     context.push<void>(KeelRoutes.note(note.id), extra: note.type);
 
-/// Pushes a note's page, open or issued.
-Future<void> openProduct(BuildContext context, Product product) =>
-    context.push<void>(
-      product.isOffering
-          ? KeelRoutes.offering(product.id)
-          : KeelRoutes.note(product.id),
-      extra: product.type,
-    );
+/// Pushes a note's page, open or issued. From a list that splits, [select]
+/// chooses the note in that list; see [SplitOpening].
+Future<void> openProduct(
+  BuildContext context,
+  Product product, {
+  VoidCallback? select,
+}) => context.push<void>(
+  product.isOffering
+      ? KeelRoutes.offering(product.id)
+      : KeelRoutes.note(product.id),
+  extra: select == null ? product.type : (type: product.type, select: select),
+);
 
 /// A note's own page: its bar, with the bookmark for an offering, over its
 /// content as it arrives.
