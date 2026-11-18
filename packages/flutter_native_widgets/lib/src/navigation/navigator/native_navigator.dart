@@ -88,6 +88,7 @@ abstract final class NativeNavigator {
 class NativePage<T> extends Page<T> {
   const NativePage({
     required this.child,
+    this.animated = true,
     super.key,
     super.name,
     super.arguments,
@@ -96,6 +97,12 @@ class NativePage<T> extends Page<T> {
 
   /// The page's content, usually an `NativeScaffold`.
   final Widget child;
+
+  /// Whether the page slides in. A page that takes over content already on
+  /// screen, such as a split view's detail when the window narrows and the
+  /// split collapses, appears in place instead, as in UIKit's split view.
+  /// Going back always slides.
+  final bool animated;
 
   @override
   Route<T> createRoute(BuildContext context) {
@@ -121,8 +128,12 @@ final class _MaterialPageBasedRoute<T> extends PageRoute<T>
   bool popInPlace = false;
 
   @override
+  Duration get transitionDuration =>
+      _page.animated ? super.transitionDuration : Duration.zero;
+
+  @override
   Duration get reverseTransitionDuration =>
-      popInPlace ? Duration.zero : super.reverseTransitionDuration;
+      popInPlace ? Duration.zero : super.transitionDuration;
 
   @override
   Widget buildContent(BuildContext context) => _page.child;
@@ -297,6 +308,12 @@ final class _NativeNavigation {
       await previous;
       await stack.nativePush;
     }
+    // A page appearing in place takes over from what is on screen now, such
+    // as a layout that has just changed under a fold; UIKit keeps a picture
+    // of the source page for going back, so that frame must be on screen
+    // before it is taken.
+    if (!route.animatedPush) await _renderedPage();
+    if (!route.isActive || !stack.navigator.mounted) return;
     // UIKit refuses while another push or pop is still settling.
     for (var attempt = 0; attempt < 30; attempt++) {
       if (!route.isActive || !stack.navigator.mounted) return;
@@ -376,6 +393,7 @@ final class _NativeNavigation {
       'routeId': route.id,
       'parentRouteId': route.stack.parentIdOf(route),
       'expectsNativePage': _expectsNativePage(route),
+      'animated': route.animatedPush,
     });
     popPermissionChanged(route);
     backButtonVisibilityChanged(route);
@@ -532,6 +550,12 @@ final class _NativePageRoute<T> extends PageRoute<T> {
   bool _awaitingNative;
 
   bool get _pageBased => builder == null;
+
+  /// Whether UIKit animates this route's push; see [NativePage.animated].
+  bool get animatedPush {
+    final page = settings;
+    return page is! NativePage<T> || page.animated;
+  }
 
   void reveal() {
     if (!_awaitingNative) return;

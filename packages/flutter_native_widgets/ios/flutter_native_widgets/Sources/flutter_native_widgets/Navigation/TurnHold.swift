@@ -33,6 +33,7 @@ final class TurnHold {
     private(set) var holding = false
     private var snapScheduled = false
     private var fallbackWork: DispatchWorkItem?
+    private var releaseWork: [() -> Void] = []
 
     init(layer: @escaping () -> CALayer?) {
         self.layer = layer
@@ -73,9 +74,26 @@ final class TurnHold {
         }
     }
 
+    /// Runs [work] once the layer shows the turn's final state: at once when
+    /// nothing is held, otherwise right after the snap. A picture taken of
+    /// the screen mid turn would show the old layout.
+    func whenReleased(_ work: @escaping () -> Void) {
+        guard holding else { work(); return }
+        releaseWork.append(work)
+    }
+
     /// Runs the paused animations past their end, so the layer shows its
     /// final state at once. Safe to call when nothing is held.
     func snap(duration: TimeInterval) {
+        defer {
+            let work = releaseWork
+            releaseWork = []
+            if !work.isEmpty {
+                // After this turn of the run loop, once the final state is on
+                // screen.
+                DispatchQueue.main.async { work.forEach { $0() } }
+            }
+        }
         holding = false
         snapScheduled = false
         fallbackWork?.cancel()

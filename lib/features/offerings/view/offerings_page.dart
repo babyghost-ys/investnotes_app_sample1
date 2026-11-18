@@ -43,16 +43,18 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
   }
 
   /// Shows [offering] beside the list in a split window, or pushes its page.
-  void _open(BuildContext context, Offering offering) {
+  void _open(BuildContext context, Offering offering, {bool inPlace = false}) {
     final bloc = context.read<OfferingsBloc>();
     void select() => bloc.add(OfferingSelected(offering.id));
     ResponsiveMasterDetail.open(
       context,
+      inPlace: inPlace,
       select: select,
-      push: () => context.push<void>(
+      push: ({required inPlace}) => context.push<void>(
         KeelRoutes.offering(offering.id),
-        extra: (type: offering.type, select: select),
+        extra: (type: offering.type, select: select, inPlace: inPlace),
       ),
+      onClosed: () => bloc.add(const OfferingSelected(null)),
     );
   }
 
@@ -92,8 +94,10 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
               child: ProductScope(id: detail.id, child: const ProductLoader()),
             ),
       opened: detail != null && detail.id == state.selectedId,
-      onClose: () =>
-          context.read<OfferingsBloc>().add(const OfferingSelected(null)),
+      // Folded with an offering open: it carries on as its own page.
+      onCollapse: detail == null
+          ? null
+          : () => _open(context, detail, inPlace: true),
     );
   }
 
@@ -106,7 +110,10 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
     final insets = MediaQuery.paddingOf(context);
     final visible = state.visible;
     final split = ResponsiveMasterDetail.isSplit(context);
-    final shown = split ? state.detail?.id : null;
+    // The item beside the list; on a single pane, the item whose own page is
+    // open over the list, highlighted until the person comes back, as an
+    // iOS list does.
+    final shown = split ? state.detail?.id : state.selectedId;
     return ColoredBox(
       color: KeelColors.page.of(context),
       child: MediaQuery.removePadding(

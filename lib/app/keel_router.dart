@@ -196,6 +196,7 @@ NativePage<void> _productPage(GoRouterState state, {required bool isOffering}) {
   return NativePage<void>(
     key: state.pageKey,
     name: state.matchedLocation,
+    animated: !(opening?.inPlace ?? false),
     child: opening == null
         ? page
         : SplitDetailPage(onSplit: opening.select, child: page),

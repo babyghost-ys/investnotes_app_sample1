@@ -34,16 +34,18 @@ class IssuedPage extends StatelessWidget implements LocalisationConsumer {
   }
 
   /// Shows [note] beside the list in a split window, or pushes its page.
-  void _open(BuildContext context, IssuedNote note) {
+  void _open(BuildContext context, IssuedNote note, {bool inPlace = false}) {
     final bloc = context.read<IssuedBloc>();
     void select() => bloc.add(IssuedNoteSelected(note.id));
     ResponsiveMasterDetail.open(
       context,
+      inPlace: inPlace,
       select: select,
-      push: () => context.push<void>(
+      push: ({required inPlace}) => context.push<void>(
         KeelRoutes.note(note.id),
-        extra: (type: note.type, select: select),
+        extra: (type: note.type, select: select, inPlace: inPlace),
       ),
+      onClosed: () => bloc.add(const IssuedNoteSelected(null)),
     );
   }
 
@@ -80,8 +82,10 @@ class IssuedPage extends StatelessWidget implements LocalisationConsumer {
                 ),
               ),
         opened: detail != null && detail.id == state.selectedId,
-        onClose: () =>
-            context.read<IssuedBloc>().add(const IssuedNoteSelected(null)),
+        // Folded with a note open: it carries on as its own page.
+        onCollapse: detail == null
+            ? null
+            : () => _open(context, detail, inPlace: true),
       );
     },
   );
@@ -93,7 +97,10 @@ class IssuedPage extends StatelessWidget implements LocalisationConsumer {
     GeneralLocale general,
   ) {
     final split = ResponsiveMasterDetail.isSplit(context);
-    final shown = split ? state.detail?.id : null;
+    // The item beside the list; on a single pane, the item whose own page is
+    // open over the list, highlighted until the person comes back, as an
+    // iOS list does.
+    final shown = split ? state.detail?.id : state.selectedId;
     final formats = Formats(general);
     final insets = MediaQuery.paddingOf(context);
     final visible = state.visible;

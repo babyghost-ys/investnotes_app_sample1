@@ -51,14 +51,17 @@ class SearchPage extends StatelessWidget implements LocalisationConsumer {
   );
 
   /// Shows [p] beside the results in a split window, or pushes its page.
-  void _open(BuildContext context, Product p) {
+  void _open(BuildContext context, Product p, {bool inPlace = false}) {
     FocusManager.instance.primaryFocus?.unfocus();
     final bloc = context.read<SearchBloc>();
     void select() => bloc.add(SearchResultSelected(p.id));
     ResponsiveMasterDetail.open(
       context,
+      inPlace: inPlace,
       select: select,
-      push: () => openProduct(context, p, select: select),
+      push: ({required inPlace}) =>
+          openProduct(context, p, select: select, inPlace: inPlace),
+      onClosed: () => bloc.add(const SearchResultSelected(null)),
     );
   }
 
@@ -81,8 +84,10 @@ class SearchPage extends StatelessWidget implements LocalisationConsumer {
               color: KeelColors.page.of(context),
               child: ProductScope(id: detail.id, child: const ProductLoader()),
             ),
-      onClose: () =>
-          context.read<SearchBloc>().add(const SearchResultSelected(null)),
+      // Folded with a note open: it carries on as its own page.
+      onCollapse: detail == null
+          ? null
+          : () => _open(context, detail, inPlace: true),
     );
   }
 

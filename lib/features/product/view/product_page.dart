@@ -19,9 +19,11 @@ import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.d
 
 /// What a list that splits in a wide window hands the note's page it
 /// pushes on a single pane: the note's type, so the bar is titled while the
-/// page loads, and how to choose the note in that list, so the page can hand
-/// over to the split when the window widens (a Duo unfolding).
-typedef SplitOpening = ({NoteType type, VoidCallback select});
+/// page loads; how to choose the note in that list, so the page can hand
+/// over to the split when the window widens (a Duo unfolding); and whether
+/// the page appears in place, taking over from a split that collapsed (a Duo
+/// folding), rather than sliding in.
+typedef SplitOpening = ({NoteType type, VoidCallback select, bool inPlace});
 
 /// Pushes an offering's page. Its type goes along, so the bar is titled
 /// while the page loads.
@@ -33,16 +35,20 @@ Future<void> openNote(BuildContext context, IssuedNote note) =>
     context.push<void>(KeelRoutes.note(note.id), extra: note.type);
 
 /// Pushes a note's page, open or issued. From a list that splits, [select]
-/// chooses the note in that list; see [SplitOpening].
+/// chooses the note in that list and [inPlace] says whether the page takes
+/// over from the split; see [SplitOpening].
 Future<void> openProduct(
   BuildContext context,
   Product product, {
   VoidCallback? select,
+  bool inPlace = false,
 }) => context.push<void>(
   product.isOffering
       ? KeelRoutes.offering(product.id)
       : KeelRoutes.note(product.id),
-  extra: select == null ? product.type : (type: product.type, select: select),
+  extra: select == null
+      ? product.type
+      : (type: product.type, select: select, inPlace: inPlace),
 );
 
 /// A note's own page: its bar, with the bookmark for an offering, over its

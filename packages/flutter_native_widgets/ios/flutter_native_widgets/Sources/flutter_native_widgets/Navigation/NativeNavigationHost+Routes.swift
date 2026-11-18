@@ -3,6 +3,13 @@ import UIKit
 
 extension NativeNavigationHost {
     func prepareNativePush(_ args: [String: Any], result: @escaping FlutterResult) {
+        // Mid turn (a rotation, a Duo folding) the screen still shows the old
+        // layout; the source page's picture, kept for going back, must be
+        // taken once the turn has settled.
+        if pageTurnHold.holding {
+            pageTurnHold.whenReleased { [weak self] in self?.prepareNativePush(args, result: result) }
+            return
+        }
         guard let identifier = args["routeId"] as? String,
               let parent = args["parentRouteId"] as? String,
               pendingPush == nil, pushCompletion == nil, popCompletion == nil,
@@ -164,7 +171,8 @@ extension NativeNavigationHost {
             if let incomingPage { remember(incomingPage); configure(incomingPage) }
             next.prepareSearchTransitionGlass()
             pushCompletion = result
-            navigation.pushViewController(next, animated: true)
+            // A page taking over content already on screen appears in place.
+            navigation.pushViewController(next, animated: args["animated"] as? Bool ?? true)
             scheduleLayout()
             return
         }

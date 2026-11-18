@@ -221,7 +221,10 @@ class SearchResultCard extends StatelessWidget implements LocalisationConsumer {
                 ),
               ),
             ),
+            // A change of layout (a Duo folding) shows the terms at once;
+            // only a tap unfolds them.
             AnimatedSize(
+              key: ValueKey(unfolds),
               duration: _duration,
               curve: _curve,
               alignment: Alignment.topCenter,

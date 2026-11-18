@@ -63,7 +63,6 @@
     "firstOfMonth": "{day}er"
   },
   "semantics": {
-    "back": "Retour",
     "close": "Fermer",
     "tryAgain": "Réessayer",
     "clearFilters": "Effacer les filtres",
