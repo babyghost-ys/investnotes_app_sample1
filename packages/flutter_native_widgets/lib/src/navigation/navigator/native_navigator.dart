@@ -414,10 +414,21 @@ final class _NativeNavigation {
     final topId = stack.topId;
     // popUntil may remove several Flutter routes in one call. Publish only
     // the final stack, and let UINavigationController pop to that controller.
-    // Native completes this method after its transition finishes.
-    await _channel.invokeMethod<void>('syncStack', {
-      'routeIds': stack.routeIds,
-    });
+    // Native completes this method after its transition finishes. UIKit
+    // refuses while another transition (a push, a fold) is settling; wait
+    // for it rather than leaving the Flutter and UIKit stacks apart.
+    for (var attempt = 0; ; attempt++) {
+      try {
+        await _channel.invokeMethod<void>('syncStack', {
+          'routeIds': stack.routeIds,
+        });
+        break;
+      } on PlatformException catch (error) {
+        if (error.code != 'navigation_busy' || attempt >= 120) rethrow;
+        await SchedulerBinding.instance.endOfFrame;
+        if (!stack.navigator.mounted || stack.revision != revision) return;
+      }
+    }
     // Native pop completion reattaches Flutter to the target controller. Its
     // final safe areas and bar metrics can change at that point; render them
     // before removing UIKit's retained target-content cover.

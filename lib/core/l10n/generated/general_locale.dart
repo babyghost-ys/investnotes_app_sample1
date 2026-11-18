@@ -442,6 +442,9 @@ class GeneralLabels {
 }
 
 class GeneralSemantics {
+  /// Back
+  final String back;
+
   /// Close
   final String close;
 
@@ -521,6 +524,7 @@ class GeneralSemantics {
   final String any;
 
   const GeneralSemantics({
+    required this.back,
     required this.close,
     required this.tryAgain,
     required this.clearFilters,
@@ -551,6 +555,7 @@ class GeneralSemantics {
 
   factory GeneralSemantics.fromJson(Map<String, Object?> json) =>
       GeneralSemantics(
+        back: json['back'] as String,
         close: json['close'] as String,
         tryAgain: json['tryAgain'] as String,
         clearFilters: json['clearFilters'] as String,
@@ -580,6 +585,7 @@ class GeneralSemantics {
       );
 
   Map<String, Object?> toJson() => {
+    'back': back,
     'close': close,
     'tryAgain': tryAgain,
     'clearFilters': clearFilters,

@@ -25,18 +25,8 @@ abstract final class KeelRoutes {
 
   static String offering(String id) => '/offering/$id';
 
-  /// An offering opened on a single pane from a list that splits in a wide
-  /// window (Offerings, Search). In a
-  /// split window it shows beside the list instead, and this page steps
-  /// back to the split when the window widens.
-  static String offeringsItem(String id) => '/offerings/$id';
   static String note(String id) => '/note/$id';
 
-  /// An issued note opened on a single pane from a list that splits in a
-  /// wide window (Issued, Search). In a
-  /// split window it shows beside the list instead, and this page steps
-  /// back to the split when the window widens.
-  static String issuedItem(String id) => '/issued/$id';
   static String article(String id) => '/article/$id';
   static String explainer(String id) => '/explainer/$id';
   static String finderStep(int step) => '/finder/step/$step';

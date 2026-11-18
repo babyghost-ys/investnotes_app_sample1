@@ -1,10 +1,7 @@
-import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:keel_localisation/keel_localisation.dart';
 
-import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 import 'package:investnotes_app_sample1/core/widgets/empty_state.dart';
@@ -14,7 +11,6 @@ import 'package:investnotes_app_sample1/core/widgets/round_icon_button.dart';
 import 'package:investnotes_app_sample1/domain/models/loading_phase.dart';
 import 'package:investnotes_app_sample1/domain/models/product.dart';
 import 'package:investnotes_app_sample1/domain/repositories/notes_repository.dart';
-import 'package:investnotes_app_sample1/features/offerings/bloc/offerings_bloc.dart';
 import 'package:investnotes_app_sample1/features/product/view/product_page.dart';
 import 'package:investnotes_app_sample1/features/product/widgets/product_loader.dart';
 import 'package:investnotes_app_sample1/features/product/widgets/product_scope.dart';
@@ -24,107 +20,70 @@ import 'package:investnotes_app_sample1/features/search/widgets/search_result_ca
 /// Searches every offering and issued note as you type.
 ///
 /// On a single pane each result opens in place to its order terms, and from
-/// there to the note's page. In a split window, such as an unfolded iPhone
-/// Duo, the results sit on one side of the hinge and a tapped result's note
-/// opens on the other, its bookmark in the bar for an offering.
+/// there to the note. In a split window, such as an unfolded iPhone Duo, the
+/// results sit on one side of the hinge and a tapped result's note opens on
+/// the other; folded, the note takes the results' place on this page, and
+/// Back brings them back. The bar stays the same whatever the window does.
 class SearchPage extends StatelessWidget implements LocalisationConsumer {
   const SearchPage({super.key});
 
   @override
-  List<String> get namespaces => const [
-    Locales.search,
-    Locales.general,
-    Locales.product,
-  ];
+  List<String> get namespaces => const [Locales.search, Locales.general];
 
   @override
   Widget build(BuildContext context) => LocalisedBuilder(
     consumer: this,
-    builder: (context, locale) => _build(
-      context,
-      locale[0] as SearchLocale,
-      locale[1] as GeneralLocale,
-      locale[2] as ProductLocale,
-    ),
+    builder: (context, locale) =>
+        _build(context, locale[0] as SearchLocale, locale[1] as GeneralLocale),
   );
 
   Widget _build(
     BuildContext context,
     SearchLocale search,
     GeneralLocale general,
-    ProductLocale product,
   ) => BlocProvider(
     create: (context) =>
         SearchBloc(context.read<NotesRepository>(), general)
           ..add(const SearchRequested()),
     child: BlocBuilder<SearchBloc, SearchState>(
-      builder: (context, state) =>
-          _scaffold(context, state, search, general, product),
+      builder: (context, state) => _split(context, state, search, general),
     ),
   );
 
-  /// Shows [p] beside the results in a split window, or pushes its page.
+  /// Shows [p] on this page (beside the results, or in their place on a
+  /// folded Duo), or pushes its page on an iPhone.
   void _open(BuildContext context, Product p) {
     FocusManager.instance.primaryFocus?.unfocus();
     final bloc = context.read<SearchBloc>();
     ResponsiveMasterDetail.open(
       context,
       select: () => bloc.add(SearchResultSelected(p.id)),
-      push: () => context.push<void>(
-        p.isOffering
-            ? KeelRoutes.offeringsItem(p.id)
-            : KeelRoutes.issuedItem(p.id),
-        extra: p.type,
-      ),
+      push: () => openProduct(context, p),
       onClosed: () => bloc.add(const SearchResultSelected(null)),
     );
   }
 
-  Widget _scaffold(
+  Widget _split(
     BuildContext context,
     SearchState state,
     SearchLocale search,
     GeneralLocale general,
-    ProductLocale product,
   ) {
     final detail = state.detail;
-    final split = ResponsiveMasterDetail.isSplit(context);
-    // The offering beside the results: its bookmark joins the bar, as it
-    // would on the offering's own page.
-    final beside = split && detail != null && detail.isOffering
-        ? detail.id
-        : null;
-    final saved = context.select<OfferingsBloc, bool>(
-      (b) => beside != null && b.state.saved.contains(beside),
-    );
-    return NativeScaffold(
-      extendBody: true,
-      backgroundColor: KeelColors.page.of(context),
-      appBar: NativeAppBar(
-        title: search.labels.title,
-        actions: [
-          if (beside != null)
-            bookmarkAction(context, beside, saved: saved, product: product),
-        ],
+    return ResponsiveMasterDetail(
+      master: Builder(
+        builder: (context) => _list(context, state, search, general),
       ),
-      body: ResponsiveMasterDetail(
-        master: Builder(
-          builder: (context) => _list(context, state, search, general),
-        ),
-        // Fetched as it is chosen; a new choice starts its own fetch.
-        detail: detail == null
-            ? null
-            : ColoredBox(
-                key: ValueKey(detail.id),
-                color: KeelColors.page.of(context),
-                child: ProductScope(
-                  id: detail.id,
-                  child: const ProductLoader(),
-                ),
-              ),
-        // Folded with a note open: it carries on as its own page.
-        onCollapse: detail == null ? null : () => _open(context, detail),
-      ),
+      // Fetched as it is chosen; a new choice starts its own fetch.
+      detail: detail == null
+          ? null
+          : ColoredBox(
+              key: ValueKey(detail.id),
+              color: KeelColors.page.of(context),
+              child: ProductScope(id: detail.id, child: const ProductLoader()),
+            ),
+      onClose: () =>
+          context.read<SearchBloc>().add(const SearchResultSelected(null)),
     );
   }
 

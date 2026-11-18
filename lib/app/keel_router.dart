@@ -8,7 +8,6 @@ import 'package:investnotes_app_sample1/app/keel_routes.dart';
 import 'package:investnotes_app_sample1/core/l10n/generated/locales.dart';
 import 'package:investnotes_app_sample1/core/l10n/terms.dart';
 import 'package:investnotes_app_sample1/core/widgets/page_loader.dart';
-import 'package:investnotes_app_sample1/core/widgets/responsive_detail_page.dart';
 import 'package:investnotes_app_sample1/domain/models/article.dart';
 import 'package:investnotes_app_sample1/domain/models/explainer.dart';
 import 'package:investnotes_app_sample1/domain/models/note_enums.dart';
@@ -44,19 +43,9 @@ GoRouter keelRouter() => GoRouter(
               _productPage(state, isOffering: true),
         ),
         GoRoute(
-          path: 'offerings/:id',
-          pageBuilder: (context, state) =>
-              _productPage(state, isOffering: true, responsive: true),
-        ),
-        GoRoute(
           path: 'note/:id',
           pageBuilder: (context, state) =>
               _productPage(state, isOffering: false),
-        ),
-        GoRoute(
-          path: 'issued/:id',
-          pageBuilder: (context, state) =>
-              _productPage(state, isOffering: false, responsive: true),
         ),
         GoRoute(
           path: 'article/:id',
@@ -100,12 +89,11 @@ GoRouter keelRouter() => GoRouter(
         ),
         GoRoute(
           path: 'search',
-          // Nothing to load before typing: the field shows at once. The page
-          // carries its own bar, for the bookmark of an offering open
-          // beside the results.
-          pageBuilder: (context, state) => NativePage<void>(
-            key: state.pageKey,
-            name: state.matchedLocation,
+          pageBuilder: (context, state) => keelPage(
+            state,
+            namespaces: const [Locales.search],
+            title: (locale) => (locale[0] as SearchLocale).labels.title,
+            // Nothing to load before typing: the field shows at once.
             child: const SearchPage(),
           ),
         ),
@@ -193,22 +181,16 @@ GoRouter keelRouter() => GoRouter(
 );
 
 /// A note's page, open or issued, fetched as it opens. The page carries its
-/// own scaffold for its bookmark. A [responsive] page is the detail of a
-/// list that splits in a wide window, and steps back to that split when the
-/// window widens.
+/// own scaffold for its bookmark.
 NativePage<void> _productPage(
   GoRouterState state, {
   required bool isOffering,
-  bool responsive = false,
-}) {
-  final page = ProductPage(
+}) => NativePage<void>(
+  key: state.pageKey,
+  name: state.matchedLocation,
+  child: ProductPage(
     id: state.pathParameters['id']!,
     isOffering: isOffering,
     type: state.extra as NoteType?,
-  );
-  return NativePage<void>(
-    key: state.pageKey,
-    name: state.matchedLocation,
-    child: responsive ? ResponsiveDetailPage(child: page) : page,
-  );
-}
+  ),
+);

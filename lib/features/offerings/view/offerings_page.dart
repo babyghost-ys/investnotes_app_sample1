@@ -42,14 +42,15 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
     if (result != null) bloc.add(OfferingsFilterChanged(result));
   }
 
-  /// Shows [offering] beside the list in a split window, or pushes its page.
+  /// Shows [offering] on this page (beside the list, or in its place on a
+  /// folded Duo), or pushes its page on an iPhone.
   void _open(BuildContext context, Offering offering) {
     final bloc = context.read<OfferingsBloc>();
     ResponsiveMasterDetail.open(
       context,
       select: () => bloc.add(OfferingSelected(offering.id)),
       push: () => context.push<void>(
-        KeelRoutes.offeringsItem(offering.id),
+        KeelRoutes.offering(offering.id),
         extra: offering.type,
       ),
       onClosed: () => bloc.add(const OfferingSelected(null)),
@@ -91,10 +92,9 @@ class OfferingsPage extends StatelessWidget implements LocalisationConsumer {
               color: KeelColors.page.of(context),
               child: ProductScope(id: detail.id, child: const ProductLoader()),
             ),
-      // Folded with an offering open: it carries on as its own page.
-      onCollapse: state.selectedId == null || detail == null
-          ? null
-          : () => _open(context, detail),
+      opened: detail != null && detail.id == state.selectedId,
+      onClose: () =>
+          context.read<OfferingsBloc>().add(const OfferingSelected(null)),
     );
   }
 

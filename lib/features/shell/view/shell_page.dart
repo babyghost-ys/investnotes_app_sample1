@@ -30,7 +30,11 @@ import 'package:investnotes_app_sample1/features/shell/widgets/keel_drawer.dart'
 /// slides in from the left.
 class ShellPage extends StatefulWidget implements LocalisationConsumer {
   @override
-  List<String> get namespaces => const [Locales.shell, Locales.product];
+  List<String> get namespaces => const [
+    Locales.shell,
+    Locales.product,
+    Locales.general,
+  ];
 
   const ShellPage({super.key});
 
@@ -44,14 +48,19 @@ class _ShellPageState extends State<ShellPage> {
   @override
   Widget build(BuildContext context) => LocalisedBuilder(
     consumer: widget,
-    builder: (context, locale) =>
-        _build(context, locale[0] as ShellLocale, locale[1] as ProductLocale),
+    builder: (context, locale) => _build(
+      context,
+      locale[0] as ShellLocale,
+      locale[1] as ProductLocale,
+      locale[2] as GeneralLocale,
+    ),
   );
 
   Widget _build(
     BuildContext context,
     ShellLocale shell,
     ProductLocale product,
+    GeneralLocale general,
   ) {
     final signedIn = context.select<SessionBloc, bool>((b) => b.state.signedIn);
     return BlocListener<SessionBloc, SessionState>(
@@ -64,7 +73,7 @@ class _ShellPageState extends State<ShellPage> {
       },
       child: BlocBuilder<ShellBloc, ShellState>(
         builder: (context, state) =>
-            _frame(context, state, signedIn, shell, product),
+            _frame(context, state, signedIn, shell, product, general),
       ),
     );
   }
@@ -75,19 +84,38 @@ class _ShellPageState extends State<ShellPage> {
     bool signedIn,
     ShellLocale shell,
     ProductLocale product,
+    GeneralLocale general,
   ) {
     final tab = !signedIn && state.tab == ShellTab.myNotes
         ? ShellTab.home
         : state.tab;
     final shown = ShellTab.shown(signedIn: signedIn);
-    // The offering beside the Offerings list in a split window: its
-    // bookmark joins the bar, as it would on the offering's own page.
+    // The offering on the Offerings page itself, beside the list in a split
+    // window or opened in its place on a folded Duo: its bookmark joins the
+    // bar, as it would on the offering's own page.
     final split = ResponsiveMasterDetail.isSplit(context);
+    final inPlace = ResponsiveMasterDetail.showsInPlace(context);
     final beside = context.select<OfferingsBloc, (String, bool)?>((b) {
       final detail = b.state.detail;
-      if (tab != ShellTab.offerings || !split || detail == null) return null;
+      if (tab != ShellTab.offerings || detail == null) return null;
+      final opened = detail.id == b.state.selectedId;
+      if (!split && !(inPlace && opened)) return null;
       return (detail.id, b.state.saved.contains(detail.id));
     });
+    // A note opened in the list's place on a folded Duo: Back takes the
+    // menu's place and brings the list back, as on the note's own page.
+    final issuedInPlace = context.select<IssuedBloc, bool>((b) {
+      final selected = b.state.selectedId;
+      return tab == ShellTab.issued &&
+          inPlace &&
+          selected != null &&
+          b.state.detail?.id == selected;
+    });
+    final VoidCallback? closeInPlace = inPlace && beside != null
+        ? () => context.read<OfferingsBloc>().add(const OfferingSelected(null))
+        : issuedInPlace
+        ? () => context.read<IssuedBloc>().add(const IssuedNoteSelected(null))
+        : null;
     return NativeScaffold(
       key: _scaffold,
       extendBody: true,
@@ -96,15 +124,26 @@ class _ShellPageState extends State<ShellPage> {
       appBar: NativeAppBar(
         title: tab == ShellTab.home ? shell.labels.brand : null,
         actions: [
-          NativeAppBarAction(
-            icon: const NativeIcon(
-              sfSymbol: 'line.3.horizontal',
-              icon: Icons.menu_rounded,
+          if (closeInPlace != null)
+            NativeAppBarAction(
+              icon: const NativeIcon(
+                sfSymbol: 'chevron.backward',
+                icon: Icons.arrow_back_rounded,
+              ),
+              label: general.semantics.back,
+              spacerAfter: ToolbarSpacerType.flexible,
+              onPressed: closeInPlace,
+            )
+          else
+            NativeAppBarAction(
+              icon: const NativeIcon(
+                sfSymbol: 'line.3.horizontal',
+                icon: Icons.menu_rounded,
+              ),
+              label: shell.semantics.menu,
+              spacerAfter: ToolbarSpacerType.flexible,
+              onPressed: () => _scaffold.currentState?.openDrawer(),
             ),
-            label: shell.semantics.menu,
-            spacerAfter: ToolbarSpacerType.flexible,
-            onPressed: () => _scaffold.currentState?.openDrawer(),
-          ),
           NativeAppBarAction(
             icon: const NativeIcon(
               sfSymbol: 'magnifyingglass',

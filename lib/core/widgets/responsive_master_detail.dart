@@ -1,6 +1,7 @@
 import 'dart:ui' show DisplayFeatureType;
 
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter_native_widgets/flutter_native_widgets.dart';
 
 import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 
@@ -8,36 +9,45 @@ import 'package:investnotes_app_sample1/core/theme/keel_colors.dart';
 ///
 /// On a window big enough both ways, such as an unfolded iPhone Duo, the
 /// [master] sits on the left and the [detail] on the right, split at the
-/// hinge when the display reports one. Anywhere else, such as an iPhone in
-/// either orientation, only the [master] shows: the caller pushes the detail
-/// as its own page, so the native push and swipe-back stay as they are.
+/// hinge when the display reports one.
 ///
-/// Open items with [open], which picks the right one of the two for the
-/// window. When a split window becomes a single pane (the Duo folds) while
-/// an item is open, [onCollapse] runs, so the caller can push that item; the
-/// pushed page wraps itself in a `ResponsiveDetailPage`, which steps back
-/// to the split once the window is wide again.
+/// On iPhone Duo folded, the open [detail] takes the list's place on this
+/// same page, and Back closes it ([onClose]) to show the list again.
+/// Folding and unfolding therefore only change the layout: nothing is pushed
+/// or popped, and the item stays on screen the whole time.
+///
+/// On any other single pane, such as an iPhone, only the [master] shows and
+/// the caller pushes the item as its own page, so the native push and
+/// swipe-back stay as they are. Open items with [open], which picks the
+/// right one for the window.
 class ResponsiveMasterDetail extends StatefulWidget {
   const ResponsiveMasterDetail({
     super.key,
     required this.master,
     this.detail,
     this.placeholder,
-    this.onCollapse,
-  });
+    this.onClose,
+    bool? opened,
+  }) : opened = opened ?? detail != null;
 
   /// The list.
   final Widget? master;
 
-  /// The open item, shown beside the list in a split window. Give it a key
-  /// per item so a new one fades in.
+  /// The open item. Give it a key per item, so a new one fades in and each
+  /// keeps its own state.
   final Widget? detail;
 
   /// Fills the detail pane while nothing is open.
   final Widget? placeholder;
 
-  /// Runs when the window stops splitting while [detail] is set.
-  final VoidCallback? onCollapse;
+  /// Closes the open item: Back runs it while the item shows in the list's
+  /// place on a folded Duo.
+  final VoidCallback? onClose;
+
+  /// Whether the person opened [detail], rather than the split showing a
+  /// first item so its pane is never empty. Only an opened item takes the
+  /// list's place on a folded Duo.
+  final bool opened;
 
   /// The smallest window width that splits.
   static const minSplitWidth = 640.0;
@@ -53,9 +63,20 @@ class ResponsiveMasterDetail extends StatefulWidget {
         size.shortestSide >= minSplitShortestSide;
   }
 
-  /// Opens an item: [select] always runs, so the detail pane can show it;
-  /// on a single pane [push] then runs too. [onClosed] runs once a pushed
-  /// item is closed by going back, not by the window splitting.
+  /// Whether an opened item stays on the list's own page: beside the list
+  /// in a split window, or in its place on iPhone Duo (folded, its cover
+  /// display holds the system's vertical bar strip, which no other iPhone
+  /// has), so a fold or an unfold never has a page to push or pop.
+  static bool opensInPlace(BuildContext context) =>
+      isSplit(context) || DuoPoseScope.of(context) != null;
+
+  /// Whether an opened item takes the list's place: a folded Duo.
+  static bool showsInPlace(BuildContext context) =>
+      !isSplit(context) && DuoPoseScope.of(context) != null;
+
+  /// Opens an item: [select] always runs, so this page can show it; where
+  /// it does not ([opensInPlace]), [push] opens its own page too, and
+  /// [onClosed] runs once that page is closed.
   static Future<void> open(
     BuildContext context, {
     required VoidCallback select,
@@ -63,9 +84,9 @@ class ResponsiveMasterDetail extends StatefulWidget {
     VoidCallback? onClosed,
   }) async {
     select();
-    if (isSplit(context)) return;
+    if (opensInPlace(context)) return;
     await push();
-    if (context.mounted && !isSplit(context)) onClosed?.call();
+    if (context.mounted && !opensInPlace(context)) onClosed?.call();
   }
 
   @override
@@ -73,32 +94,119 @@ class ResponsiveMasterDetail extends StatefulWidget {
 }
 
 class _ResponsiveMasterDetailState extends State<ResponsiveMasterDetail> {
-  bool? _wasSplit;
+  /// Carry the list and the item across a fold or unfold, so what was typed,
+  /// where each was scrolled and what has loaded survive the change of
+  /// layout.
+  final _masterKey = GlobalKey();
+  final _detailKeys = <Key?, GlobalKey>{};
+
+  /// Lets Back close an item shown in the list's place.
+  LocalHistoryEntry? _back;
+  bool _droppingBack = false;
+  bool _syncScheduled = false;
+
+  Widget? get master => widget.master == null
+      ? null
+      : KeyedSubtree(key: _masterKey, child: widget.master!);
+
+  Widget? get detail {
+    final detail = widget.detail;
+    if (detail == null) return null;
+    _detailKeys.removeWhere((key, _) => key != detail.key);
+    return KeyedSubtree(
+      key: _detailKeys.putIfAbsent(detail.key, GlobalKey.new),
+      child: detail,
+    );
+  }
+
+  Widget? get placeholder => widget.placeholder;
+
+  /// Whether the open item shows in the list's place right now.
+  bool get _inPlace =>
+      widget.detail != null &&
+      widget.opened &&
+      ResponsiveMasterDetail.showsInPlace(context);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final split = ResponsiveMasterDetail.isSplit(context);
-    final collapsed = _wasSplit == true && !split;
-    _wasSplit = split;
-    if (!collapsed || widget.detail == null || widget.onCollapse == null) {
-      return;
+    _scheduleBackSync();
+  }
+
+  @override
+  void didUpdateWidget(ResponsiveMasterDetail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleBackSync();
+  }
+
+  @override
+  void dispose() {
+    _droppingBack = true;
+    final back = _back;
+    _back = null;
+    if (back != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => back.remove());
     }
-    // Only for the page in front: not a tab kept offstage, not a page
-    // covered by another.
-    if (!TickerMode.valuesOf(context).enabled) return;
-    if (ModalRoute.of(context)?.isCurrent == false) return;
-    final collapse = widget.onCollapse!;
+    super.dispose();
+  }
+
+  // A route's history changes outside the build.
+  void _scheduleBackSync() {
+    if (_syncScheduled) return;
+    _syncScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !ResponsiveMasterDetail.isSplit(context)) collapse();
+      _syncScheduled = false;
+      if (mounted) _syncBack();
     });
+  }
+
+  /// Holds a Back entry on this page's route exactly while the item shows
+  /// in the list's place on the page in view (not a tab kept offstage).
+  void _syncBack() {
+    final route = ModalRoute.of(context);
+    final wanted =
+        route != null &&
+        _inPlace &&
+        widget.onClose != null &&
+        TickerMode.valuesOf(context).enabled;
+    if (wanted && _back == null) {
+      final back = LocalHistoryEntry(
+        onRemove: () {
+          if (_back == null) return;
+          _back = null;
+          if (!_droppingBack && mounted) widget.onClose?.call();
+        },
+      );
+      _back = back;
+      route.addLocalHistoryEntry(back);
+    } else if (!wanted && _back != null) {
+      final back = _back!;
+      _back = null;
+      _droppingBack = true;
+      back.remove();
+      _droppingBack = false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (!ResponsiveMasterDetail.isSplit(context)) {
-      return widget.master ?? widget.detail ?? const SizedBox.shrink();
+      final inPlace = _inPlace;
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Offstage(
+            offstage: inPlace,
+            child: TickerMode(
+              enabled: !inPlace,
+              child: master ?? const SizedBox.shrink(),
+            ),
+          ),
+          if (inPlace) detail!,
+        ],
+      );
     }
+    final shown = detail;
     return LayoutBuilder(
       builder: (context, constraints) {
         final split = _split(context, constraints.maxWidth);
@@ -108,7 +216,7 @@ class _ResponsiveMasterDetailState extends State<ResponsiveMasterDetail> {
           children: [
             SizedBox(
               width: split.masterWidth,
-              child: _pane(media, keepLeft: true, child: widget.master),
+              child: _pane(media, keepLeft: true, child: master),
             ),
             SizedBox(
               width: split.gap,
@@ -127,8 +235,8 @@ class _ResponsiveMasterDetailState extends State<ResponsiveMasterDetail> {
                     children: [...previous, ?current],
                   ),
                   child:
-                      widget.detail ??
-                      widget.placeholder ??
+                      shown ??
+                      placeholder ??
                       ColoredBox(
                         key: const ValueKey('empty'),
                         color: KeelColors.page.of(context),

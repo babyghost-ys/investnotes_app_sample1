@@ -33,14 +33,15 @@ class IssuedPage extends StatelessWidget implements LocalisationConsumer {
     if (result != null) bloc.add(IssuedFilterChanged(result));
   }
 
-  /// Shows [note] beside the list in a split window, or pushes its page.
+  /// Shows [note] on this page (beside the list, or in its place on a
+  /// folded Duo), or pushes its page on an iPhone.
   void _open(BuildContext context, IssuedNote note) {
     final bloc = context.read<IssuedBloc>();
     ResponsiveMasterDetail.open(
       context,
       select: () => bloc.add(IssuedNoteSelected(note.id)),
       push: () =>
-          context.push<void>(KeelRoutes.issuedItem(note.id), extra: note.type),
+          context.push<void>(KeelRoutes.note(note.id), extra: note.type),
       onClosed: () => bloc.add(const IssuedNoteSelected(null)),
     );
   }
@@ -77,10 +78,9 @@ class IssuedPage extends StatelessWidget implements LocalisationConsumer {
                   child: const ProductLoader(),
                 ),
               ),
-        // Folded with a note open: it carries on as its own page.
-        onCollapse: state.selectedId == null || detail == null
-            ? null
-            : () => _open(context, detail),
+        opened: detail != null && detail.id == state.selectedId,
+        onClose: () =>
+            context.read<IssuedBloc>().add(const IssuedNoteSelected(null)),
       );
     },
   );
